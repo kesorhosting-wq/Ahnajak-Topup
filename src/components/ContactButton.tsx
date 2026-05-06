@@ -31,16 +31,15 @@ const ContactButton: React.FC = () => {
         'fixed bottom-4 right-4 z-[60] flex items-center justify-center',
         'animate-contact-jump',
         'hover:scale-110 active:scale-95 transition-transform duration-200',
-        customIcon
-          ? 'w-14 h-14'
-          : 'w-14 h-14 rounded-full bg-[#229ED9] text-white shadow-lg hover:shadow-xl'
+        'w-14 h-14 rounded-full overflow-hidden shadow-lg hover:shadow-xl',
+        !customIcon && 'bg-[#229ED9] text-white'
       )}
     >
       {customIcon ? (
         <img
           src={customIcon}
           alt=""
-          className="w-full h-full object-contain drop-shadow-lg"
+          className="w-full h-full object-cover"
         />
       ) : (
         <TelegramGlyph className="w-7 h-7" />
