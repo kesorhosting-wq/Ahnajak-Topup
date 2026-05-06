@@ -105,10 +105,11 @@ const AdminPage: React.FC = () => {
   // Game state
   const [editingGame, setEditingGame] = useState<string | null>(null);
   const [newGame, setNewGame] = useState({ name: "", slug: "", image: "", g2bulkCategoryId: "" });
-  const [editGameData, setEditGameData] = useState<{ name: string; slug: string; image: string; g2bulkCategoryId: string; defaultPackageIcon: string }>({
+  const [editGameData, setEditGameData] = useState<{ name: string; slug: string; image: string; coverImage: string; g2bulkCategoryId: string; defaultPackageIcon: string }>({
     name: "",
     slug: "",
     image: "",
+    coverImage: "",
     g2bulkCategoryId: "",
     defaultPackageIcon: "",
   });
