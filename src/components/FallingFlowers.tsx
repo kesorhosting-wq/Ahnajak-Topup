@@ -40,19 +40,19 @@ const FallingFlowers: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Initial batch
+    // Initial batch (lighter)
     const initial: Petal[] = [];
-    for (let i = 0; i < 25; i++) {
-      initial.push({ ...createPetal(), delay: Math.random() * 6 });
+    for (let i = 0; i < 8; i++) {
+      initial.push({ ...createPetal(), delay: Math.random() * 8 });
     }
     setPetals(initial);
 
     const interval = setInterval(() => {
       setPetals(prev => {
-        const filtered = prev.length > 50 ? prev.slice(-40) : prev;
-        return [...filtered, createPetal(), createPetal()];
+        const filtered = prev.length > 18 ? prev.slice(-15) : prev;
+        return [...filtered, createPetal()];
       });
-    }, 600);
+    }, 1600);
 
     return () => clearInterval(interval);
   }, [createPetal]);
