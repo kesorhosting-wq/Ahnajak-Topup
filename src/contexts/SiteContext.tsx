@@ -124,6 +124,9 @@ export interface SiteSettings {
   // Custom font settings
   customKhmerFont: string;
   customEnglishFont: string;
+  // Falling animation
+  fallingIntensity: number; // 0-100 (% of base spawn count)
+  fallingSpeed: number; // 0.2 - 3 multiplier (higher = faster fall)
 }
 
 interface SiteContextType {
@@ -226,6 +229,8 @@ const defaultSettings: SiteSettings = {
   // Custom font defaults
   customKhmerFont: '',
   customEnglishFont: '',
+  fallingIntensity: 30,
+  fallingSpeed: 1,
 };
 
 const defaultPaymentMethods: PaymentMethod[] = [
@@ -344,6 +349,8 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           // Custom fonts
           if (row.key === 'customKhmerFont') loadedSettings.customKhmerFont = row.value as string;
           if (row.key === 'customEnglishFont') loadedSettings.customEnglishFont = row.value as string;
+          if (row.key === 'fallingIntensity') loadedSettings.fallingIntensity = row.value as number;
+          if (row.key === 'fallingSpeed') loadedSettings.fallingSpeed = row.value as number;
         });
         setSettings(prev => ({ ...prev, ...loadedSettings }));
       }
