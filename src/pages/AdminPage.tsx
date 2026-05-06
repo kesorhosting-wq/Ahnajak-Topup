@@ -728,6 +728,45 @@ const AdminPage: React.FC = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Falling Animation Controls */}
+                  <div className="border-t border-gold/20 pt-6 mt-2">
+                    <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                      🌸 Falling Animation
+                    </h3>
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">
+                          Intensity: {settings.fallingIntensity ?? 30}% {(settings.fallingIntensity ?? 30) === 0 && '(Off)'}
+                        </label>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          step={5}
+                          value={settings.fallingIntensity ?? 30}
+                          onChange={(e) => handleUpdateSettings("fallingIntensity", Number(e.target.value))}
+                          className="w-full"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">How many petals appear on screen.</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">
+                          Speed: {(settings.fallingSpeed ?? 1).toFixed(1)}×
+                        </label>
+                        <input
+                          type="range"
+                          min={0.2}
+                          max={3}
+                          step={0.1}
+                          value={settings.fallingSpeed ?? 1}
+                          onChange={(e) => handleUpdateSettings("fallingSpeed", Number(e.target.value))}
+                          className="w-full"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">How fast they fall and spin.</p>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
