@@ -105,10 +105,11 @@ const AdminPage: React.FC = () => {
   // Game state
   const [editingGame, setEditingGame] = useState<string | null>(null);
   const [newGame, setNewGame] = useState({ name: "", slug: "", image: "", g2bulkCategoryId: "" });
-  const [editGameData, setEditGameData] = useState<{ name: string; slug: string; image: string; g2bulkCategoryId: string; defaultPackageIcon: string }>({
+  const [editGameData, setEditGameData] = useState<{ name: string; slug: string; image: string; coverImage: string; g2bulkCategoryId: string; defaultPackageIcon: string }>({
     name: "",
     slug: "",
     image: "",
+    coverImage: "",
     g2bulkCategoryId: "",
     defaultPackageIcon: "",
   });
@@ -210,6 +211,7 @@ const AdminPage: React.FC = () => {
       name: game.name,
       slug: game.slug,
       image: game.image,
+      coverImage: game.coverImage || "",
       g2bulkCategoryId: game.g2bulkCategoryId || "",
       defaultPackageIcon: game.defaultPackageIcon || "",
     });
@@ -220,6 +222,7 @@ const AdminPage: React.FC = () => {
       name: editGameData.name,
       slug: editGameData.slug,
       image: editGameData.image,
+      coverImage: editGameData.coverImage || undefined,
       g2bulkCategoryId: editGameData.g2bulkCategoryId || undefined,
       defaultPackageIcon: editGameData.defaultPackageIcon || undefined,
     });
@@ -1855,6 +1858,16 @@ const AdminPage: React.FC = () => {
                                 folder="package-icons"
                                 aspectRatio="square"
                                 placeholder="Icon"
+                              />
+                            </div>
+                            <div className="w-full sm:w-64">
+                              <label className="text-xs text-muted-foreground mb-1 block">Topup Cover Image (wide)</label>
+                              <ImageUpload
+                                value={editGameData.coverImage}
+                                onChange={(url) => setEditGameData((prev) => ({ ...prev, coverImage: url }))}
+                                folder="game-covers"
+                                aspectRatio="wide"
+                                placeholder="Cover"
                               />
                             </div>
                           </div>
