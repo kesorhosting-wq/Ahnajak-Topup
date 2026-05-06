@@ -167,7 +167,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
             style={{ backgroundColor: pkg.labelBgColor || '#dc2626' }}
           >
             {pkg.labelIcon && (
-              <img src={pkg.labelIcon} alt="" className="w-3 h-3 object-contain" loading="lazy" decoding="async" />
+              <img src={resolveIconUrl(pkg.labelIcon, settings.iconCdnBaseUrl)} alt="" className="w-3 h-3 object-contain" loading="lazy" decoding="async" />
             )}
             <span
               className="text-[8px] sm:text-[10px] font-extrabold uppercase tracking-wider truncate"
