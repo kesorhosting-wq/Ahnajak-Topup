@@ -1279,69 +1279,56 @@ const TopupPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Special Price Section - Only show if there are special packages */}
-          {game.specialPackages && game.specialPackages.length > 0 && (
-            <div className="mb-6 sm:mb-8">
-              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <span className="w-auto px-3 sm:px-4 h-6 sm:h-8 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center justify-center font-bold text-xs sm:text-sm">
+          {/* Step 2: Select Package (Specials + Regular merged) */}
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span
+                  className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-base"
+                  style={{
+                    backgroundColor: settings.frameColor || "hsl(43 74% 49%)",
+                    color: "hsl(var(--primary-foreground))",
+                  }}
+                >
+                  2
+                </span>
+                <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសតម្លៃពេជ្រ</h2>
+              </div>
+              {game.specialPackages && game.specialPackages.length > 0 && (
+                <span className="px-3 h-6 sm:h-7 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center font-bold text-[10px] sm:text-xs">
                   Special Price
                 </span>
-              </div>
-
-              <div className="flex gap-3 sm:gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 -mx-3 px-3 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
-                {[...game.specialPackages]
-                  .sort((a, b) => a.price - b.price)
-                  .map((pkg, index) => (
-                    <div key={pkg.id} className="snap-start shrink-0 basis-[calc((100%-1.5rem)/3)] sm:basis-[calc((100%-2.5rem)/3)]">
-                      <PackageCard
-                        pkg={pkg}
-                        selected={selectedPackage === pkg.id}
-                        onSelect={() => setSelectedPackage(pkg.id)}
-                        priority={index < 4}
-                        gameDefaultIcon={game.defaultPackageIcon}
-                      />
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Select Package */}
-          <div className="mb-6 sm:mb-8">
-            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-              <span
-                className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-base"
-                style={{
-                  backgroundColor: settings.frameColor || "hsl(43 74% 49%)",
-                  color: "hsl(var(--primary-foreground))",
-                }}
-              >
-                2
-              </span>
-              <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសតម្លៃពេជ្រ</h2>
+              )}
             </div>
 
-            {game.packages.length === 0 ? (
-              /* Show skeleton placeholders while packages might be loading */
+            {game.packages.length === 0 && (!game.specialPackages || game.specialPackages.length === 0) ? (
               <div className="grid grid-cols-3 gap-3 sm:gap-5">
                 {[...Array(6)].map((_, i) => (
                   <Skeleton key={i} className="h-24 sm:h-28 rounded-xl" />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-3 sm:gap-5">
-                {[...game.packages]
-                  .sort((a, b) => a.price - b.price)
-                  .map((pkg, index) => (
-                    <PackageCard
-                      key={pkg.id}
-                      pkg={pkg}
-                      selected={selectedPackage === pkg.id}
-                      onSelect={() => setSelectedPackage(pkg.id)}
-                      priority={index < 6}
-                      gameDefaultIcon={game.defaultPackageIcon}
-                    />
-                  ))}
+              <div className="max-h-[460px] sm:max-h-[560px] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
+                <div className="grid grid-cols-3 gap-3 sm:gap-5">
+                  {[
+                    ...(game.specialPackages || []).map((p) => ({ ...p, __special: true })),
+                    ...game.packages.map((p) => ({ ...p, __special: false })),
+                  ]
+                    .sort((a, b) => {
+                      if (a.__special !== b.__special) return a.__special ? -1 : 1;
+                      return a.price - b.price;
+                    })
+                    .map((pkg, index) => (
+                      <PackageCard
+                        key={`${pkg.__special ? 'sp' : 'pk'}-${pkg.id}`}
+                        pkg={pkg}
+                        selected={selectedPackage === pkg.id}
+                        onSelect={() => setSelectedPackage(pkg.id)}
+                        priority={index < 6}
+                        gameDefaultIcon={game.defaultPackageIcon}
+                      />
+                    ))}
+                </div>
               </div>
             )}
           </div>
