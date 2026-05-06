@@ -1323,7 +1323,12 @@ const TopupPage: React.FC = () => {
                         key={`${pkg.__special ? 'sp' : 'pk'}-${pkg.id}`}
                         pkg={pkg}
                         selected={selectedPackage === pkg.id}
-                        onSelect={() => setSelectedPackage(pkg.id)}
+                        onSelect={() => {
+                          setSelectedPackage(pkg.id);
+                          setTimeout(() => {
+                            document.getElementById('payment-method-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }, 150);
+                        }}
                         priority={index < 6}
                         gameDefaultIcon={game.defaultPackageIcon}
                         isSpecial={pkg.__special}
@@ -1336,7 +1341,8 @@ const TopupPage: React.FC = () => {
 
           {/* Step 3: Payment Method */}
           <div
-            className="mb-6 sm:mb-8 p-3 sm:p-4 rounded-lg"
+            id="payment-method-section"
+            className="mb-6 sm:mb-8 p-3 sm:p-4 rounded-lg scroll-mt-24"
             style={{
               backgroundColor: settings.paymentSectionBgColor || undefined,
               backgroundImage: settings.paymentSectionBgImage ? `url(${settings.paymentSectionBgImage})` : undefined,
