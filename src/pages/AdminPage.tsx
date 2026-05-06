@@ -1860,6 +1860,16 @@ const AdminPage: React.FC = () => {
                                 placeholder="Icon"
                               />
                             </div>
+                            <div className="w-full sm:w-64">
+                              <label className="text-xs text-muted-foreground mb-1 block">Topup Cover Image (wide)</label>
+                              <ImageUpload
+                                value={editGameData.coverImage}
+                                onChange={(url) => setEditGameData((prev) => ({ ...prev, coverImage: url }))}
+                                folder="game-covers"
+                                aspectRatio="wide"
+                                placeholder="Cover"
+                              />
+                            </div>
                           </div>
                           <div className="flex gap-2 justify-end">
                             <Button variant="outline" size="sm" onClick={() => setEditingGame(null)}>
