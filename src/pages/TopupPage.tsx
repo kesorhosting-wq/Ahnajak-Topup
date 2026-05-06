@@ -1324,7 +1324,7 @@ const TopupPage: React.FC = () => {
               /* Show skeleton placeholders while packages might be loading */
               <div className="grid grid-cols-2 gap-3 sm:gap-5">
                 {[...Array(6)].map((_, i) => (
-                  <Skeleton key={i} className="h-20 sm:h-24 rounded-lg" />
+                  <Skeleton key={i} className="h-24 sm:h-28 rounded-xl" />
                 ))}
               </div>
             ) : (
