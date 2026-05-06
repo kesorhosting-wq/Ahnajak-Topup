@@ -1,8 +1,14 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { MessageCircle } from 'lucide-react';
 import { useSite } from '@/contexts/SiteContext';
+import { resolveIconUrl } from '@/lib/icon-url';
 import { cn } from '@/lib/utils';
+
+const TelegramGlyph: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
+    <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.24 3.64 11.95c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.05-1.99 1.93c-.23.23-.42.42-.83.42z" />
+  </svg>
+);
 
 const ContactButton: React.FC = () => {
   const { pathname } = useLocation();
@@ -13,20 +19,25 @@ const ContactButton: React.FC = () => {
   const url = settings.footerTelegramUrl;
   if (!url) return null;
 
+  const customIcon = resolveIconUrl(settings.contactButtonIcon, settings.iconCdnBaseUrl);
+
   return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Contact us on Telegram"
+      aria-label="Contact us"
       className={cn(
-        'fixed bottom-4 left-4 z-[60] flex items-center gap-2 rounded-full px-4 py-3',
-        'bg-[#229ED9] text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95',
-        'transition-all duration-200'
+        'fixed bottom-4 right-4 z-[60] flex items-center justify-center',
+        'w-14 h-14 rounded-full bg-[#229ED9] text-white shadow-lg',
+        'hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200'
       )}
     >
-      <MessageCircle className="w-5 h-5" />
-      <span className="text-sm font-semibold hidden sm:inline">Contact us</span>
+      {customIcon ? (
+        <img src={customIcon} alt="" className="w-9 h-9 object-contain" />
+      ) : (
+        <TelegramGlyph className="w-7 h-7" />
+      )}
     </a>
   );
 };
