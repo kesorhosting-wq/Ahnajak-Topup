@@ -1081,25 +1081,8 @@ const TopupPage: React.FC = () => {
                 backgroundPosition: "center",
               }}
             >
-              {!game.coverImage && (
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage: `url(${game.image})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    filter: "blur(28px) brightness(0.6)",
-                    transform: "scale(1.2)",
-                  }}
-                />
-              )}
-              {/* Gradient overlays */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent" />
-
-              {/* Decorative glows */}
-              <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gold/30 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-16 -left-12 w-56 h-56 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
+              {/* Gradient overlays - bottom only for text legibility */}
+              <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
               {/* Content */}
               <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 sm:gap-5 p-4 sm:p-6">
