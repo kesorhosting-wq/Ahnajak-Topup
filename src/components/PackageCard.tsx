@@ -206,6 +206,15 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
           </div>
         )}
 
+        {/* Special Price ribbon (top-right diagonal) */}
+        {isSpecial && (
+          <div className="pointer-events-none absolute -top-px -right-px z-30 h-16 w-16 overflow-hidden">
+            <div className="absolute top-[14px] right-[-34px] rotate-45 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider px-8 py-[2px] shadow-md">
+              Special
+            </div>
+          </div>
+        )}
+
         {/* Selected pulsing ring overlay */}
         {selected && (
           <div className="pointer-events-none absolute inset-0 rounded-xl ring-2 ring-gold/60 animate-pulse" />
