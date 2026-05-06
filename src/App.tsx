@@ -10,6 +10,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CustomFontLoader from "./components/CustomFontLoader";
 import FallingFlowers from "./components/FallingFlowers";
+import ContactButton from "./components/ContactButton";
 import Index from "./pages/Index";
 import TopupPage from "./pages/TopupPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -55,6 +56,7 @@ const App = () => (
                   />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                <ContactButton />
               </TooltipProvider>
             </CartProvider>
           </SiteProvider>
