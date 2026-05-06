@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CustomFontLoader from "./components/CustomFontLoader";
 import FallingFlowers from "./components/FallingFlowers";
 import ContactButton from "./components/ContactButton";
+import AuroraBackground from "./components/AuroraBackground";
 import Index from "./pages/Index";
 import TopupPage from "./pages/TopupPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -33,6 +34,7 @@ const App = () => (
             <CartProvider>
               <TooltipProvider>
                 <CustomFontLoader />
+                <AuroraBackground />
                 <FallingFlowers />
                 <Toaster />
                 <Sonner />
