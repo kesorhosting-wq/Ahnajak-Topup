@@ -211,6 +211,7 @@ const AdminPage: React.FC = () => {
       name: game.name,
       slug: game.slug,
       image: game.image,
+      coverImage: game.coverImage || "",
       g2bulkCategoryId: game.g2bulkCategoryId || "",
       defaultPackageIcon: game.defaultPackageIcon || "",
     });
@@ -221,6 +222,7 @@ const AdminPage: React.FC = () => {
       name: editGameData.name,
       slug: editGameData.slug,
       image: editGameData.image,
+      coverImage: editGameData.coverImage || undefined,
       g2bulkCategoryId: editGameData.g2bulkCategoryId || undefined,
       defaultPackageIcon: editGameData.defaultPackageIcon || undefined,
     });
