@@ -727,6 +727,46 @@ const AdminPage: React.FC = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Contact Us Floating Button */}
+                    <div className="pt-4 border-t border-border">
+                      <h4 className="text-sm font-medium mb-2">Floating "Contact Us" Button</h4>
+                      <p className="text-xs text-muted-foreground mb-3">Uses the Telegram URL (set in Home tab → Social Media). Upload a custom icon or paste a URL — leave empty for the default Telegram icon.</p>
+                      <div className="grid gap-4 md:grid-cols-2 max-w-2xl">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium block">Button Icon (upload)</label>
+                          <ImageUpload
+                            value={settings.contactButtonIcon}
+                            onChange={(url) => handleUpdateSettings("contactButtonIcon", url)}
+                            folder="contact-button"
+                            aspectRatio="square"
+                            placeholder="Upload icon"
+                            className="max-w-[100px]"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium block">Button Icon URL</label>
+                          <Input
+                            value={settings.contactButtonIcon}
+                            onChange={(e) => handleUpdateSettings("contactButtonIcon", e.target.value)}
+                            className="border-gold/50"
+                            placeholder="https://..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Icon CDN Base URL */}
+                    <div className="pt-4 border-t border-border">
+                      <h4 className="text-sm font-medium mb-2">Icon CDN / Base URL</h4>
+                      <p className="text-xs text-muted-foreground mb-3">Optional. Prepended to relative package & label icon paths to serve from a CDN. Absolute URLs (https://…) are not modified.</p>
+                      <Input
+                        value={settings.iconCdnBaseUrl}
+                        onChange={(e) => handleUpdateSettings("iconCdnBaseUrl", e.target.value)}
+                        className="border-gold/50 max-w-xl"
+                        placeholder="https://cdn.example.com/icons"
+                      />
+                    </div>
                   </div>
 
                   {/* Falling Animation Controls */}
@@ -1499,45 +1539,6 @@ const AdminPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Contact Us Floating Button */}
-                    <div className="pt-4 border-t border-border">
-                      <h4 className="text-sm font-medium mb-2">Floating "Contact Us" Button</h4>
-                      <p className="text-xs text-muted-foreground mb-3">Uses the Telegram URL below. Upload a custom icon or paste a URL — leave empty for the default Telegram icon.</p>
-                      <div className="grid gap-4 md:grid-cols-2 max-w-2xl">
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium block">Button Icon (upload)</label>
-                          <ImageUpload
-                            value={settings.contactButtonIcon}
-                            onChange={(url) => handleUpdateSettings("contactButtonIcon", url)}
-                            folder="contact-button"
-                            aspectRatio="square"
-                            placeholder="Upload icon"
-                            className="max-w-[100px]"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium block">Button Icon URL</label>
-                          <Input
-                            value={settings.contactButtonIcon}
-                            onChange={(e) => handleUpdateSettings("contactButtonIcon", e.target.value)}
-                            className="border-gold/50"
-                            placeholder="https://..."
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Icon CDN Base URL */}
-                    <div className="pt-4 border-t border-border">
-                      <h4 className="text-sm font-medium mb-2">Icon CDN / Base URL</h4>
-                      <p className="text-xs text-muted-foreground mb-3">Optional. Prepended to relative package & label icon paths to serve from a CDN. Absolute URLs (https://…) are not modified.</p>
-                      <Input
-                        value={settings.iconCdnBaseUrl}
-                        onChange={(e) => handleUpdateSettings("iconCdnBaseUrl", e.target.value)}
-                        className="border-gold/50 max-w-xl"
-                        placeholder="https://cdn.example.com/icons"
-                      />
-                    </div>
 
                     {/* Social Icons */}
                     <div className="pt-4 border-t border-border">
