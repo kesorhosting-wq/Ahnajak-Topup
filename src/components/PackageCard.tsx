@@ -11,6 +11,7 @@ interface PackageCardProps {
   onSelect: () => void;
   priority?: boolean;
   gameDefaultIcon?: string;
+  isSpecial?: boolean;
 }
 
 const imageCache = new Map<string, boolean>();
@@ -25,7 +26,7 @@ const preloadImage = (src: string): Promise<boolean> => {
   });
 };
 
-const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, priority = false, gameDefaultIcon }) => {
+const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, priority = false, gameDefaultIcon, isSpecial = false }) => {
   const { settings } = useSite();
   const isMobile = useIsMobile();
   const [iconLoaded, setIconLoaded] = useState(false);
