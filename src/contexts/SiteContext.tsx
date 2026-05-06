@@ -127,6 +127,10 @@ export interface SiteSettings {
   // Falling animation
   fallingIntensity: number; // 0-100 (% of base spawn count)
   fallingSpeed: number; // 0.2 - 3 multiplier (higher = faster fall)
+  // CDN base URL for icons (prepended to relative icon paths)
+  iconCdnBaseUrl: string;
+  // Contact button icon (overrides default Telegram icon)
+  contactButtonIcon: string;
 }
 
 interface SiteContextType {
@@ -231,6 +235,8 @@ const defaultSettings: SiteSettings = {
   customEnglishFont: '',
   fallingIntensity: 30,
   fallingSpeed: 1,
+  iconCdnBaseUrl: '',
+  contactButtonIcon: '',
 };
 
 const defaultPaymentMethods: PaymentMethod[] = [
@@ -351,6 +357,8 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (row.key === 'customEnglishFont') loadedSettings.customEnglishFont = row.value as string;
           if (row.key === 'fallingIntensity') loadedSettings.fallingIntensity = row.value as number;
           if (row.key === 'fallingSpeed') loadedSettings.fallingSpeed = row.value as number;
+          if (row.key === 'iconCdnBaseUrl') loadedSettings.iconCdnBaseUrl = row.value as string;
+          if (row.key === 'contactButtonIcon') loadedSettings.contactButtonIcon = row.value as string;
         });
         setSettings(prev => ({ ...prev, ...loadedSettings }));
       }
