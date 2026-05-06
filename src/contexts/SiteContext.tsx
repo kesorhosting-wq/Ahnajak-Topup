@@ -372,6 +372,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           image: game.image || '',
           g2bulkCategoryId: (game as any).g2bulk_category_id || undefined,
           defaultPackageIcon: (game as any).default_package_icon || undefined,
+          coverImage: (game as any).cover_image || undefined,
           packages: (packagesData || [])
             .filter(pkg => pkg.game_id === game.id)
             .map(pkg => ({
