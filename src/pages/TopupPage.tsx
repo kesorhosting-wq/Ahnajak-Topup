@@ -1081,18 +1081,6 @@ const TopupPage: React.FC = () => {
                 backgroundPosition: "center",
               }}
             >
-              {!game.coverImage && (
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage: `url(${game.image})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    filter: "blur(28px) brightness(0.6)",
-                    transform: "scale(1.2)",
-                  }}
-                />
-              )}
               {/* Gradient overlays */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent" />
