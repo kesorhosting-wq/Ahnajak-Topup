@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { Package } from '@/contexts/SiteContext';
 import { useSite } from '@/contexts/SiteContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Skeleton } from '@/components/ui/skeleton';
+import { resolveIconUrl } from '@/lib/icon-url';
 
 interface PackageCardProps {
   pkg: Package;
@@ -24,7 +24,10 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
     ? (settings.packageIconSizeMobile || 64)
     : (settings.packageIconSizeDesktop || 60);
 
-  const iconSrc = pkg.icon || gameDefaultIcon || settings.packageIconUrl;
+  const iconSrc = resolveIconUrl(
+    pkg.icon || gameDefaultIcon || settings.packageIconUrl,
+    settings.iconCdnBaseUrl
+  );
 
   const cardHeight = isMobile
     ? Math.max(settings.packageHeight || 96, 92)
