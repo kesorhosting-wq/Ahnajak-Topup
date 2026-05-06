@@ -1326,6 +1326,7 @@ const TopupPage: React.FC = () => {
                         onSelect={() => setSelectedPackage(pkg.id)}
                         priority={index < 6}
                         gameDefaultIcon={game.defaultPackageIcon}
+                        isSpecial={pkg.__special}
                       />
                     ))}
                 </div>
