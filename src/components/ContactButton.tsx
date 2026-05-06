@@ -39,7 +39,7 @@ const ContactButton: React.FC = () => {
         <img
           src={customIcon}
           alt=""
-          className="w-full h-full object-contain drop-shadow-lg"
+          className="w-full h-full object-cover"
         />
       ) : (
         <TelegramGlyph className="w-7 h-7" />
