@@ -34,8 +34,8 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
   const cardRef = useRef<HTMLButtonElement>(null);
 
   const iconSize = isMobile
-    ? (settings.packageIconSizeMobile || 56)
-    : (settings.packageIconSizeDesktop || 44);
+    ? (settings.packageIconSizeMobile || 64)
+    : (settings.packageIconSizeDesktop || 60);
 
   const iconSrc = pkg.icon || gameDefaultIcon || settings.packageIconUrl;
 
@@ -59,10 +59,9 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
     }
   }, [iconSrc, isVisible]);
 
-  const cardHeight = Math.min(
-    settings.packageHeight || 78,
-    isMobile ? 72 : (settings.packageHeight || 78)
-  );
+  const cardHeight = isMobile
+    ? Math.max(settings.packageHeight || 96, 92)
+    : Math.max(settings.packageHeight || 110, 104);
 
   return (
     <button
