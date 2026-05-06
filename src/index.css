@@ -241,3 +241,19 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+@keyframes contactJump {
+  0%, 60%, 100% { transform: translateY(0); }
+  70% { transform: translateY(-12px); }
+  80% { transform: translateY(0); }
+  85% { transform: translateY(-6px); }
+  92% { transform: translateY(0); }
+}
+
+.animate-contact-jump {
+  animation: contactJump 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-contact-jump { animation: none; }
+}

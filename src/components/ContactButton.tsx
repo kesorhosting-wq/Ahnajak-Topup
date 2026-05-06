@@ -29,12 +29,19 @@ const ContactButton: React.FC = () => {
       aria-label="Contact us"
       className={cn(
         'fixed bottom-4 right-4 z-[60] flex items-center justify-center',
-        'w-14 h-14 rounded-full bg-[#229ED9] text-white shadow-lg',
-        'hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200'
+        'animate-contact-jump',
+        'hover:scale-110 active:scale-95 transition-transform duration-200',
+        customIcon
+          ? 'w-14 h-14'
+          : 'w-14 h-14 rounded-full bg-[#229ED9] text-white shadow-lg hover:shadow-xl'
       )}
     >
       {customIcon ? (
-        <img src={customIcon} alt="" className="w-9 h-9 object-contain" />
+        <img
+          src={customIcon}
+          alt=""
+          className="w-full h-full object-contain drop-shadow-lg"
+        />
       ) : (
         <TelegramGlyph className="w-7 h-7" />
       )}
