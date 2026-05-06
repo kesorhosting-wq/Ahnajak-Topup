@@ -1330,69 +1330,72 @@ const TopupPage: React.FC = () => {
           </div>
 
           {/* Step 2: Select Package (Specials + Regular merged) */}
-          <div className="mb-6 sm:mb-8">
-            <div className="flex items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <span
-                  className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-base"
-                  style={{
-                    backgroundColor: settings.frameColor || "hsl(43 74% 49%)",
-                    color: "hsl(var(--primary-foreground))",
-                  }}
-                >
-                  2
-                </span>
-                <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសតម្លៃពេជ្រ</h2>
+          <div className="mb-6 sm:mb-8 p-5 sm:p-6 rounded-3xl relative overflow-hidden border border-white/40 shadow-xl backdrop-blur-xl bg-white/70">
+            <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between gap-2 sm:gap-3 mb-4 sm:mb-5">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span
+                    className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-md ring-2 ring-white/60"
+                    style={{
+                      backgroundColor: settings.frameColor || "hsl(43 74% 49%)",
+                      color: "hsl(var(--primary-foreground))",
+                    }}
+                  >
+                    2
+                  </span>
+                  <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសតម្លៃពេជ្រ</h2>
+                </div>
+                {game.specialPackages && game.specialPackages.length > 0 && (
+                  <span className="px-3 h-6 sm:h-7 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center font-bold text-[10px] sm:text-xs shadow-md animate-pulse">
+                    🔥 Special Price
+                  </span>
+                )}
               </div>
-              {game.specialPackages && game.specialPackages.length > 0 && (
-                <span className="px-3 h-6 sm:h-7 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center font-bold text-[10px] sm:text-xs">
-                  Special Price
-                </span>
+
+              {game.packages.length === 0 && (!game.specialPackages || game.specialPackages.length === 0) ? (
+                <div className="grid grid-cols-3 gap-3 sm:gap-5">
+                  {[...Array(6)].map((_, i) => (
+                    <Skeleton key={i} className="h-24 sm:h-28 rounded-xl" />
+                  ))}
+                </div>
+              ) : (
+                <div className="max-h-[460px] sm:max-h-[560px] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
+                  <div className="grid grid-cols-3 gap-3 sm:gap-5">
+                    {[
+                      ...(game.specialPackages || []).map((p) => ({ ...p, __special: true })),
+                      ...game.packages.map((p) => ({ ...p, __special: false })),
+                    ]
+                      .sort((a, b) => {
+                        if (a.__special !== b.__special) return a.__special ? -1 : 1;
+                        return a.price - b.price;
+                      })
+                      .map((pkg, index) => (
+                        <PackageCard
+                          key={`${pkg.__special ? 'sp' : 'pk'}-${pkg.id}`}
+                          pkg={pkg}
+                          selected={selectedPackage === pkg.id}
+                          onSelect={() => {
+                            setSelectedPackage(pkg.id);
+                            setTimeout(() => {
+                              document.getElementById('payment-method-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }, 150);
+                          }}
+                          priority={index < 6}
+                          gameDefaultIcon={game.defaultPackageIcon}
+                          isSpecial={pkg.__special}
+                        />
+                      ))}
+                  </div>
+                </div>
               )}
             </div>
-
-            {game.packages.length === 0 && (!game.specialPackages || game.specialPackages.length === 0) ? (
-              <div className="grid grid-cols-3 gap-3 sm:gap-5">
-                {[...Array(6)].map((_, i) => (
-                  <Skeleton key={i} className="h-24 sm:h-28 rounded-xl" />
-                ))}
-              </div>
-            ) : (
-              <div className="max-h-[460px] sm:max-h-[560px] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
-                <div className="grid grid-cols-3 gap-3 sm:gap-5">
-                  {[
-                    ...(game.specialPackages || []).map((p) => ({ ...p, __special: true })),
-                    ...game.packages.map((p) => ({ ...p, __special: false })),
-                  ]
-                    .sort((a, b) => {
-                      if (a.__special !== b.__special) return a.__special ? -1 : 1;
-                      return a.price - b.price;
-                    })
-                    .map((pkg, index) => (
-                      <PackageCard
-                        key={`${pkg.__special ? 'sp' : 'pk'}-${pkg.id}`}
-                        pkg={pkg}
-                        selected={selectedPackage === pkg.id}
-                        onSelect={() => {
-                          setSelectedPackage(pkg.id);
-                          setTimeout(() => {
-                            document.getElementById('payment-method-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }, 150);
-                        }}
-                        priority={index < 6}
-                        gameDefaultIcon={game.defaultPackageIcon}
-                        isSpecial={pkg.__special}
-                      />
-                    ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Step 3: Payment Method */}
           <div
             id="payment-method-section"
-            className="mb-6 sm:mb-8 p-3 sm:p-4 rounded-lg scroll-mt-24"
+            className="mb-6 sm:mb-8 p-5 sm:p-6 rounded-3xl scroll-mt-24 relative overflow-hidden border border-white/40 shadow-xl backdrop-blur-xl bg-white/70"
             style={{
               backgroundColor: settings.paymentSectionBgColor || undefined,
               backgroundImage: settings.paymentSectionBgImage ? `url(${settings.paymentSectionBgImage})` : undefined,
@@ -1401,85 +1404,96 @@ const TopupPage: React.FC = () => {
               color: settings.paymentSectionTextColor || undefined,
             }}
           >
-            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-              <span
-                className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-base"
-                style={{
-                  backgroundColor: settings.frameColor || "hsl(43 74% 49%)",
-                  color: "hsl(var(--primary-foreground))",
-                }}
-              >
-                3
-              </span>
-              <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសធនាគារបង់ប្រាក់</h2>
-            </div>
-
-            <div className="flex gap-2 sm:gap-4 flex-wrap">
-              {paymentMethods.map((method) => (
-                <button
-                  key={method.id}
-                  onClick={() => setSelectedPayment(method.id)}
-                  className={cn(
-                    "px-3 sm:px-6 py-2 sm:py-4 rounded-xl border-2 transition-all flex flex-col items-center gap-1 sm:gap-2 min-w-[70px] sm:min-w-[100px]",
-                    selectedPayment === method.id
-                      ? "border-gold bg-gold/20"
-                      : "border-border bg-card hover:border-gold/50",
-                  )}
+            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-emerald-400/15 blur-3xl pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
+                <span
+                  className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-md ring-2 ring-white/60"
+                  style={{
+                    backgroundColor: settings.frameColor || "hsl(43 74% 49%)",
+                    color: "hsl(var(--primary-foreground))",
+                  }}
                 >
-                  {method.icon.startsWith("http") ? (
-                    <img
-                      src={method.icon}
-                      alt={method.name}
-                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <img
-                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwG-Zx92YNnU6BuabALnRRwBqX_5USd3AJJw&s"
-                      alt="phone"
-                      className="w-6 h-6 inline"
-                    />
-                  )}
-                  <span className="text-xs sm:text-sm font-medium">{method.name}</span>
-                </button>
-              ))}
+                  3
+                </span>
+                <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសធនាគារបង់ប្រាក់</h2>
+              </div>
+
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
+                {paymentMethods.map((method) => (
+                  <button
+                    key={method.id}
+                    onClick={() => setSelectedPayment(method.id)}
+                    className={cn(
+                      "group relative px-2 sm:px-4 py-3 sm:py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2 hover:-translate-y-0.5",
+                      selectedPayment === method.id
+                        ? "border-gold bg-gradient-to-br from-gold/25 to-amber-300/15 shadow-md"
+                        : "border-border/60 bg-white/70 hover:border-gold/60 hover:shadow-md",
+                    )}
+                  >
+                    {selectedPayment === method.id && (
+                      <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-gold flex items-center justify-center text-black text-[10px] font-bold shadow">✓</span>
+                    )}
+                    {method.icon.startsWith("http") ? (
+                      <img
+                        src={method.icon}
+                        alt={method.name}
+                        className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl object-cover shadow-sm"
+                      />
+                    ) : (
+                      <img
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwG-Zx92YNnU6BuabALnRRwBqX_5USd3AJJw&s"
+                        alt="phone"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg"
+                      />
+                    )}
+                    <span className="text-[11px] sm:text-sm font-semibold text-center truncate w-full">{method.name}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Terms & Submit */}
-          <div className="border-t border-border pt-4 sm:pt-6">
-            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-              <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gold text-black flex items-center justify-center text-sm sm:text-base font-bold flex-shrink-0">
-                4
-              </span>
-              <span className="font-khmer text-sm sm:text-base font-bold text-black">ចុច​ ✔ នៅខាងក្រោម​</span>
-            </div>
-            <label className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 cursor-pointer">
-              <button
-                onClick={() => setAgreedToTerms(!agreedToTerms)}
-                className={cn(
-                  "w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0",
-                  agreedToTerms ? "bg-gold border-gold" : "border-muted-foreground",
-                )}
-              >
-                {agreedToTerms && <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-primary-foreground" />}
-              </button>
-              <span className="font-khmer text-sm sm:text-base">យកព្រមទទួលលក្ខខណ្ឌ</span>
-            </label>
-
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting || !agreedToTerms || !selectedPackage || !selectedPayment || !verifiedUser}
-              className="w-full py-4 sm:py-6 text-base sm:text-lg font-bold bg-gradient-to-r from-gold to-gold-dark hover:from-gold-dark hover:to-gold text-primary-foreground shadow-gold disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  កំពុងដំណើរការ...
+          <div className="rounded-3xl p-5 sm:p-6 border border-white/40 shadow-xl backdrop-blur-xl bg-white/70 relative overflow-hidden">
+            <div className="absolute -bottom-12 -right-12 w-48 h-48 rounded-full bg-gold/20 blur-3xl pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <span className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gold text-black flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0 shadow-md ring-2 ring-white/60">
+                  4
                 </span>
-              ) : (
-                "សម្រេចទិញ"
-              )}
-            </Button>
+                <span className="font-khmer text-sm sm:text-base font-bold text-foreground">ចុច​ ✔ នៅខាងក្រោម​</span>
+              </div>
+              <label className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 cursor-pointer group">
+                <button
+                  onClick={() => setAgreedToTerms(!agreedToTerms)}
+                  className={cn(
+                    "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
+                    agreedToTerms ? "bg-gold border-gold scale-110" : "border-muted-foreground group-hover:border-gold",
+                  )}
+                >
+                  {agreedToTerms && <CheckCircle className="w-4 h-4 text-primary-foreground" />}
+                </button>
+                <span className="font-khmer text-sm sm:text-base">យកព្រមទទួលលក្ខខណ្ឌ</span>
+              </label>
+
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting || !agreedToTerms || !selectedPackage || !selectedPayment || !verifiedUser}
+                className="w-full py-5 sm:py-7 text-base sm:text-lg font-bold rounded-2xl bg-gradient-to-r from-gold via-amber-400 to-gold-dark hover:from-gold-dark hover:via-amber-500 hover:to-gold text-primary-foreground shadow-gold hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    កំពុងដំណើរការ...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    🚀 សម្រេចទិញ
+                  </span>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
