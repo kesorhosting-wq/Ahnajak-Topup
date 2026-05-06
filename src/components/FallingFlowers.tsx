@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useSite } from '@/contexts/SiteContext';
 
 const FLOWER_IMAGES = [
   '/images/flower1.png',
@@ -23,6 +24,9 @@ interface Petal {
 let petalId = 0;
 
 const FallingFlowers: React.FC = () => {
+  const { settings } = useSite();
+  const intensity = Math.max(0, Math.min(100, settings.fallingIntensity ?? 30));
+  const speed = Math.max(0.2, Math.min(3, settings.fallingSpeed ?? 1));
   const [petals, setPetals] = useState<Petal[]>([]);
 
   const createPetal = useCallback((): Petal => {
@@ -31,31 +35,41 @@ const FallingFlowers: React.FC = () => {
       image: FLOWER_IMAGES[Math.floor(Math.random() * FLOWER_IMAGES.length)],
       left: Math.random() * 100,
       size: 20 + Math.random() * 30,
-      duration: 6 + Math.random() * 8,
+      duration: (6 + Math.random() * 8) / speed,
       delay: 0,
       swayAmount: 30 + Math.random() * 60,
       rotation: Math.random() * 360,
-      opacity: 1, // Full opacity, real image color
+      opacity: 1,
     };
-  }, []);
+  }, [speed]);
 
   useEffect(() => {
-    // Initial batch (lighter)
+    if (intensity <= 0) {
+      setPetals([]);
+      return;
+    }
+
+    // initial = up to 25 petals scaled by intensity
+    const initialCount = Math.max(1, Math.round((intensity / 100) * 25));
     const initial: Petal[] = [];
-    for (let i = 0; i < 8; i++) {
-      initial.push({ ...createPetal(), delay: Math.random() * 8 });
+    for (let i = 0; i < initialCount; i++) {
+      initial.push({ ...createPetal(), delay: Math.random() * 6 });
     }
     setPetals(initial);
 
+    // spawn interval: 100% intensity = ~400ms, 0% = ~3000ms
+    const intervalMs = Math.round(3000 - (intensity / 100) * 2600);
+    const maxAlive = Math.max(4, Math.round((intensity / 100) * 60));
+
     const interval = setInterval(() => {
       setPetals(prev => {
-        const filtered = prev.length > 18 ? prev.slice(-15) : prev;
+        const filtered = prev.length > maxAlive ? prev.slice(-Math.floor(maxAlive * 0.8)) : prev;
         return [...filtered, createPetal()];
       });
-    }, 1600);
+    }, intervalMs);
 
     return () => clearInterval(interval);
-  }, [createPetal]);
+  }, [createPetal, intensity]);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
@@ -79,7 +93,7 @@ const FallingFlowers: React.FC = () => {
             alt=""
             className="w-full h-full object-contain"
             style={{
-              animation: `flowerSpin ${3 + Math.random() * 4}s linear infinite`,
+              animation: `flowerSpin ${(3 + Math.random() * 4) / speed}s linear infinite`,
             }}
           />
         </div>
