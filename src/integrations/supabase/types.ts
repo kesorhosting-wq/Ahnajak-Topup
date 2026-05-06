@@ -172,6 +172,7 @@ export type Database = {
       }
       games: {
         Row: {
+          cover_image: string | null
           created_at: string
           default_package_icon: string | null
           description: string | null
@@ -184,6 +185,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cover_image?: string | null
           created_at?: string
           default_package_icon?: string | null
           description?: string | null
@@ -196,6 +198,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cover_image?: string | null
           created_at?: string
           default_package_icon?: string | null
           description?: string | null
