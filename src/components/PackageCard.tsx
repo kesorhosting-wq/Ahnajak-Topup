@@ -9,28 +9,18 @@ interface PackageCardProps {
   pkg: Package;
   selected: boolean;
   onSelect: () => void;
-  priority?: boolean; // If true, load immediately (above the fold)
-  gameDefaultIcon?: string; // Game-specific default icon
+  priority?: boolean;
+  gameDefaultIcon?: string;
 }
 
-// Preload image and cache it
 const imageCache = new Map<string, boolean>();
 
 const preloadImage = (src: string): Promise<boolean> => {
-  if (imageCache.has(src)) {
-    return Promise.resolve(imageCache.get(src)!);
-  }
-  
+  if (imageCache.has(src)) return Promise.resolve(imageCache.get(src)!);
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => {
-      imageCache.set(src, true);
-      resolve(true);
-    };
-    img.onerror = () => {
-      imageCache.set(src, false);
-      resolve(false);
-    };
+    img.onload = () => { imageCache.set(src, true); resolve(true); };
+    img.onerror = () => { imageCache.set(src, false); resolve(false); };
     img.src = src;
   });
 };
@@ -42,186 +32,172 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
   const [iconError, setIconError] = useState(false);
   const [isVisible, setIsVisible] = useState(priority);
   const cardRef = useRef<HTMLButtonElement>(null);
-  
-  // Get icon sizes from settings with defaults - use appropriate size based on screen
-  const iconSize = isMobile 
-    ? (settings.packageIconSizeMobile || 50) 
-    : (settings.packageIconSizeDesktop || 32);
 
-  // Determine which icon to use: package icon > game default icon > global icon > default emoji
+  const iconSize = isMobile
+    ? (settings.packageIconSizeMobile || 56)
+    : (settings.packageIconSizeDesktop || 44);
+
   const iconSrc = pkg.icon || gameDefaultIcon || settings.packageIconUrl;
-  
-  // Intersection Observer for lazy loading
-  useEffect(() => {
-    if (priority || !cardRef.current) {
-      setIsVisible(true);
-      return;
-    }
 
+  useEffect(() => {
+    if (priority || !cardRef.current) { setIsVisible(true); return; }
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); } },
       { rootMargin: '100px', threshold: 0 }
     );
-
     observer.observe(cardRef.current);
     return () => observer.disconnect();
   }, [priority]);
-  
-  // Preload icon when visible
+
   useEffect(() => {
-    if (!isVisible || !iconSrc) {
-      if (!iconSrc) setIconLoaded(true);
-      return;
-    }
-    
-    // Check cache first
+    if (!isVisible || !iconSrc) { if (!iconSrc) setIconLoaded(true); return; }
     if (imageCache.has(iconSrc)) {
       setIconLoaded(true);
       setIconError(!imageCache.get(iconSrc));
     } else {
-      preloadImage(iconSrc).then((success) => {
-        setIconLoaded(true);
-        setIconError(!success);
-      });
+      preloadImage(iconSrc).then((success) => { setIconLoaded(true); setIconError(!success); });
     }
   }, [iconSrc, isVisible]);
-  
+
+  const cardHeight = Math.min(
+    settings.packageHeight || 78,
+    isMobile ? 72 : (settings.packageHeight || 78)
+  );
+
   return (
     <button
       ref={cardRef}
       onClick={onSelect}
       className={cn(
-        "relative w-full overflow-hidden transition-all duration-300",
-        "hover:scale-[1.02] active:scale-[0.98]",
-        selected && "ring-2 ring-gold ring-offset-2 ring-offset-background"
+        "group relative w-full overflow-hidden rounded-xl transition-all duration-300 ease-out",
+        "hover:-translate-y-0.5 hover:scale-[1.015] active:scale-[0.98]",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/70",
+        selected && "ring-2 ring-gold ring-offset-2 ring-offset-background animate-scale-in"
       )}
+      style={{ animation: 'fade-in 0.35s ease-out' }}
     >
-      {/* Banner/Ribbon style container */}
-      <div 
+      {/* Outer card */}
+      <div
         className={cn(
-          "relative flex items-center rounded-lg overflow-hidden",
-          "shadow-md hover:shadow-lg transition-shadow"
+          "relative flex items-center rounded-xl overflow-hidden",
+          "shadow-md group-hover:shadow-xl group-hover:shadow-gold/20 transition-all duration-300"
         )}
         style={{
-          height: `${Math.min(settings.packageHeight || 64, window.innerWidth < 640 ? 52 : settings.packageHeight || 64)}px`,
-          background: settings.packageBgImage 
-            ? `url(${settings.packageBgImage})` 
-            : settings.packageBgColor 
-              ? settings.packageBgColor 
-              : 'linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 50%, #2d2d2d 100%)',
+          height: `${cardHeight}px`,
+          background: settings.packageBgImage
+            ? `url(${settings.packageBgImage})`
+            : settings.packageBgColor
+              ? settings.packageBgColor
+              : 'linear-gradient(135deg, #2a2a2e 0%, #161618 55%, #2a2a2e 100%)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          border: settings.packageBorderWidth ? `${settings.packageBorderWidth}px solid ${settings.packageBorderColor || '#D4A84B'}` : 'none',
+          border: settings.packageBorderWidth
+            ? `${settings.packageBorderWidth}px solid ${settings.packageBorderColor || '#D4A84B'}`
+            : '1px solid hsl(var(--border) / 0.4)',
         }}
       >
-        {/* Left section with icon */}
-        <div className="flex items-center px-2 sm:px-3">
-          {/* Show skeleton while loading or not visible */}
-          {!isVisible || !iconLoaded ? (
-            <Skeleton 
-              className="rounded-md flex-shrink-0"
-              style={{
-                width: `${iconSize}px`,
-                height: `${iconSize}px`,
-              }}
-            />
-          ) : iconSrc && !iconError ? (
-            <img 
-              src={iconSrc} 
-              alt="" 
-              className="object-contain flex-shrink-0"
-              style={{
-                width: `${iconSize}px`,
-                height: `${iconSize}px`,
-              }}
-              loading={priority ? "eager" : "lazy"}
-              decoding="async"
-            />
-          ) : (
-            <span className="flex-shrink-0 text-3xl sm:text-xl">💎</span>
-          )}
+        {/* Subtle inner highlight */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/20" />
+
+        {/* Animated shimmer sweep on hover */}
+        <div
+          className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 rotate-12 bg-gradient-to-r from-transparent via-white/15 to-transparent opacity-0 group-hover:opacity-100 group-hover:translate-x-[400%] transition-all duration-[1100ms] ease-out"
+        />
+
+        {/* Icon */}
+        <div className="flex items-center pl-2.5 sm:pl-3 z-10">
+          <div
+            className={cn(
+              "relative flex items-center justify-center rounded-lg",
+              "bg-white/5 backdrop-blur-sm ring-1 ring-white/10",
+              "transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-3deg]"
+            )}
+            style={{ width: `${iconSize + 8}px`, height: `${iconSize + 8}px` }}
+          >
+            {!isVisible || !iconLoaded ? (
+              <Skeleton className="rounded-md" style={{ width: iconSize, height: iconSize }} />
+            ) : iconSrc && !iconError ? (
+              <img
+                src={iconSrc}
+                alt=""
+                className="object-contain drop-shadow-[0_2px_6px_rgba(212,168,75,0.35)]"
+                style={{ width: iconSize, height: iconSize }}
+                loading={priority ? 'eager' : 'lazy'}
+                decoding="async"
+              />
+            ) : (
+              <span className="text-2xl sm:text-3xl">💎</span>
+            )}
+          </div>
         </div>
-        
-        {/* Center section with amount and name - centered */}
-        <div className="flex-1 flex flex-col items-center justify-center min-w-0 leading-tight">
-          <span 
-            className="truncate text-xs sm:text-sm"
-            style={{ 
+
+        {/* Center content */}
+        <div className="flex-1 flex flex-col items-center justify-center min-w-0 px-2 leading-tight z-10">
+          <span
+            className="truncate text-sm sm:text-base tracking-wide"
+            style={{
               color: settings.packageTextColor || '#ffffff',
-              fontWeight: settings.packageTextWeight || 700
+              fontWeight: settings.packageTextWeight || 700,
+              textShadow: '0 1px 2px rgba(0,0,0,0.4)',
             }}
           >
             {pkg.amount.toLocaleString()}
           </span>
-          <span 
-            className="truncate text-[10px] sm:text-xs"
-            style={{ 
+          <span
+            className="truncate text-[10px] sm:text-xs opacity-80"
+            style={{
               color: settings.packageTextColor || '#ffffff',
-              fontWeight: settings.packageTextWeight || 700,
-              opacity: 0.9
+              fontWeight: settings.packageTextWeight || 500,
             }}
           >
             {pkg.name}
           </span>
           {pkg.quantity != null && pkg.quantity > 0 && (
-            <span 
-              className="text-[9px] sm:text-[10px] opacity-70"
+            <span
+              className="text-[9px] sm:text-[10px] opacity-60"
               style={{ color: settings.packageTextColor || '#ffffff' }}
             >
               ×{pkg.quantity} available
             </span>
           )}
         </div>
-        
-        {/* Right section with chevron arrow shape */}
-        <div 
-          className="relative flex items-center justify-end pr-2 sm:pr-3 pl-3 sm:pl-6 h-full"
-          style={{
-            background: 'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.3) 100%)',
-          }}
-        >
-          {/* Arrow/chevron cutout effect */}
-          <div 
-            className="absolute left-0 top-0 h-full w-3 sm:w-4"
+
+        {/* Price pill */}
+        <div className="relative flex items-center justify-end pr-2.5 sm:pr-3 pl-3 z-10">
+          <span
+            className={cn(
+              "whitespace-nowrap text-xs sm:text-sm rounded-full px-2.5 py-1",
+              "bg-gradient-to-r from-gold/90 to-amber-500/90 text-black",
+              "shadow-[0_2px_10px_rgba(212,168,75,0.45)]",
+              "transition-transform duration-300 group-hover:scale-105"
+            )}
             style={{
-              background: 'linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.2) 50%)',
-            }}
-          />
-          
-          {/* Price */}
-          <span 
-            className="whitespace-nowrap text-[10px] sm:text-sm"
-            style={{ 
-              color: settings.packagePriceColor || '#ffffff',
-              fontWeight: settings.packagePriceWeight || 700
+              color: settings.packagePriceColor || undefined,
+              fontWeight: settings.packagePriceWeight || 800,
             }}
           >
-            {settings.packageCurrencySymbol || '$'}{pkg.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {settings.packageCurrencySymbol || '$'}
+            {pkg.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
-        
-        {/* Selection checkmark */}
+
+        {/* Selection check */}
         {selected && (
-          <div className="absolute -top-0.5 sm:-top-1 -right-0.5 sm:-right-1 w-4 h-4 sm:w-5 sm:h-5 bg-gold rounded-full flex items-center justify-center z-10">
-            <span className="text-primary-foreground text-[10px] sm:text-xs">✓</span>
+          <div className="absolute top-1 right-1 w-5 h-5 sm:w-6 sm:h-6 bg-gold rounded-full flex items-center justify-center z-20 shadow-lg animate-scale-in">
+            <span className="text-primary-foreground text-[11px] sm:text-xs font-bold">✓</span>
           </div>
         )}
-        
-        {/* Label badge - top left inside card */}
+
+        {/* Label */}
         {pkg.label && (
-          <div 
-            className="absolute top-0 left-0 z-20 inline-flex items-center gap-1 px-2 py-[2px] rounded-br-md"
+          <div
+            className="absolute top-0 left-0 z-20 inline-flex items-center gap-1 px-2 py-[3px] rounded-br-lg shadow-md"
             style={{ backgroundColor: pkg.labelBgColor || '#dc2626' }}
           >
             {pkg.labelIcon && (
               <img src={pkg.labelIcon} alt="" className="w-3 h-3 object-contain" loading="lazy" />
             )}
-            <span 
+            <span
               className="text-[8px] sm:text-[10px] font-extrabold uppercase tracking-wider truncate"
               style={{ color: pkg.labelTextColor || '#ffffff' }}
             >
@@ -230,8 +206,10 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
           </div>
         )}
 
-        {/* Hover glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-gold/0 via-gold/10 to-gold/0 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        {/* Selected pulsing ring overlay */}
+        {selected && (
+          <div className="pointer-events-none absolute inset-0 rounded-xl ring-2 ring-gold/60 animate-pulse" />
+        )}
       </div>
     </button>
   );
