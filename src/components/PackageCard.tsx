@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { Package } from '@/contexts/SiteContext';
 import { useSite } from '@/contexts/SiteContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Skeleton } from '@/components/ui/skeleton';
+import { resolveIconUrl } from '@/lib/icon-url';
 
 interface PackageCardProps {
   pkg: Package;
@@ -24,7 +24,10 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
     ? (settings.packageIconSizeMobile || 64)
     : (settings.packageIconSizeDesktop || 60);
 
-  const iconSrc = pkg.icon || gameDefaultIcon || settings.packageIconUrl;
+  const iconSrc = resolveIconUrl(
+    pkg.icon || gameDefaultIcon || settings.packageIconUrl,
+    settings.iconCdnBaseUrl
+  );
 
   const cardHeight = isMobile
     ? Math.max(settings.packageHeight || 96, 92)
@@ -70,11 +73,17 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
             {iconSrc && !iconError ? (
               <>
                 {!iconLoaded && (
-                  <Skeleton className="absolute rounded-md" style={{ width: iconSize, height: iconSize }} />
+                  <div
+                    className="absolute rounded-full bg-gradient-to-br from-white/10 to-white/[0.03] animate-pulse"
+                    style={{ width: iconSize, height: iconSize }}
+                    aria-hidden
+                  />
                 )}
                 <img
                   src={iconSrc}
                   alt=""
+                  width={iconSize}
+                  height={iconSize}
                   className="object-contain"
                   style={{
                     width: iconSize,
@@ -92,7 +101,11 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
             ) : iconError ? (
               <span className="text-2xl sm:text-3xl">💎</span>
             ) : (
-              <Skeleton className="rounded-md" style={{ width: iconSize, height: iconSize }} />
+              <div
+                className="rounded-full bg-gradient-to-br from-white/10 to-white/[0.03] animate-pulse"
+                style={{ width: iconSize, height: iconSize }}
+                aria-hidden
+              />
             )}
           </div>
         </div>
@@ -154,7 +167,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
             style={{ backgroundColor: pkg.labelBgColor || '#dc2626' }}
           >
             {pkg.labelIcon && (
-              <img src={pkg.labelIcon} alt="" className="w-3 h-3 object-contain" loading="lazy" decoding="async" />
+              <img src={resolveIconUrl(pkg.labelIcon, settings.iconCdnBaseUrl)} alt="" className="w-3 h-3 object-contain" loading="lazy" decoding="async" />
             )}
             <span
               className="text-[8px] sm:text-[10px] font-extrabold uppercase tracking-wider truncate"
