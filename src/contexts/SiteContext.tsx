@@ -540,6 +540,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (updatedGame.slug !== undefined) updateData.slug = updatedGame.slug;
       if (updatedGame.g2bulkCategoryId !== undefined) updateData.g2bulk_category_id = updatedGame.g2bulkCategoryId || null;
       if (updatedGame.defaultPackageIcon !== undefined) updateData.default_package_icon = updatedGame.defaultPackageIcon || null;
+      if (updatedGame.coverImage !== undefined) updateData.cover_image = updatedGame.coverImage || null;
 
       const { error } = await supabase
         .from('games')
