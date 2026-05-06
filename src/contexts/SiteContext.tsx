@@ -8,6 +8,7 @@ export interface Game {
   name: string;
   slug: string;
   image: string;
+  coverImage?: string;
   packages: Package[];
   specialPackages: Package[];
   g2bulkCategoryId?: string;
