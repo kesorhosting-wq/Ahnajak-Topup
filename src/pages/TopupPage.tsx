@@ -1055,20 +1055,22 @@ const TopupPage: React.FC = () => {
         <Header />
         <HeaderSpacer />
 
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-2xl">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-3xl">
           {/* Back button */}
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm sm:text-base text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-colors"
+            className="group inline-flex items-center gap-2 text-sm sm:text-base text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-colors"
           >
-            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/60 backdrop-blur ring-1 ring-border flex items-center justify-center group-hover:bg-white transition-colors">
+              <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </span>
             <span>ត្រលប់ក្រោយ</span>
           </Link>
 
           {/* Game Header — modern cover */}
-          <div className="relative mb-6 sm:mb-8 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-gold/30">
+          <div className="relative mb-6 sm:mb-8 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-gold/30">
             <div
-              className="relative w-full h-44 sm:h-60"
+              className="relative w-full h-52 sm:h-72"
               style={{
                 backgroundImage: game.coverImage
                   ? `url(${game.coverImage})`
@@ -1079,7 +1081,6 @@ const TopupPage: React.FC = () => {
                 backgroundPosition: "center",
               }}
             >
-              {/* Blurred backdrop fallback when no cover */}
               {!game.coverImage && (
                 <div
                   className="absolute inset-0"
@@ -1087,37 +1088,49 @@ const TopupPage: React.FC = () => {
                     backgroundImage: `url(${game.image})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
-                    filter: "blur(24px) brightness(0.7)",
-                    transform: "scale(1.15)",
+                    filter: "blur(28px) brightness(0.6)",
+                    transform: "scale(1.2)",
                   }}
                 />
               )}
-              {/* Gradient overlay for legibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+              {/* Gradient overlays */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent" />
+
+              {/* Decorative glows */}
+              <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gold/30 blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-16 -left-12 w-56 h-56 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
 
               {/* Content */}
-              <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 sm:gap-5 p-3 sm:p-5">
+              <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 sm:gap-5 p-4 sm:p-6">
                 <div className="relative shrink-0">
+                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-gold via-amber-400 to-gold-dark blur opacity-70" />
                   <img
                     src={game.image}
                     alt={game.name}
-                    className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 shadow-xl"
+                    className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 shadow-2xl"
                     style={{ borderColor: settings.topupBannerColor || "hsl(43 74% 49%)" }}
                   />
                   <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 ring-2 ring-black/60 animate-pulse" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-gold/90 text-black mb-1.5 shadow">
-                    ⚡ Instant Top-Up
-                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-gold/95 text-black shadow">
+                      ⚡ Instant Top-Up
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-white/15 text-white backdrop-blur ring-1 ring-white/20">
+                      🔒 Secure
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-500/90 text-white shadow">
+                      ● Online
+                    </span>
+                  </div>
                   <h1
-                    className="font-display text-xl sm:text-3xl font-extrabold leading-tight drop-shadow-lg truncate"
-                    style={{ color: "#fff" }}
+                    className="font-display text-2xl sm:text-4xl font-extrabold leading-tight drop-shadow-lg truncate text-white"
                   >
                     {game.name}
                   </h1>
-                  <p className="text-[11px] sm:text-sm text-white/80 mt-0.5 hidden sm:block">
+                  <p className="text-[11px] sm:text-sm text-white/80 mt-1 hidden sm:block">
                     Choose a package and pay securely in seconds.
                   </p>
                 </div>
@@ -1127,15 +1140,17 @@ const TopupPage: React.FC = () => {
 
           {/* Step 1: Enter ID */}
           <div
-            className="mb-6 sm:mb-8 p-4 sm:p-6 rounded-lg relative"
+            className="mb-6 sm:mb-8 p-5 sm:p-7 rounded-3xl relative overflow-hidden border border-white/40 shadow-xl backdrop-blur-xl"
             style={{
-              backgroundColor: settings.idSectionBgColor || "hsl(39 40% 88%)",
+              backgroundColor: settings.idSectionBgColor || "hsl(39 40% 95% / 0.85)",
               backgroundImage: settings.idSectionBgImage ? `url(${settings.idSectionBgImage})` : undefined,
               backgroundSize: "cover",
               backgroundPosition: "center",
               color: settings.idSectionTextColor || undefined,
             }}
           >
+            {/* Soft accent glow */}
+            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-gold/20 blur-3xl pointer-events-none" />
             {/* Flower ornaments - smaller on mobile */}
             <img
               src="/assets/romdoul-flower.png"
