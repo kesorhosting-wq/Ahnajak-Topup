@@ -1288,18 +1288,19 @@ const TopupPage: React.FC = () => {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:gap-5">
+              <div className="flex gap-3 sm:gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-3 -mx-3 px-3 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
                 {[...game.specialPackages]
                   .sort((a, b) => a.price - b.price)
                   .map((pkg, index) => (
-                    <PackageCard
-                      key={pkg.id}
-                      pkg={pkg}
-                      selected={selectedPackage === pkg.id}
-                      onSelect={() => setSelectedPackage(pkg.id)}
-                      priority={index < 4}
-                      gameDefaultIcon={game.defaultPackageIcon}
-                    />
+                    <div key={pkg.id} className="snap-start shrink-0 basis-[calc((100%-1.5rem)/3)] sm:basis-[calc((100%-2.5rem)/3)]">
+                      <PackageCard
+                        pkg={pkg}
+                        selected={selectedPackage === pkg.id}
+                        onSelect={() => setSelectedPackage(pkg.id)}
+                        priority={index < 4}
+                        gameDefaultIcon={game.defaultPackageIcon}
+                      />
+                    </div>
                   ))}
               </div>
             </div>
@@ -1322,13 +1323,13 @@ const TopupPage: React.FC = () => {
 
             {game.packages.length === 0 ? (
               /* Show skeleton placeholders while packages might be loading */
-              <div className="grid grid-cols-2 gap-3 sm:gap-5">
+              <div className="grid grid-cols-3 gap-3 sm:gap-5">
                 {[...Array(6)].map((_, i) => (
                   <Skeleton key={i} className="h-24 sm:h-28 rounded-xl" />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:gap-5">
+              <div className="grid grid-cols-3 gap-3 sm:gap-5">
                 {[...game.packages]
                   .sort((a, b) => a.price - b.price)
                   .map((pkg, index) => (
