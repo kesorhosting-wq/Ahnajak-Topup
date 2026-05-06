@@ -1065,30 +1065,65 @@ const TopupPage: React.FC = () => {
             <span>ត្រលប់ក្រោយ</span>
           </Link>
 
-          {/* Game Header */}
-          <KhmerFrame variant="gold" className="mb-6 sm:mb-8">
+          {/* Game Header — modern cover */}
+          <div className="relative mb-6 sm:mb-8 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-gold/30">
             <div
-              className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4"
+              className="relative w-full h-44 sm:h-60"
               style={{
-                backgroundImage: settings.topupBannerImage ? `url(${settings.topupBannerImage})` : undefined,
+                backgroundImage: game.coverImage
+                  ? `url(${game.coverImage})`
+                  : settings.topupBannerImage
+                    ? `url(${settings.topupBannerImage})`
+                    : `url(${game.image})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             >
-              <img
-                src={game.image}
-                alt={game.name}
-                className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover border-2"
-                style={{ borderColor: settings.topupBannerColor || "hsl(43 74% 49%)" }}
-              />
-              <h1
-                className="font-display text-xl sm:text-2xl font-bold"
-                style={{ color: settings.topupBannerColor || "hsl(43 74% 49%)" }}
-              >
-                {game.name}
-              </h1>
+              {/* Blurred backdrop fallback when no cover */}
+              {!game.coverImage && (
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundImage: `url(${game.image})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    filter: "blur(24px) brightness(0.7)",
+                    transform: "scale(1.15)",
+                  }}
+                />
+              )}
+              {/* Gradient overlay for legibility */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+
+              {/* Content */}
+              <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 sm:gap-5 p-3 sm:p-5">
+                <div className="relative shrink-0">
+                  <img
+                    src={game.image}
+                    alt={game.name}
+                    className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 shadow-xl"
+                    style={{ borderColor: settings.topupBannerColor || "hsl(43 74% 49%)" }}
+                  />
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 ring-2 ring-black/60 animate-pulse" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-gold/90 text-black mb-1.5 shadow">
+                    ⚡ Instant Top-Up
+                  </span>
+                  <h1
+                    className="font-display text-xl sm:text-3xl font-extrabold leading-tight drop-shadow-lg truncate"
+                    style={{ color: "#fff" }}
+                  >
+                    {game.name}
+                  </h1>
+                  <p className="text-[11px] sm:text-sm text-white/80 mt-0.5 hidden sm:block">
+                    Choose a package and pay securely in seconds.
+                  </p>
+                </div>
+              </div>
             </div>
-          </KhmerFrame>
+          </div>
 
           {/* Step 1: Enter ID */}
           <div
