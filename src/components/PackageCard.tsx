@@ -73,11 +73,17 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
             {iconSrc && !iconError ? (
               <>
                 {!iconLoaded && (
-                  <Skeleton className="absolute rounded-md" style={{ width: iconSize, height: iconSize }} />
+                  <div
+                    className="absolute rounded-full bg-gradient-to-br from-white/10 to-white/[0.03] animate-pulse"
+                    style={{ width: iconSize, height: iconSize }}
+                    aria-hidden
+                  />
                 )}
                 <img
                   src={iconSrc}
                   alt=""
+                  width={iconSize}
+                  height={iconSize}
                   className="object-contain"
                   style={{
                     width: iconSize,
@@ -95,7 +101,11 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
             ) : iconError ? (
               <span className="text-2xl sm:text-3xl">💎</span>
             ) : (
-              <Skeleton className="rounded-md" style={{ width: iconSize, height: iconSize }} />
+              <div
+                className="rounded-full bg-gradient-to-br from-white/10 to-white/[0.03] animate-pulse"
+                style={{ width: iconSize, height: iconSize }}
+                aria-hidden
+              />
             )}
           </div>
         </div>
