@@ -1319,14 +1319,15 @@ const TopupPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Step 2: Select Package (Specials + Regular merged) */}
-          <div className="mb-6 sm:mb-8 p-5 sm:p-6 rounded-3xl relative overflow-hidden border border-white/40 shadow-xl backdrop-blur-xl bg-white/70">
-            <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
+          {/* Step 2: Select Package — bento layout (featured first) */}
+          <div className="mb-6 sm:mb-8 p-5 sm:p-6 rounded-[28px] relative overflow-hidden border border-white/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] backdrop-blur-2xl bg-white/75 animate-fade-in-up">
+            <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-amber-400/20 blur-3xl pointer-events-none animate-float-slow" />
+            <div className="absolute -top-10 right-10 w-40 h-40 rounded-full bg-gold/15 blur-3xl pointer-events-none animate-float-slow" style={{ animationDelay: '2s' }} />
             <div className="relative z-10">
               <div className="flex items-center justify-between gap-2 sm:gap-3 mb-4 sm:mb-5">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <span
-                    className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-md ring-2 ring-white/60"
+                    className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-lg ring-2 ring-white/70"
                     style={{
                       backgroundColor: settings.frameColor || "hsl(43 74% 49%)",
                       color: "hsl(var(--primary-foreground))",
@@ -1337,7 +1338,7 @@ const TopupPage: React.FC = () => {
                   <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសតម្លៃពេជ្រ</h2>
                 </div>
                 {game.specialPackages && game.specialPackages.length > 0 && (
-                  <span className="px-3 h-6 sm:h-7 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center font-bold text-[10px] sm:text-xs shadow-md animate-pulse">
+                  <span className="px-3 h-6 sm:h-7 rounded-full bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-[length:200%_100%] animate-gradient-shift text-white flex items-center font-bold text-[10px] sm:text-xs shadow-lg ring-1 ring-white/40">
                     🔥 Special Price
                   </span>
                 )}
@@ -1350,8 +1351,8 @@ const TopupPage: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="max-h-[460px] sm:max-h-[560px] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
-                  <div className="grid grid-cols-3 gap-3 sm:gap-5">
+                <div className="max-h-[480px] sm:max-h-[580px] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 auto-rows-fr">
                     {[
                       ...(game.specialPackages || []).map((p) => ({ ...p, __special: true })),
                       ...game.packages.map((p) => ({ ...p, __special: false })),
@@ -1360,22 +1361,34 @@ const TopupPage: React.FC = () => {
                         if (a.__special !== b.__special) return a.__special ? -1 : 1;
                         return a.price - b.price;
                       })
-                      .map((pkg, index) => (
-                        <PackageCard
-                          key={`${pkg.__special ? 'sp' : 'pk'}-${pkg.id}`}
-                          pkg={pkg}
-                          selected={selectedPackage === pkg.id}
-                          onSelect={() => {
-                            setSelectedPackage(pkg.id);
-                            setTimeout(() => {
-                              document.getElementById('payment-method-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }, 150);
-                          }}
-                          priority={index < 6}
-                          gameDefaultIcon={game.defaultPackageIcon}
-                          isSpecial={pkg.__special}
-                        />
-                      ))}
+                      .map((pkg, index) => {
+                        // Bento: first special package spans 2 cols on desktop
+                        const featured = pkg.__special && index === 0;
+                        return (
+                          <div
+                            key={`${pkg.__special ? 'sp' : 'pk'}-${pkg.id}`}
+                            className={cn(
+                              "animate-fade-in-up",
+                              featured ? "col-span-3 sm:col-span-4" : "sm:col-span-2",
+                            )}
+                            style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                          >
+                            <PackageCard
+                              pkg={pkg}
+                              selected={selectedPackage === pkg.id}
+                              onSelect={() => {
+                                setSelectedPackage(pkg.id);
+                                setTimeout(() => {
+                                  document.getElementById('payment-method-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }, 150);
+                              }}
+                              priority={index < 6}
+                              gameDefaultIcon={game.defaultPackageIcon}
+                              isSpecial={pkg.__special}
+                            />
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               )}
