@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Package } from '@/contexts/SiteContext';
-import { useSite } from '@/contexts/SiteContext';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { resolveIconUrl } from '@/lib/icon-url';
+import React from "react";
+import { Package } from "@/contexts/SiteContext";
+import { resolveIconUrl } from "@/lib/icon-url";
+import { useSite } from "@/contexts/SiteContext";
 
 interface PackageCardProps {
   pkg: Package;
@@ -14,175 +12,92 @@ interface PackageCardProps {
   isSpecial?: boolean;
 }
 
-const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, priority = false, gameDefaultIcon, isSpecial = false }) => {
+const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, priority = false, gameDefaultIcon }) => {
   const { settings } = useSite();
-  const isMobile = useIsMobile();
-  const [iconLoaded, setIconLoaded] = useState(false);
-  const [iconError, setIconError] = useState(false);
 
-  const iconSize = isMobile
-    ? (settings.packageIconSizeMobile || 110)
-    : (settings.packageIconSizeDesktop || 120);
-
-  const iconSrc = resolveIconUrl(
-    pkg.icon || gameDefaultIcon || settings.packageIconUrl,
-    settings.iconCdnBaseUrl
-  );
-
-  const cardHeight = isMobile
-    ? Math.max(settings.packageHeight || 180, 170)
-    : Math.max(settings.packageHeight || 210, 200);
+  const iconSrc = resolveIconUrl(pkg.icon || gameDefaultIcon || settings.packageIconUrl, settings.iconCdnBaseUrl);
 
   return (
     <button
       onClick={onSelect}
-      className={cn(
-        "group relative w-full overflow-hidden rounded-xl transition-all duration-200 ease-out",
-        "hover:-translate-y-0.5 active:scale-[0.98]",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/70",
-        selected && "ring-2 ring-gold ring-offset-2 ring-offset-background"
-      )}
+      className={`relative w-full overflow-hidden rounded-[18px] transition-all duration-200
+        hover:scale-[1.02] active:scale-[0.98]
+        ${selected ? "ring-4 ring-yellow-300" : ""}
+      `}
     >
       <div
-        className={cn(
-          "relative flex flex-col items-center rounded-xl overflow-hidden shadow-md transition-shadow duration-200 group-hover:shadow-lg"
-        )}
+        className="relative aspect-[16/9] overflow-hidden rounded-[18px] border border-yellow-500/40"
         style={{
-          height: `${cardHeight}px`,
-          background: settings.packageBgImage
+          backgroundImage: settings.packageBgImage
             ? `url(${settings.packageBgImage})`
-            : settings.packageBgColor
-              ? settings.packageBgColor
-              : 'linear-gradient(135deg, #2a2a2e 0%, #161618 55%, #2a2a2e 100%)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          border: settings.packageBorderWidth
-            ? `${settings.packageBorderWidth}px solid ${settings.packageBorderColor || '#D4A84B'}`
-            : '1px solid hsl(var(--border) / 0.4)',
-          contain: 'layout paint',
+            : `
+              linear-gradient(rgba(205,143,18,.88), rgba(205,143,18,.88)),
+              radial-gradient(circle at center, #f6c94e 0%, #b9780e 100%)
+            `,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/20" />
+        {/* Khmer/gold pattern overlay */}
+        <div
+          className="absolute inset-0 opacity-25"
+          style={{
+            backgroundImage: "repeating-linear-gradient(45deg, rgba(255,255,255,.10) 0 2px, transparent 2px 34px)",
+          }}
+        />
 
-        {/* Icon - top center */}
-        <div className="flex items-center justify-center pt-3 z-10">
-          <div
-            className="relative flex items-center justify-center rounded-xl bg-white/5 ring-1 ring-white/10"
-            style={{ width: `${iconSize + 12}px`, height: `${iconSize + 12}px` }}
-          >
-            {iconSrc && !iconError ? (
-              <>
-                {!iconLoaded && (
-                  <div
-                    className="absolute rounded-full bg-gradient-to-br from-white/10 to-white/[0.03] animate-pulse"
-                    style={{ width: iconSize, height: iconSize }}
-                    aria-hidden
-                  />
-                )}
-                <img
-                  src={iconSrc}
-                  alt=""
-                  width={iconSize}
-                  height={iconSize}
-                  className="object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.35)]"
-                  style={{
-                    width: iconSize,
-                    height: iconSize,
-                    opacity: iconLoaded ? 1 : 0,
-                    transition: 'opacity 200ms',
-                  }}
-                  loading={priority ? 'eager' : 'lazy'}
-                  decoding="async"
-                  fetchPriority={priority ? 'high' : 'low'}
-                  onLoad={() => setIconLoaded(true)}
-                  onError={() => { setIconError(true); setIconLoaded(true); }}
-                />
-              </>
-            ) : iconError ? (
-              <span className="text-3xl sm:text-4xl">💎</span>
-            ) : (
-              <div
-                className="rounded-full bg-gradient-to-br from-white/10 to-white/[0.03] animate-pulse"
-                style={{ width: iconSize, height: iconSize }}
-                aria-hidden
-              />
-            )}
-          </div>
-        </div>
+        {/* soft image box */}
+        <div className="absolute left-[3%] top-[8%] h-[84%] w-[44%] rounded-[22px] bg-white/20 backdrop-blur-[1px]" />
 
-        {/* Center content - amount + name */}
-        <div className="flex-1 flex flex-col items-center justify-center min-w-0 px-2 leading-tight z-10 w-full">
-          <span
-            className="truncate text-base sm:text-lg tracking-wide"
-            style={{
-              color: settings.packageTextColor || '#ffffff',
-              fontWeight: settings.packageTextWeight || 800,
-              textShadow: '0 1px 3px rgba(0,0,0,0.5)',
-            }}
-          >
-            {pkg.amount.toLocaleString()}
-          </span>
-          <span
-            className="truncate text-[11px] sm:text-xs opacity-85 max-w-full"
-            style={{
-              color: settings.packageTextColor || '#ffffff',
-              fontWeight: settings.packageTextWeight || 500,
-            }}
-          >
-            {pkg.name}
-          </span>
-          {pkg.quantity != null && pkg.quantity > 0 && (
-            <span
-              className="text-[9px] sm:text-[10px] opacity-60"
-              style={{ color: settings.packageTextColor || '#ffffff' }}
-            >
-              ×{pkg.quantity} available
-            </span>
+        {/* Icon */}
+        <div className="absolute left-[8%] top-1/2 flex h-[58%] w-[34%] -translate-y-1/2 items-center justify-center">
+          {iconSrc ? (
+            <img
+              src={iconSrc}
+              alt={pkg.name}
+              className="h-full w-full object-contain drop-shadow-[0_8px_8px_rgba(0,0,0,.35)]"
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={priority ? "high" : "low"}
+            />
+          ) : (
+            <span className="text-7xl">💎</span>
           )}
         </div>
 
-        {/* Price pill - bottom */}
-        <div className="relative flex items-center justify-center pb-2.5 z-10 w-full">
-          <span
-            className="whitespace-nowrap text-xs sm:text-sm rounded-full px-3 py-1 bg-gradient-to-r from-gold/90 to-amber-500/90 text-black shadow-[0_2px_10px_rgba(212,168,75,0.45)]"
-            style={{
-              color: settings.packagePriceColor || undefined,
-              fontWeight: settings.packagePriceWeight || 800,
-            }}
-          >
-            {settings.packageCurrencySymbol || '$'}
-            {pkg.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
+        {/* Price */}
+        <div className="absolute right-[4%] top-[3%] text-[clamp(28px,7vw,92px)] font-black leading-none text-white drop-shadow-[6px_7px_0_rgba(74,53,0,.75)]">
+          {settings.packageCurrencySymbol || "$"}
+          {pkg.price.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
         </div>
 
+        {/* Amount */}
+        <div className="absolute right-[12%] top-[32%] text-[clamp(70px,15vw,210px)] font-black leading-none text-white drop-shadow-[10px_13px_0_rgba(74,53,0,.65)]">
+          {pkg.amount.toLocaleString()}
+        </div>
+
+        {/* Name */}
+        <div className="absolute bottom-[7%] right-[4%] text-[clamp(28px,6vw,80px)] font-black leading-none text-white drop-shadow-[6px_7px_0_rgba(74,53,0,.65)]">
+          {pkg.name}
+        </div>
+
+        {/* Selected tick */}
         {selected && (
-          <div className="absolute top-1 right-1 w-5 h-5 sm:w-6 sm:h-6 bg-gold rounded-full flex items-center justify-center z-20 shadow-lg">
-            <span className="text-primary-foreground text-[11px] sm:text-xs font-bold">✓</span>
+          <div className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white text-yellow-600 shadow-lg">
+            ✓
           </div>
         )}
 
+        {/* Label */}
         {pkg.label && (
           <div
-            className="absolute top-0 left-0 z-20 inline-flex items-center gap-1 px-2 py-[3px] rounded-br-lg shadow-md"
-            style={{ backgroundColor: pkg.labelBgColor || '#dc2626' }}
+            className="absolute left-0 top-0 rounded-br-xl px-3 py-1 text-xs font-black uppercase text-white"
+            style={{ backgroundColor: pkg.labelBgColor || "#dc2626" }}
           >
-            {pkg.labelIcon && (
-              <img src={resolveIconUrl(pkg.labelIcon, settings.iconCdnBaseUrl)} alt="" className="w-3 h-3 object-contain" loading="lazy" decoding="async" />
-            )}
-            <span
-              className="text-[8px] sm:text-[10px] font-extrabold uppercase tracking-wider truncate"
-              style={{ color: pkg.labelTextColor || '#ffffff' }}
-            >
-              {pkg.label}
-            </span>
-          </div>
-        )}
-
-        {isSpecial && (
-          <div className="pointer-events-none absolute -top-px -right-px z-30 h-16 w-16 overflow-hidden">
-            <div className="absolute top-[14px] right-[-34px] rotate-45 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider px-8 py-[2px] shadow-md">
-              Special
-            </div>
+            {pkg.label}
           </div>
         )}
       </div>
@@ -190,10 +105,4 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
   );
 };
 
-export default React.memo(PackageCard, (prev, next) =>
-  prev.pkg === next.pkg &&
-  prev.selected === next.selected &&
-  prev.priority === next.priority &&
-  prev.gameDefaultIcon === next.gameDefaultIcon &&
-  prev.isSpecial === next.isSpecial
-);
+export default React.memo(PackageCard);
