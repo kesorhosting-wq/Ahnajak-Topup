@@ -47,13 +47,14 @@ const PackageCard: React.FC<PackageCardProps> = ({
     <button
       onClick={onSelect}
       className={cn(
-        "group relative w-full overflow-hidden rounded-[14px] transition-transform duration-200 ease-out",
+        "group relative w-full rounded-[14px] transition-transform duration-200 ease-out",
         "hover:-translate-y-1 active:scale-[0.98]",
         selected && "ring-2 ring-white ring-offset-2 ring-offset-[#D4A84B]",
+        isSpecial && "shadow-[0_0_0_2px_rgba(255,69,0,0.85),0_0_18px_rgba(255,120,0,0.55)] animate-pulse-gold",
       )}
     >
       <div
-        className="relative flex flex-col items-center justify-between w-full rounded-[12px] shadow-md border border-[#FDE08B]/50 p-1.5 sm:p-2"
+        className="relative flex flex-col items-center justify-between w-full overflow-hidden rounded-[12px] shadow-md border border-[#FDE08B]/50 p-1.5 sm:p-2"
         style={{
           background: settings.packageBgImage
             ? `url(${settings.packageBgImage})`
@@ -115,12 +116,10 @@ const PackageCard: React.FC<PackageCardProps> = ({
           </div>
         </div>
 
-        {/* Special Ribbon Overlay */}
+        {/* Special badge */}
         {isSpecial && (
-          <div className="absolute top-0 right-0 overflow-hidden w-[60px] h-[60px] rounded-tr-[14px] z-20 pointer-events-none">
-            <div className="absolute top-[12px] right-[-20px] w-[200%] rotate-45 bg-[#FF4500] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider py-[2px] text-center shadow-md border-y border-white/30">
-              Special
-            </div>
+          <div className="absolute -top-1.5 -right-1.5 z-20 px-1.5 py-[1px] rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white text-[8px] sm:text-[9px] font-black uppercase tracking-wide shadow-md ring-1 ring-white/70 pointer-events-none">
+            ✨ Hot
           </div>
         )}
 
