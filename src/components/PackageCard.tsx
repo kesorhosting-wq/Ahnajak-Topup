@@ -47,13 +47,14 @@ const PackageCard: React.FC<PackageCardProps> = ({
     <button
       onClick={onSelect}
       className={cn(
-        "group relative w-full overflow-hidden rounded-[14px] transition-transform duration-200 ease-out",
+        "group relative w-full rounded-[14px] transition-transform duration-200 ease-out",
         "hover:-translate-y-1 active:scale-[0.98]",
         selected && "ring-2 ring-white ring-offset-2 ring-offset-[#D4A84B]",
+        isSpecial && "shadow-[0_0_0_2px_rgba(255,69,0,0.85),0_0_18px_rgba(255,120,0,0.55)] animate-pulse-gold",
       )}
     >
       <div
-        className="relative flex flex-col items-center justify-between w-full rounded-[12px] shadow-md border border-[#FDE08B]/50 p-1.5 sm:p-2"
+        className="relative flex flex-col items-center justify-between w-full overflow-hidden rounded-[12px] shadow-md border border-[#FDE08B]/50 p-1.5 sm:p-2"
         style={{
           background: settings.packageBgImage
             ? `url(${settings.packageBgImage})`
