@@ -26,7 +26,9 @@ const IMAGE_COLUMNS = [
 
 function isStorageUrl(url: string, supabaseUrl: string): boolean {
   if (!url) return true; // empty = skip
-  return url.includes(`${supabaseUrl}/storage/`) || url.includes("supabase.co/storage/");
+  // Only treat URLs from THIS project's storage as internal.
+  // URLs pointing to other Supabase projects must be migrated.
+  return url.startsWith(`${supabaseUrl}/storage/`);
 }
 
 Deno.serve(async (req) => {
