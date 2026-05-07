@@ -1059,18 +1059,20 @@ const TopupPage: React.FC = () => {
           {/* Back button */}
           <Link
             to="/"
-            className="group inline-flex items-center gap-2 text-sm sm:text-base text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-colors"
+            className="group inline-flex items-center gap-2 text-sm sm:text-base text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-colors animate-fade-in-up"
           >
-            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/60 backdrop-blur ring-1 ring-border flex items-center justify-center group-hover:bg-white transition-colors">
+            <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/70 backdrop-blur-xl ring-1 ring-white/60 shadow-sm flex items-center justify-center group-hover:bg-white group-hover:-translate-x-0.5 transition-all">
               <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </span>
             <span>ត្រលប់ក្រោយ</span>
           </Link>
 
-          {/* Game Header — modern cover */}
-          <div className="relative mb-6 sm:mb-8 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-gold/30">
+          {/* Game Header — modern cinematic cover */}
+          <div className="relative mb-6 sm:mb-8 overflow-hidden rounded-[28px] shadow-2xl ring-1 ring-white/20 animate-fade-in-up">
+            {/* Animated gradient border glow */}
+            <div className="pointer-events-none absolute -inset-[1px] rounded-[28px] bg-[linear-gradient(120deg,hsl(43_74%_49%/.6),transparent_30%,transparent_70%,hsl(43_74%_49%/.6))] bg-[length:200%_100%] animate-gradient-shift opacity-70" />
             <div
-              className="relative w-full h-52 sm:h-72"
+              className="relative w-full h-56 sm:h-80"
               style={{
                 backgroundImage: game.coverImage
                   ? `url(${game.coverImage})`
@@ -1081,13 +1083,18 @@ const TopupPage: React.FC = () => {
                 backgroundPosition: "center",
               }}
             >
-              {/* Gradient overlays - bottom only for text legibility */}
-              <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+              {/* Layered gradient overlays */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(43_74%_49%/.25),transparent_60%)]" />
+
+              {/* Floating gold orbs */}
+              <div className="absolute top-6 right-6 w-24 h-24 rounded-full bg-gold/30 blur-3xl animate-float-slow" />
+              <div className="absolute bottom-10 left-10 w-32 h-32 rounded-full bg-amber-500/20 blur-3xl animate-float-slow" style={{ animationDelay: '1.5s' }} />
 
               {/* Content */}
               <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 sm:gap-5 p-4 sm:p-6">
-                <div className="relative shrink-0">
-                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-gold via-amber-400 to-gold-dark blur opacity-70" />
+                <div className="relative shrink-0 animate-float-slow">
+                  <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-br from-gold via-amber-400 to-gold-dark blur-md opacity-80 animate-pulse-gold" />
                   <img
                     src={game.image}
                     alt={game.name}
@@ -1098,14 +1105,14 @@ const TopupPage: React.FC = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-gold/95 text-black shadow">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-gradient-to-r from-gold to-amber-400 text-black shadow-lg">
                       ⚡ Instant Top-Up
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-white/15 text-white backdrop-blur ring-1 ring-white/20">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-white/15 text-white backdrop-blur-md ring-1 ring-white/25">
                       🔒 Secure
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-500/90 text-white shadow">
-                      ● Online
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-500/90 text-white shadow ring-1 ring-emerald-300/40">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Online
                     </span>
                   </div>
                   <h1
@@ -1123,7 +1130,7 @@ const TopupPage: React.FC = () => {
 
           {/* Step 1: Enter ID */}
           <div
-            className="mb-6 sm:mb-8 p-5 sm:p-7 rounded-3xl relative overflow-hidden border border-white/40 shadow-xl backdrop-blur-xl"
+            className="mb-6 sm:mb-8 p-5 sm:p-7 rounded-[28px] relative overflow-hidden border border-white/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] backdrop-blur-2xl animate-fade-in-up"
             style={{
               backgroundColor: settings.idSectionBgColor || "hsl(39 40% 95% / 0.85)",
               backgroundImage: settings.idSectionBgImage ? `url(${settings.idSectionBgImage})` : undefined,
@@ -1312,14 +1319,15 @@ const TopupPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Step 2: Select Package (Specials + Regular merged) */}
-          <div className="mb-6 sm:mb-8 p-5 sm:p-6 rounded-3xl relative overflow-hidden border border-white/40 shadow-xl backdrop-blur-xl bg-white/70">
-            <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
+          {/* Step 2: Select Package — bento layout (featured first) */}
+          <div className="mb-6 sm:mb-8 p-5 sm:p-6 rounded-[28px] relative overflow-hidden border border-white/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] backdrop-blur-2xl bg-white/75 animate-fade-in-up">
+            <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-amber-400/20 blur-3xl pointer-events-none animate-float-slow" />
+            <div className="absolute -top-10 right-10 w-40 h-40 rounded-full bg-gold/15 blur-3xl pointer-events-none animate-float-slow" style={{ animationDelay: '2s' }} />
             <div className="relative z-10">
               <div className="flex items-center justify-between gap-2 sm:gap-3 mb-4 sm:mb-5">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <span
-                    className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-md ring-2 ring-white/60"
+                    className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-lg ring-2 ring-white/70"
                     style={{
                       backgroundColor: settings.frameColor || "hsl(43 74% 49%)",
                       color: "hsl(var(--primary-foreground))",
@@ -1330,7 +1338,7 @@ const TopupPage: React.FC = () => {
                   <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសតម្លៃពេជ្រ</h2>
                 </div>
                 {game.specialPackages && game.specialPackages.length > 0 && (
-                  <span className="px-3 h-6 sm:h-7 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white flex items-center font-bold text-[10px] sm:text-xs shadow-md animate-pulse">
+                  <span className="px-3 h-6 sm:h-7 rounded-full bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-[length:200%_100%] animate-gradient-shift text-white flex items-center font-bold text-[10px] sm:text-xs shadow-lg ring-1 ring-white/40">
                     🔥 Special Price
                   </span>
                 )}
@@ -1343,8 +1351,8 @@ const TopupPage: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="max-h-[460px] sm:max-h-[560px] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
-                  <div className="grid grid-cols-3 gap-3 sm:gap-5">
+                <div className="max-h-[480px] sm:max-h-[580px] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 auto-rows-fr">
                     {[
                       ...(game.specialPackages || []).map((p) => ({ ...p, __special: true })),
                       ...game.packages.map((p) => ({ ...p, __special: false })),
@@ -1353,22 +1361,34 @@ const TopupPage: React.FC = () => {
                         if (a.__special !== b.__special) return a.__special ? -1 : 1;
                         return a.price - b.price;
                       })
-                      .map((pkg, index) => (
-                        <PackageCard
-                          key={`${pkg.__special ? 'sp' : 'pk'}-${pkg.id}`}
-                          pkg={pkg}
-                          selected={selectedPackage === pkg.id}
-                          onSelect={() => {
-                            setSelectedPackage(pkg.id);
-                            setTimeout(() => {
-                              document.getElementById('payment-method-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }, 150);
-                          }}
-                          priority={index < 6}
-                          gameDefaultIcon={game.defaultPackageIcon}
-                          isSpecial={pkg.__special}
-                        />
-                      ))}
+                      .map((pkg, index) => {
+                        // Bento: first special package spans 2 cols on desktop
+                        const featured = pkg.__special && index === 0;
+                        return (
+                          <div
+                            key={`${pkg.__special ? 'sp' : 'pk'}-${pkg.id}`}
+                            className={cn(
+                              "animate-fade-in-up",
+                              featured ? "col-span-3 sm:col-span-4" : "sm:col-span-2",
+                            )}
+                            style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                          >
+                            <PackageCard
+                              pkg={pkg}
+                              selected={selectedPackage === pkg.id}
+                              onSelect={() => {
+                                setSelectedPackage(pkg.id);
+                                setTimeout(() => {
+                                  document.getElementById('payment-method-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }, 150);
+                              }}
+                              priority={index < 6}
+                              gameDefaultIcon={game.defaultPackageIcon}
+                              isSpecial={pkg.__special}
+                            />
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               )}
@@ -1378,7 +1398,7 @@ const TopupPage: React.FC = () => {
           {/* Step 3: Payment Method */}
           <div
             id="payment-method-section"
-            className="mb-6 sm:mb-8 p-5 sm:p-6 rounded-3xl scroll-mt-24 relative overflow-hidden border border-white/40 shadow-xl backdrop-blur-xl bg-white/70"
+            className="mb-6 sm:mb-8 p-5 sm:p-6 rounded-[28px] scroll-mt-24 relative overflow-hidden border border-white/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] backdrop-blur-2xl bg-white/75 animate-fade-in-up"
             style={{
               backgroundColor: settings.paymentSectionBgColor || undefined,
               backgroundImage: settings.paymentSectionBgImage ? `url(${settings.paymentSectionBgImage})` : undefined,
@@ -1387,11 +1407,12 @@ const TopupPage: React.FC = () => {
               color: settings.paymentSectionTextColor || undefined,
             }}
           >
-            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-emerald-400/15 blur-3xl pointer-events-none" />
+            <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none animate-float-slow" />
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-sky-400/15 blur-3xl pointer-events-none animate-float-slow" style={{ animationDelay: '1s' }} />
             <div className="relative z-10">
               <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
                 <span
-                  className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-md ring-2 ring-white/60"
+                  className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-lg ring-2 ring-white/70"
                   style={{
                     backgroundColor: settings.frameColor || "hsl(43 74% 49%)",
                     color: "hsl(var(--primary-foreground))",
@@ -1402,35 +1423,37 @@ const TopupPage: React.FC = () => {
                 <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសធនាគារបង់ប្រាក់</h2>
               </div>
 
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
-                {paymentMethods.map((method) => (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 sm:gap-3">
+                {paymentMethods.map((method, idx) => (
                   <button
                     key={method.id}
                     onClick={() => setSelectedPayment(method.id)}
                     className={cn(
-                      "group relative px-2 sm:px-4 py-3 sm:py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2 hover:-translate-y-0.5",
+                      "group relative px-2 sm:px-4 py-3 sm:py-4 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 hover:-translate-y-1 hover:shadow-xl backdrop-blur-md animate-fade-in-up overflow-hidden",
                       selectedPayment === method.id
-                        ? "border-gold bg-gradient-to-br from-gold/25 to-amber-300/15 shadow-md"
-                        : "border-border/60 bg-white/70 hover:border-gold/60 hover:shadow-md",
+                        ? "border-gold/80 bg-gradient-to-br from-gold/30 via-amber-200/20 to-amber-300/10 shadow-[0_8px_24px_-6px_hsl(43_74%_49%/.5)] ring-1 ring-gold/40"
+                        : "border-white/70 bg-white/80 hover:border-gold/50",
                     )}
+                    style={{ animationDelay: `${idx * 40}ms` }}
                   >
+                    <span className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
                     {selectedPayment === method.id && (
-                      <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-gold flex items-center justify-center text-black text-[10px] font-bold shadow">✓</span>
+                      <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-gradient-to-br from-gold to-amber-500 flex items-center justify-center text-black text-[10px] font-bold shadow-md z-10">✓</span>
                     )}
                     {method.icon.startsWith("http") ? (
                       <img
                         src={method.icon}
                         alt={method.name}
-                        className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl object-cover shadow-sm"
+                        className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl object-cover shadow-sm transition-transform group-hover:scale-110 z-10"
                       />
                     ) : (
                       <img
                         src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwG-Zx92YNnU6BuabALnRRwBqX_5USd3AJJw&s"
                         alt="phone"
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg z-10"
                       />
                     )}
-                    <span className="text-[11px] sm:text-sm font-semibold text-center truncate w-full">{method.name}</span>
+                    <span className="text-[11px] sm:text-sm font-semibold text-center truncate w-full z-10">{method.name}</span>
                   </button>
                 ))}
               </div>
@@ -1438,11 +1461,11 @@ const TopupPage: React.FC = () => {
           </div>
 
           {/* Terms & Submit */}
-          <div className="rounded-3xl p-5 sm:p-6 border border-white/40 shadow-xl backdrop-blur-xl bg-white/70 relative overflow-hidden">
-            <div className="absolute -bottom-12 -right-12 w-48 h-48 rounded-full bg-gold/20 blur-3xl pointer-events-none" />
+          <div className="rounded-[28px] p-5 sm:p-6 border border-white/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] backdrop-blur-2xl bg-white/75 relative overflow-hidden animate-fade-in-up">
+            <div className="absolute -bottom-12 -right-12 w-56 h-56 rounded-full bg-gold/25 blur-3xl pointer-events-none animate-float-slow" />
             <div className="relative z-10">
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <span className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gold text-black flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0 shadow-md ring-2 ring-white/60">
+                <span className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-gold to-amber-500 text-black flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0 shadow-lg ring-2 ring-white/70">
                   4
                 </span>
                 <span className="font-khmer text-sm sm:text-base font-bold text-foreground">ចុច​ ✔ នៅខាងក្រោម​</span>
@@ -1452,7 +1475,7 @@ const TopupPage: React.FC = () => {
                   onClick={() => setAgreedToTerms(!agreedToTerms)}
                   className={cn(
                     "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
-                    agreedToTerms ? "bg-gold border-gold scale-110" : "border-muted-foreground group-hover:border-gold",
+                    agreedToTerms ? "bg-gradient-to-br from-gold to-amber-500 border-gold scale-110 shadow-md" : "border-muted-foreground group-hover:border-gold",
                   )}
                 >
                   {agreedToTerms && <CheckCircle className="w-4 h-4 text-primary-foreground" />}
@@ -1463,15 +1486,16 @@ const TopupPage: React.FC = () => {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting || !agreedToTerms || !selectedPackage || !selectedPayment || !verifiedUser}
-                className="w-full py-5 sm:py-7 text-base sm:text-lg font-bold rounded-2xl bg-gradient-to-r from-gold via-amber-400 to-gold-dark hover:from-gold-dark hover:via-amber-500 hover:to-gold text-primary-foreground shadow-gold hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full py-5 sm:py-7 text-base sm:text-lg font-bold rounded-2xl bg-gradient-to-r from-gold via-amber-400 to-gold-dark bg-[length:200%_100%] hover:bg-[position:100%_0] text-primary-foreground shadow-gold hover:shadow-2xl transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
               >
+                <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 {isSubmitting ? (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center justify-center gap-2 relative z-10">
                     <Loader2 className="w-5 h-5 animate-spin" />
                     កំពុងដំណើរការ...
                   </span>
                 ) : (
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center justify-center gap-2 relative z-10">
                     🚀 សម្រេចទិញ
                   </span>
                 )}
