@@ -50,7 +50,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
         "group relative w-full rounded-[14px] transition-transform duration-200 ease-out",
         "hover:-translate-y-1 active:scale-[0.98]",
         selected && "ring-2 ring-white ring-offset-2 ring-offset-[#D4A84B]",
-        isSpecial && "shadow-[0_0_0_2px_rgba(255,69,0,0.85),0_0_18px_rgba(255,120,0,0.55)] animate-pulse-gold",
+        isSpecial && "shadow-[0_0_0_2px_rgba(255,69,0,0.85),0_0_18px_rgba(255,120,0,0.45)]",
       )}
     >
       <div
