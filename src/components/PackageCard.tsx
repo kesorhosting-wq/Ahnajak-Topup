@@ -27,212 +27,127 @@ const PackageCard: React.FC<PackageCardProps> = ({
   const [iconLoaded, setIconLoaded] = useState(false);
   const [iconError, setIconError] = useState(false);
 
+  // Increased icon size to match the prominent image style
+  const iconSize = isMobile ? 80 : 100;
   const iconSrc = resolveIconUrl(pkg.icon || gameDefaultIcon || settings.packageIconUrl, settings.iconCdnBaseUrl);
 
-  const cardHeight = isMobile ? 170 : 255;
-
-  const priceFont = isMobile ? 42 : 78;
-  const amountFont = isMobile ? 78 : 150;
-  const nameFont = isMobile ? 33 : 58;
-
-  const iconBox = isMobile ? 112 : 185;
-  const iconSize = isMobile ? 95 : 155;
+  // CSS for the heavy "game style" text outline and shadow
+  const getGameTextStyle = (fontSize: string) => ({
+    color: "#ffffff",
+    fontWeight: 900,
+    fontSize: fontSize,
+    fontFamily: '"Nunito", "Arial Rounded MT Bold", sans-serif', // Recommended to use a rounded font
+    textShadow: `
+      -2px -2px 0 #8B6508,
+       2px -2px 0 #8B6508,
+      -2px  2px 0 #8B6508,
+       2px  2px 0 #8B6508,
+       0px  4px 0 #5c4103,
+       0px  6px 5px rgba(0,0,0,0.5)
+    `,
+    lineHeight: "1.1",
+    letterSpacing: "1px",
+  });
 
   return (
     <button
       onClick={onSelect}
       className={cn(
-        "group relative w-full overflow-hidden rounded-[14px] transition-all duration-200 ease-out",
-        "hover:-translate-y-0.5 active:scale-[0.98]",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300/80",
-        selected && "ring-4 ring-yellow-300 ring-offset-2 ring-offset-background",
+        "group relative w-full overflow-hidden rounded-2xl transition-all duration-200 ease-out",
+        "hover:-translate-y-1 hover:shadow-xl active:scale-[0.98]",
+        "focus focus-visible focus-visible/70",
+        selected && "ring-4 ring-white ring-offset-2 ring-offset-yellow-500",
       )}
     >
       <div
-        className="relative overflow-hidden rounded-[14px] shadow-md transition-shadow duration-200 group-hover:shadow-xl"
+        className="relative flex items-center rounded-2xl overflow-hidden shadow-lg border-2 border-[#FFE885] p-3 sm:p-4"
         style={{
-          height: `${cardHeight}px`,
           background: settings.packageBgImage
             ? `url(${settings.packageBgImage})`
-            : "linear-gradient(180deg, #d6a11c 0%, #c88b10 100%)",
+            : "radial-gradient(circle at center, #FAD961 0%, #F76B1C 100%)", // Golden gradient fallback
           backgroundSize: "cover",
           backgroundPosition: "center",
-          border: settings.packageBorderWidth
-            ? `${settings.packageBorderWidth}px solid ${settings.packageBorderColor || "#f1c75b"}`
-            : "1px solid rgba(255, 215, 90, 0.55)",
-          contain: "layout paint",
+          minHeight: isMobile ? "140px" : "160px",
         }}
       >
-        {/* Pattern overlay */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.22]"
-          style={{
-            backgroundImage: `
-              repeating-linear-gradient(
-                45deg,
-                rgba(255,255,255,0.10) 0px,
-                rgba(255,255,255,0.10) 2px,
-                transparent 2px,
-                transparent 34px
-              )
-            `,
-          }}
-        />
-
-        {/* Gold glow */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/15" />
-
-        {/* Left soft icon panel */}
-        <div
-          className="absolute left-[3%] top-1/2 -translate-y-1/2 rounded-[20px] bg-white/15 backdrop-blur-[1px]"
-          style={{
-            width: isMobile ? "42%" : "43%",
-            height: "82%",
-          }}
-        />
-
-        {/* Icon */}
-        <div
-          className="absolute left-[7%] top-1/2 z-10 flex -translate-y-1/2 items-center justify-center"
-          style={{
-            width: `${iconBox}px`,
-            height: `${iconBox}px`,
-          }}
-        >
-          {iconSrc && !iconError ? (
-            <>
-              {!iconLoaded && (
-                <div
-                  className="absolute rounded-full bg-white/20 animate-pulse"
-                  style={{ width: iconSize, height: iconSize }}
-                  aria-hidden
-                />
-              )}
-
-              <img
-                src={iconSrc}
-                alt=""
-                width={iconSize}
-                height={iconSize}
-                className="object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,.35)]"
-                style={{
-                  width: iconSize,
-                  height: iconSize,
-                  opacity: iconLoaded ? 1 : 0,
-                  transition: "opacity 200ms",
-                }}
-                loading={priority ? "eager" : "lazy"}
-                decoding="async"
-                fetchPriority={priority ? "high" : "low"}
-                onLoad={() => setIconLoaded(true)}
-                onError={() => {
-                  setIconError(true);
-                  setIconLoaded(true);
-                }}
-              />
-            </>
-          ) : (
-            <span className="text-6xl drop-shadow-lg">💎</span>
-          )}
-        </div>
-
-        {/* Text content */}
-        <div className="absolute inset-y-0 right-[4%] z-10 flex flex-col items-end justify-center leading-none">
-          {/* Price */}
+        {/* Left Side: Icon Container */}
+        <div className="flex-shrink-0 z-10 mr-4">
           <div
-            className="whitespace-nowrap text-white"
+            className="relative flex items-center justify-center rounded-2xl bg-white/20 shadow-inner"
             style={{
-              fontSize: `${priceFont}px`,
-              fontWeight: 900,
-              lineHeight: 0.85,
-              letterSpacing: "-0.05em",
-              textShadow: "5px 6px 0 rgba(72, 52, 0, 0.65)",
+              width: `${iconSize + 24}px`,
+              height: `${iconSize + 24}px`,
+              backdropFilter: "blur(4px)",
             }}
           >
-            {settings.packageCurrencySymbol || "$"}
+            {iconSrc && !iconError ? (
+              <>
+                {!iconLoaded && (
+                  <div
+                    className="absolute rounded-full bg-white/20 animate-pulse"
+                    style={{ width: iconSize, height: iconSize }}
+                    aria-hidden
+                  />
+                )}
+                <img
+                  src={iconSrc}
+                  alt=""
+                  className="object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-300"
+                  style={{
+                    width: iconSize,
+                    height: iconSize,
+                    opacity: iconLoaded ? 1 : 0,
+                    transition: "opacity 200ms",
+                  }}
+                  loading={priority ? "eager" : "lazy"}
+                  decoding="async"
+                  fetchPriority={priority ? "high" : "low"}
+                  onLoad={() => setIconLoaded(true)}
+                  onError={() => {
+                    setIconError(true);
+                    setIconLoaded(true);
+                  }}
+                />
+              </>
+            ) : iconError ? (
+              <span className="text-4xl sm:text-5xl drop-shadow-lg">💎</span>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Right Side: Stacked Game Text */}
+        <div className="flex-1 flex flex-col items-center justify-center z-10 w-full min-w-0">
+          {/* Price (Top) */}
+          <div style={getGameTextStyle(isMobile ? "1.5rem" : "2rem")} className="mb-1">
+            {settings.packageCurrencySymbol || "$"}{" "}
             {pkg.price.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}
           </div>
 
-          {/* Amount */}
-          <div
-            className="whitespace-nowrap text-white"
-            style={{
-              fontSize: `${amountFont}px`,
-              fontWeight: 900,
-              lineHeight: 0.72,
-              letterSpacing: "-0.08em",
-              textShadow: "8px 10px 0 rgba(72, 52, 0, 0.62)",
-              marginTop: isMobile ? "4px" : "10px",
-            }}
-          >
+          {/* Amount (Middle - Massive) */}
+          <div style={getGameTextStyle(isMobile ? "4rem" : "5rem")} className="my-1 leading-none">
             {pkg.amount.toLocaleString()}
           </div>
 
-          {/* Name */}
-          <div
-            className="whitespace-nowrap text-white"
-            style={{
-              fontSize: `${nameFont}px`,
-              fontWeight: 900,
-              lineHeight: 0.9,
-              letterSpacing: "-0.04em",
-              textShadow: "5px 6px 0 rgba(72, 52, 0, 0.62)",
-              marginTop: isMobile ? "8px" : "16px",
-            }}
-          >
+          {/* Name (Bottom) */}
+          <div style={getGameTextStyle(isMobile ? "1.25rem" : "1.75rem")} className="mt-1">
             {pkg.name}
           </div>
-
-          {pkg.quantity != null && pkg.quantity > 0 && (
-            <div
-              className="mt-2 rounded-full bg-black/25 px-3 py-1 text-xs font-bold text-white"
-              style={{
-                textShadow: "0 1px 2px rgba(0,0,0,.6)",
-              }}
-            >
-              ×{pkg.quantity} available
-            </div>
-          )}
         </div>
 
-        {/* Selected tick */}
+        {/* Selected Checkmark Overlay */}
         {selected && (
-          <div className="absolute right-2 top-2 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm font-black text-yellow-600 shadow-lg">
-            ✓
+          <div className="absolute top-2 right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center z-20 shadow-[0_0_10px_rgba(0,0,0,0.5)] border-2 border-white">
+            <span className="text-white text-lg font-bold">✓</span>
           </div>
         )}
 
-        {/* Label */}
-        {pkg.label && (
-          <div
-            className="absolute left-0 top-0 z-30 inline-flex items-center gap-1 rounded-br-lg px-2 py-[3px] shadow-md"
-            style={{ backgroundColor: pkg.labelBgColor || "#dc2626" }}
-          >
-            {pkg.labelIcon && (
-              <img
-                src={resolveIconUrl(pkg.labelIcon, settings.iconCdnBaseUrl)}
-                alt=""
-                className="h-3 w-3 object-contain"
-                loading="lazy"
-                decoding="async"
-              />
-            )}
-            <span
-              className="truncate text-[9px] font-extrabold uppercase tracking-wider"
-              style={{ color: pkg.labelTextColor || "#ffffff" }}
-            >
-              {pkg.label}
-            </span>
-          </div>
-        )}
-
-        {/* Special ribbon */}
+        {/* Special Banner Overlay */}
         {isSpecial && (
-          <div className="pointer-events-none absolute -right-px -top-px z-30 h-16 w-16 overflow-hidden">
-            <div className="absolute right-[-34px] top-[14px] rotate-45 bg-gradient-to-r from-red-600 to-orange-500 px-8 py-[2px] text-[9px] font-extrabold uppercase tracking-wider text-white shadow-md">
+          <div className="pointer-events-none absolute -top-px -right-px z-30 h-20 w-20 overflow-hidden">
+            <div className="absolute top-[18px] right-[-40px] rotate-45 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider px-10 py-1 shadow-lg border-y border-white/50">
               Special
             </div>
           </div>
