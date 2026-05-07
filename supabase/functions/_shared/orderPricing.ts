@@ -51,6 +51,13 @@ export function selectBestPackageMatch(
   const expectedPackage = normalizeForCompare(expected.packageName);
   const expectedProduct = normalizeForCompare(expected.g2bulkProductId);
 
+  const allEquivalent = (rows: ResolvedPackage[]) =>
+    rows.every(
+      (r) =>
+        Math.abs(r.price - rows[0].price) < 0.0001 &&
+        normalizeForCompare(r.g2bulkProductId) === normalizeForCompare(rows[0].g2bulkProductId),
+    );
+
   const exactProductMatch = candidates.filter(
     (candidate) =>
       normalizeForCompare(candidate.gameName) === expectedGame &&
@@ -59,6 +66,7 @@ export function selectBestPackageMatch(
       normalizeForCompare(candidate.g2bulkProductId) === expectedProduct,
   );
   if (exactProductMatch.length === 1) return exactProductMatch[0];
+  if (exactProductMatch.length > 1 && allEquivalent(exactProductMatch)) return exactProductMatch[0];
 
   const exactNameMatch = candidates.filter(
     (candidate) =>
@@ -66,6 +74,7 @@ export function selectBestPackageMatch(
       normalizeForCompare(candidate.packageName) === expectedPackage,
   );
   if (exactNameMatch.length === 1) return exactNameMatch[0];
+  if (exactNameMatch.length > 1 && allEquivalent(exactNameMatch)) return exactNameMatch[0];
 
   return null;
 }
