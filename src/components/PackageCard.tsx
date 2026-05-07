@@ -104,7 +104,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
 
           {/* Amount / Multiplier (Scaled down slightly) */}
           <div style={gameTextStyle} className="text-[28px] sm:text-[36px] leading-none my-0.5 tracking-wider">
-            {/* Added "x " prefix to match the "x1" in your second screenshot. 
+            {/* Added " " prefix to match the "x1" in your second screenshot. 
                 Remove the "x " if you only want the number! */}
             x {pkg.amount.toLocaleString()}
           </div>
