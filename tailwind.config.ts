@@ -112,6 +112,11 @@ export default {
           "0%": { opacity: "0", transform: "translateY(12px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "icon-jump": {
+          "0%, 80%, 100%": { transform: "translateY(0)" },
+          "85%": { transform: "translateY(-8px)" },
+          "92%": { transform: "translateY(-3px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -121,6 +126,7 @@ export default {
         "gradient-shift": "gradient-shift 6s ease infinite",
         "float-slow": "float-slow 4s ease-in-out infinite",
         "fade-in-up": "fade-in-up 0.5s ease-out both",
+        "icon-jump": "icon-jump 3s ease-in-out infinite",
       },
       backgroundImage: {
         'gradient-gold': 'var(--gradient-gold)',
