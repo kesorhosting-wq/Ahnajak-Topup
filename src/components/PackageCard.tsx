@@ -29,7 +29,6 @@ const PackageCard: React.FC<PackageCardProps> = ({
 
   const iconSrc = resolveIconUrl(pkg.icon || gameDefaultIcon || settings.packageIconUrl, settings.iconCdnBaseUrl);
 
-  // Replicated the crisp dark-brown stroke and shadow from your screenshot
   const gameTextStyle = {
     color: "#ffffff",
     fontWeight: 900,
@@ -58,13 +57,13 @@ const PackageCard: React.FC<PackageCardProps> = ({
         style={{
           background: settings.packageBgImage
             ? `url(${settings.packageBgImage})`
-            : "linear-gradient(135deg, #E6B93F 0%, #C99622 100%)", // Fallback gold
+            : "linear-gradient(135deg, #E6B93F 0%, #C99622 100%)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           minHeight: isMobile ? "110px" : "130px",
         }}
       >
-        {/* Left Side: Image Box Container (Fixed aspect ratio) */}
+        {/* Left Side: Image Box Container */}
         <div className="w-[35%] max-w-[100px] aspect-square flex-shrink-0 z-10 relative">
           <div className="absolute inset-0 bg-white/20 rounded-xl backdrop-blur-[2px] shadow-inner"></div>
           <div className="relative w-full h-full flex items-center justify-center p-2">
@@ -103,11 +102,11 @@ const PackageCard: React.FC<PackageCardProps> = ({
             })}
           </div>
 
-          {/* Amount / Multiplier (Huge Text) */}
-          <div style={gameTextStyle} className="text-[36px] sm:text-[46px] leading-none my-0.5 tracking-wider">
-            {/* Added "x" if you want it to look exactly like the screenshot. 
-                If you just want the number, remove the 'x' here. */}
-            {pkg.amount.toLocaleString()}
+          {/* Amount / Multiplier (Scaled down slightly) */}
+          <div style={gameTextStyle} className="text-[28px] sm:text-[36px] leading-none my-0.5 tracking-wider">
+            {/* Added "x " prefix to match the "x1" in your second screenshot. 
+                Remove the "x " if you only want the number! */}
+            x {pkg.amount.toLocaleString()}
           </div>
 
           {/* Name */}
@@ -119,7 +118,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
           </div>
         </div>
 
-        {/* Special Ribbon Overlay (Top Right corner) */}
+        {/* Special Ribbon Overlay */}
         {isSpecial && (
           <div className="absolute top-0 right-0 overflow-hidden w-[60px] h-[60px] rounded-tr-[14px] z-20 pointer-events-none">
             <div className="absolute top-[12px] right-[-20px] w-[200%] rotate-45 bg-[#FF4500] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider py-[2px] text-center shadow-md border-y border-white/30">
@@ -128,7 +127,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
           </div>
         )}
 
-        {/* Selected Checkmark (Optional, if you still want it visible when clicked) */}
+        {/* Selected Checkmark */}
         {selected && (
           <div className="absolute top-1 left-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center z-20 border border-white shadow-sm">
             <span className="text-white text-xs font-bold">✓</span>
