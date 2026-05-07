@@ -96,11 +96,31 @@ export default {
           "0%, 100%": { boxShadow: "0 0 20px hsl(43 74% 49% / 0.4)" },
           "50%": { boxShadow: "0 0 40px hsl(43 74% 49% / 0.6)" },
         },
+        "shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "gradient-shift": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        "float-slow": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        "fade-in-up": {
+          "0%": { opacity: "0", transform: "translateY(12px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "pulse-gold": "pulse-gold 2s ease-in-out infinite",
+        "shimmer": "shimmer 2.5s linear infinite",
+        "gradient-shift": "gradient-shift 6s ease infinite",
+        "float-slow": "float-slow 4s ease-in-out infinite",
+        "fade-in-up": "fade-in-up 0.5s ease-out both",
       },
       backgroundImage: {
         'gradient-gold': 'var(--gradient-gold)',
