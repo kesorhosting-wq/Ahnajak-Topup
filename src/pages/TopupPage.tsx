@@ -1059,18 +1059,20 @@ const TopupPage: React.FC = () => {
           {/* Back button */}
           <Link
             to="/"
-            className="group inline-flex items-center gap-2 text-sm sm:text-base text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-colors"
+            className="group inline-flex items-center gap-2 text-sm sm:text-base text-muted-foreground hover:text-foreground mb-4 sm:mb-6 transition-colors animate-fade-in-up"
           >
-            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/60 backdrop-blur ring-1 ring-border flex items-center justify-center group-hover:bg-white transition-colors">
+            <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/70 backdrop-blur-xl ring-1 ring-white/60 shadow-sm flex items-center justify-center group-hover:bg-white group-hover:-translate-x-0.5 transition-all">
               <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </span>
             <span>ត្រលប់ក្រោយ</span>
           </Link>
 
-          {/* Game Header — modern cover */}
-          <div className="relative mb-6 sm:mb-8 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-gold/30">
+          {/* Game Header — modern cinematic cover */}
+          <div className="relative mb-6 sm:mb-8 overflow-hidden rounded-[28px] shadow-2xl ring-1 ring-white/20 animate-fade-in-up">
+            {/* Animated gradient border glow */}
+            <div className="pointer-events-none absolute -inset-[1px] rounded-[28px] bg-[linear-gradient(120deg,hsl(43_74%_49%/.6),transparent_30%,transparent_70%,hsl(43_74%_49%/.6))] bg-[length:200%_100%] animate-gradient-shift opacity-70" />
             <div
-              className="relative w-full h-52 sm:h-72"
+              className="relative w-full h-56 sm:h-80"
               style={{
                 backgroundImage: game.coverImage
                   ? `url(${game.coverImage})`
@@ -1081,13 +1083,18 @@ const TopupPage: React.FC = () => {
                 backgroundPosition: "center",
               }}
             >
-              {/* Gradient overlays - bottom only for text legibility */}
-              <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+              {/* Layered gradient overlays */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(43_74%_49%/.25),transparent_60%)]" />
+
+              {/* Floating gold orbs */}
+              <div className="absolute top-6 right-6 w-24 h-24 rounded-full bg-gold/30 blur-3xl animate-float-slow" />
+              <div className="absolute bottom-10 left-10 w-32 h-32 rounded-full bg-amber-500/20 blur-3xl animate-float-slow" style={{ animationDelay: '1.5s' }} />
 
               {/* Content */}
               <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 sm:gap-5 p-4 sm:p-6">
-                <div className="relative shrink-0">
-                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-gold via-amber-400 to-gold-dark blur opacity-70" />
+                <div className="relative shrink-0 animate-float-slow">
+                  <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-br from-gold via-amber-400 to-gold-dark blur-md opacity-80 animate-pulse-gold" />
                   <img
                     src={game.image}
                     alt={game.name}
@@ -1098,14 +1105,14 @@ const TopupPage: React.FC = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-gold/95 text-black shadow">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-gradient-to-r from-gold to-amber-400 text-black shadow-lg">
                       ⚡ Instant Top-Up
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-white/15 text-white backdrop-blur ring-1 ring-white/20">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-white/15 text-white backdrop-blur-md ring-1 ring-white/25">
                       🔒 Secure
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-500/90 text-white shadow">
-                      ● Online
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-500/90 text-white shadow ring-1 ring-emerald-300/40">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Online
                     </span>
                   </div>
                   <h1
