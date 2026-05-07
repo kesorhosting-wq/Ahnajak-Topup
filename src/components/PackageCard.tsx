@@ -21,8 +21,8 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
   const [iconError, setIconError] = useState(false);
 
   const iconSize = isMobile
-    ? (settings.packageIconSizeMobile || 64)
-    : (settings.packageIconSizeDesktop || 60);
+    ? (settings.packageIconSizeMobile || 110)
+    : (settings.packageIconSizeDesktop || 120);
 
   const iconSrc = resolveIconUrl(
     pkg.icon || gameDefaultIcon || settings.packageIconUrl,
