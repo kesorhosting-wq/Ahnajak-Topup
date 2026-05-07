@@ -106,7 +106,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
           <div style={gameTextStyle} className="text-[28px] sm:text-[36px] leading-none my-0.5 tracking-wider">
             {/* Added " " prefix to match the "x1" in your second screenshot. 
                 Remove the "x " if you only want the number! */}
-            x {pkg.amount.toLocaleString()}
+            {pkg.amount.toLocaleString()}
           </div>
 
           {/* Name */}
