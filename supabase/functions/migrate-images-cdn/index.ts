@@ -216,7 +216,7 @@ Deno.serve(async (req) => {
       const migrated = results.filter(r => r.status === "migrated").length;
       const failed = results.filter(r => r.status === "failed").length;
 
-      return new Response(JSON.stringify({ migrated, failed, total: results.length, results }), {
+      return new Response(JSON.stringify({ migrated, failed, total: results.length, done, results }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
