@@ -30,8 +30,8 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
   );
 
   const cardHeight = isMobile
-    ? Math.max(settings.packageHeight || 96, 92)
-    : Math.max(settings.packageHeight || 110, 104);
+    ? Math.max(settings.packageHeight || 180, 170)
+    : Math.max(settings.packageHeight || 210, 200);
 
   return (
     <button
@@ -45,7 +45,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
     >
       <div
         className={cn(
-          "relative flex items-center rounded-xl overflow-hidden shadow-md transition-shadow duration-200 group-hover:shadow-lg"
+          "relative flex flex-col items-center rounded-xl overflow-hidden shadow-md transition-shadow duration-200 group-hover:shadow-lg"
         )}
         style={{
           height: `${cardHeight}px`,
