@@ -1130,7 +1130,7 @@ const TopupPage: React.FC = () => {
 
           {/* Step 1: Enter ID */}
           <div
-            className="mb-6 sm:mb-8 p-5 sm:p-7 rounded-3xl relative overflow-hidden border border-white/40 shadow-xl backdrop-blur-xl"
+            className="mb-6 sm:mb-8 p-5 sm:p-7 rounded-[28px] relative overflow-hidden border border-white/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] backdrop-blur-2xl animate-fade-in-up"
             style={{
               backgroundColor: settings.idSectionBgColor || "hsl(39 40% 95% / 0.85)",
               backgroundImage: settings.idSectionBgImage ? `url(${settings.idSectionBgImage})` : undefined,
