@@ -116,10 +116,12 @@ const PackageCard: React.FC<PackageCardProps> = ({
           </div>
         </div>
 
-        {/* Special badge */}
+        {/* Special corner ribbon */}
         {isSpecial && (
-          <div className="absolute -top-1.5 -right-1.5 z-20 px-1.5 py-[1px] rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white text-[8px] sm:text-[9px] font-black uppercase tracking-wide shadow-md ring-1 ring-white/70 pointer-events-none">
-            ✨ Hot
+          <div className="absolute top-0 right-0 overflow-hidden w-[48px] h-[48px] rounded-tr-[12px] z-20 pointer-events-none">
+            <div className="absolute top-[8px] right-[-22px] w-[120px] rotate-45 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[8px] sm:text-[9px] font-black uppercase tracking-widest py-[2px] text-center shadow-md ring-1 ring-white/40">
+              ★ Hot
+            </div>
           </div>
         )}
 
