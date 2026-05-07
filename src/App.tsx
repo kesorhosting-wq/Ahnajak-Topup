@@ -38,6 +38,7 @@ const App = () => (
                 <CustomFontLoader />
                 <AuroraBackground />
                 <FallingFlowers />
+                <ClickSpark sparkColor="#E6B93F" sparkCount={10} sparkRadius={20} sparkSize={12} duration={500} />
                 <Toaster />
                 <Sonner />
                 <Routes>
