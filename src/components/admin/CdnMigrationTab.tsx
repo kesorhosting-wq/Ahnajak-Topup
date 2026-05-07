@@ -56,9 +56,8 @@ const CdnMigrationTab: React.FC = () => {
     const allResults: MigrationResult[] = [];
     let totalMigrated = 0;
     let totalFailed = 0;
+    let completed = false;
     try {
-      // Loop in batches until the function reports done
-      // Safety cap to prevent runaway loops
       for (let i = 0; i < 200; i++) {
         const { data, error } = await supabase.functions.invoke('migrate-images-cdn', {
           body: { action: 'migrate' },
@@ -70,11 +69,28 @@ const CdnMigrationTab: React.FC = () => {
         setMigrationResults([...allResults]);
         toast({
           title: data.done ? 'Migration complete' : `Batch ${i + 1} done — continuing…`,
-          description: `✅ ${totalMigrated} migrated, ❌ ${totalFailed} failed`,
+          description: `✅ ${totalMigrated} migrated, ❌ ${totalFailed} failed, ${data.remaining ?? 0} remaining`,
         });
-        if (data.done) break;
+        if (data.done) {
+          completed = true;
+          break;
+        }
       }
-      setScanResults(null);
+
+      if (!completed) {
+        toast({
+          title: 'Migration paused before completion',
+          description: 'Some images still remain. The stop limit was reached before the migration finished.',
+          variant: 'destructive',
+        });
+      }
+
+      const { data: rescanData, error: rescanError } = await supabase.functions.invoke('migrate-images-cdn', {
+        body: { action: 'scan' },
+      });
+
+      if (rescanError) throw rescanError;
+      setScanResults(rescanData.items || []);
     } catch (err) {
       toast({ title: 'Migration failed', description: String(err), variant: 'destructive' });
     } finally {
