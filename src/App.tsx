@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import EventsPage from "./pages/EventsPage";
 import PreorderPage from "./pages/PreorderPage";
 import PreorderTopupPage from "./pages/PreorderTopupPage";
+import TermsPage from "./pages/TermsPage";
 const queryClient = new QueryClient();
 
 const App = () => (
