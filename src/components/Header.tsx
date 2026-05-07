@@ -29,7 +29,7 @@ const Header: React.FC = () => {
 
   return (
     <header 
-      className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 flex items-center backdrop-blur-xl bg-white/30"
+      className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 flex items-center bg-transparent"
       style={{
         height: `${headerHeight}px`,
         backgroundImage: settings.headerImage ? `url(${settings.headerImage})` : undefined,
