@@ -97,9 +97,12 @@ Deno.serve(async (req) => {
     }
 
     if (action === "migrate") {
+      const BATCH_LIMIT = 25; // process at most 25 images per invocation to avoid 150s timeout
       const results: MigrationResult[] = [];
+      let processed = 0;
+      let done = true;
 
-      for (const { table, columns, idCol } of IMAGE_COLUMNS) {
+      outer: for (const { table, columns, idCol } of IMAGE_COLUMNS) {
         const { data: rows, error } = await supabase.from(table).select("*");
         if (error || !rows) continue;
 
@@ -108,8 +111,10 @@ Deno.serve(async (req) => {
             const url = row[col];
             if (!url || isStorageUrl(url, supabaseUrl)) continue;
 
+            if (processed >= BATCH_LIMIT) { done = false; break outer; }
+            processed++;
+
             try {
-              // Download the image
               const imgResponse = await fetch(url);
               if (!imgResponse.ok) {
                 results.push({ table, column: col, id: row[idCol], old_url: url, new_url: "", status: "failed", error: `HTTP ${imgResponse.status}` });
@@ -132,7 +137,6 @@ Deno.serve(async (req) => {
 
               const { data: { publicUrl } } = supabase.storage.from("site-assets").getPublicUrl(fileName);
 
-              // Update the database record
               const { error: updateError } = await supabase
                 .from(table)
                 .update({ [col]: publicUrl })
