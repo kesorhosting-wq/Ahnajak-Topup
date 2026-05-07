@@ -5,6 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const BATCH_LIMIT = 25;
+
 interface MigrationResult {
   table: string;
   column: string;
@@ -20,6 +22,7 @@ interface ScanItem {
   column: string;
   id: string;
   url: string;
+  location: UrlLocation;
 }
 
 interface TableConfig {
@@ -32,7 +35,12 @@ interface SiteSettingCandidate extends ScanItem {
   path: (string | number)[];
 }
 
-const BATCH_LIMIT = 25;
+type UrlLocation =
+  | "site-assets"
+  | "current-other-storage"
+  | "external-storage"
+  | "external-http"
+  | "ignore";
 
 const IMAGE_COLUMNS: TableConfig[] = [
   { table: "games", columns: ["image", "cover_image", "default_package_icon"], idCol: "id" },
@@ -47,15 +55,35 @@ function isHttpUrl(value: unknown): value is string {
   return typeof value === "string" && /^https?:\/\//i.test(value);
 }
 
-function isStorageUrl(url: string, supabaseUrl: string): boolean {
-  if (!url) return true;
-
+function getProjectRef(supabaseUrl: string): string | null {
   const refMatch = supabaseUrl.match(/https?:\/\/([a-z0-9]+)\.supabase\.co/i);
-  const ourRef = refMatch?.[1];
+  return refMatch?.[1] ?? null;
+}
 
-  if (!ourRef) return false;
+function classifyUrl(url: string, supabaseUrl: string): UrlLocation {
+  if (!url) return "ignore";
+  if (!isHttpUrl(url)) return "ignore";
 
-  return url.includes(`${ourRef}.supabase.co/storage/`);
+  const projectRef = getProjectRef(supabaseUrl);
+  if (!projectRef) return "external-http";
+
+  if (url.includes(`${projectRef}.supabase.co/storage/v1/object/public/site-assets/`)) {
+    return "site-assets";
+  }
+
+  if (url.includes(`${projectRef}.supabase.co/storage/`)) {
+    return "current-other-storage";
+  }
+
+  if (url.includes("supabase.co/storage/")) {
+    return "external-storage";
+  }
+
+  return "external-http";
+}
+
+function shouldMigrate(location: UrlLocation): boolean {
+  return location === "current-other-storage" || location === "external-storage" || location === "external-http";
 }
 
 function setNestedValue(target: unknown, path: (string | number)[], nextValue: string): unknown {
@@ -83,9 +111,12 @@ function collectUrlsFromValue(
   value: unknown,
   supabaseUrl: string,
   path: (string | number)[] = [],
-): Array<{ url: string; path: (string | number)[] }> {
-  if (isHttpUrl(value) && !isStorageUrl(value, supabaseUrl)) {
-    return [{ url: value, path }];
+): Array<{ url: string; path: (string | number)[]; location: UrlLocation }> {
+  if (isHttpUrl(value)) {
+    const location = classifyUrl(value, supabaseUrl);
+    if (location !== "ignore") {
+      return [{ url: value, path, location }];
+    }
   }
 
   if (Array.isArray(value)) {
@@ -116,9 +147,12 @@ async function scanTableCandidates(
     for (const row of rows) {
       for (const col of columns) {
         const url = row[col];
-        if (isHttpUrl(url) && !isStorageUrl(url, supabaseUrl)) {
-          results.push({ table, column: col, id: String(row[idCol]), url });
-        }
+        if (!isHttpUrl(url)) continue;
+
+        const location = classifyUrl(url, supabaseUrl);
+        if (location === "ignore") continue;
+
+        results.push({ table, column: col, id: String(row[idCol]), url, location });
       }
     }
   }
@@ -134,12 +168,13 @@ async function scanSiteSettingsCandidates(
   if (error || !rows) return [];
 
   return rows.flatMap((row) =>
-    collectUrlsFromValue(row.value, supabaseUrl).map(({ url, path }) => ({
+    collectUrlsFromValue(row.value, supabaseUrl).map(({ url, path, location }) => ({
       table: "site_settings",
       column: path.length > 0 ? `key:${row.key}.${path.join(".")}` : `key:${row.key}`,
       id: String(row.id),
       url,
       path,
+      location,
     }))
   );
 }
@@ -154,6 +189,27 @@ async function scanAllCandidates(
   ]);
 
   return [...tableCandidates, ...siteSettingCandidates];
+}
+
+function summarizeCandidates(items: Array<ScanItem | SiteSettingCandidate>) {
+  const summary = {
+    total_refs: items.length,
+    site_assets_refs: 0,
+    current_other_storage_refs: 0,
+    external_storage_refs: 0,
+    external_http_refs: 0,
+    migratable_refs: 0,
+  };
+
+  for (const item of items) {
+    if (item.location === "site-assets") summary.site_assets_refs += 1;
+    if (item.location === "current-other-storage") summary.current_other_storage_refs += 1;
+    if (item.location === "external-storage") summary.external_storage_refs += 1;
+    if (item.location === "external-http") summary.external_http_refs += 1;
+    if (shouldMigrate(item.location)) summary.migratable_refs += 1;
+  }
+
+  return summary;
 }
 
 async function migrateUrl(
@@ -209,15 +265,22 @@ Deno.serve(async (req) => {
     const { action } = await req.json();
 
     if (action === "scan") {
-      const items = await scanAllCandidates(supabase, supabaseUrl);
+      const allItems = await scanAllCandidates(supabase, supabaseUrl);
+      const items = allItems.filter((item) => shouldMigrate(item.location));
+      const summary = summarizeCandidates(allItems);
 
-      return new Response(JSON.stringify({ total: items.length, items }), {
+      return new Response(JSON.stringify({
+        total: items.length,
+        items,
+        summary,
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (action === "migrate") {
-      const candidates = await scanAllCandidates(supabase, supabaseUrl);
+      const allCandidates = await scanAllCandidates(supabase, supabaseUrl);
+      const candidates = allCandidates.filter((item) => shouldMigrate(item.location));
       const batch = candidates.slice(0, BATCH_LIMIT);
       const results: MigrationResult[] = [];
 
@@ -315,7 +378,7 @@ Deno.serve(async (req) => {
         }
       }
 
-      const remainingItems = await scanAllCandidates(supabase, supabaseUrl);
+      const remainingItems = (await scanAllCandidates(supabase, supabaseUrl)).filter((item) => shouldMigrate(item.location));
       const migrated = results.filter((item) => item.status === "migrated").length;
       const failed = results.filter((item) => item.status === "failed").length;
 
