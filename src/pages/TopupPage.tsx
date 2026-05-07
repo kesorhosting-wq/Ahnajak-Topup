@@ -1502,48 +1502,6 @@ const TopupPage: React.FC = () => {
               </Button>
             </div>
           </div>
-
-          {/* Terms & Submit */}
-          <div className="rounded-3xl p-5 sm:p-6 border border-white/40 shadow-xl backdrop-blur-xl bg-white/70 relative overflow-hidden">
-            <div className="absolute -bottom-12 -right-12 w-48 h-48 rounded-full bg-gold/20 blur-3xl pointer-events-none" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <span className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gold text-black flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0 shadow-md ring-2 ring-white/60">
-                  4
-                </span>
-                <span className="font-khmer text-sm sm:text-base font-bold text-foreground">ចុច​ ✔ នៅខាងក្រោម​</span>
-              </div>
-              <label className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 cursor-pointer group">
-                <button
-                  onClick={() => setAgreedToTerms(!agreedToTerms)}
-                  className={cn(
-                    "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
-                    agreedToTerms ? "bg-gold border-gold scale-110" : "border-muted-foreground group-hover:border-gold",
-                  )}
-                >
-                  {agreedToTerms && <CheckCircle className="w-4 h-4 text-primary-foreground" />}
-                </button>
-                <span className="font-khmer text-sm sm:text-base">យកព្រមទទួលលក្ខខណ្ឌ</span>
-              </label>
-
-              <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting || !agreedToTerms || !selectedPackage || !selectedPayment || !verifiedUser}
-                className="w-full py-5 sm:py-7 text-base sm:text-lg font-bold rounded-2xl bg-gradient-to-r from-gold via-amber-400 to-gold-dark hover:from-gold-dark hover:via-amber-500 hover:to-gold text-primary-foreground shadow-gold hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    កំពុងដំណើរការ...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    🚀 សម្រេចទិញ
-                  </span>
-                )}
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
     </>
