@@ -1391,14 +1391,14 @@ const TopupPage: React.FC = () => {
                         </span>
                         <div className="flex-1 h-px bg-gradient-to-r from-gold/40 to-transparent ml-2" />
                       </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 auto-rows-fr">
+                      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 auto-rows-fr">
                         {game.packages
                           .slice()
                           .sort((a, b) => a.price - b.price)
                           .map((pkg, index) => (
                             <div
                               key={`pk-${pkg.id}`}
-                              className="sm:col-span-2 animate-fade-in-up"
+                              className="animate-fade-in-up"
                               style={{ animationDelay: `${Math.min(index * 25, 300)}ms` }}
                             >
                               <PackageCard
