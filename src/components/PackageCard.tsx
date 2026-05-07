@@ -30,8 +30,8 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
   );
 
   const cardHeight = isMobile
-    ? Math.max(settings.packageHeight || 96, 92)
-    : Math.max(settings.packageHeight || 110, 104);
+    ? Math.max(settings.packageHeight || 180, 170)
+    : Math.max(settings.packageHeight || 210, 200);
 
   return (
     <button
@@ -45,7 +45,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
     >
       <div
         className={cn(
-          "relative flex items-center rounded-xl overflow-hidden shadow-md transition-shadow duration-200 group-hover:shadow-lg"
+          "relative flex flex-col items-center rounded-xl overflow-hidden shadow-md transition-shadow duration-200 group-hover:shadow-lg"
         )}
         style={{
           height: `${cardHeight}px`,
@@ -64,11 +64,11 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
       >
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/20" />
 
-        {/* Icon */}
-        <div className="flex items-center pl-2.5 sm:pl-3 z-10">
+        {/* Icon - top center */}
+        <div className="flex items-center justify-center pt-3 z-10">
           <div
-            className="relative flex items-center justify-center rounded-lg bg-white/5 ring-1 ring-white/10"
-            style={{ width: `${iconSize + 8}px`, height: `${iconSize + 8}px` }}
+            className="relative flex items-center justify-center rounded-xl bg-white/5 ring-1 ring-white/10"
+            style={{ width: `${iconSize + 12}px`, height: `${iconSize + 12}px` }}
           >
             {iconSrc && !iconError ? (
               <>
@@ -84,7 +84,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
                   alt=""
                   width={iconSize}
                   height={iconSize}
-                  className="object-contain"
+                  className="object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.35)]"
                   style={{
                     width: iconSize,
                     height: iconSize,
@@ -99,7 +99,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
                 />
               </>
             ) : iconError ? (
-              <span className="text-2xl sm:text-3xl">💎</span>
+              <span className="text-3xl sm:text-4xl">💎</span>
             ) : (
               <div
                 className="rounded-full bg-gradient-to-br from-white/10 to-white/[0.03] animate-pulse"
@@ -110,20 +110,20 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
           </div>
         </div>
 
-        {/* Center content */}
-        <div className="flex-1 flex flex-col items-center justify-center min-w-0 px-2 leading-tight z-10">
+        {/* Center content - amount + name */}
+        <div className="flex-1 flex flex-col items-center justify-center min-w-0 px-2 leading-tight z-10 w-full">
           <span
-            className="truncate text-sm sm:text-base tracking-wide"
+            className="truncate text-base sm:text-lg tracking-wide"
             style={{
               color: settings.packageTextColor || '#ffffff',
-              fontWeight: settings.packageTextWeight || 700,
-              textShadow: '0 1px 2px rgba(0,0,0,0.4)',
+              fontWeight: settings.packageTextWeight || 800,
+              textShadow: '0 1px 3px rgba(0,0,0,0.5)',
             }}
           >
             {pkg.amount.toLocaleString()}
           </span>
           <span
-            className="truncate text-[10px] sm:text-xs opacity-80"
+            className="truncate text-[11px] sm:text-xs opacity-85 max-w-full"
             style={{
               color: settings.packageTextColor || '#ffffff',
               fontWeight: settings.packageTextWeight || 500,
@@ -141,10 +141,10 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, selected, onSelect, prio
           )}
         </div>
 
-        {/* Price pill */}
-        <div className="relative flex items-center justify-end pr-2.5 sm:pr-3 pl-3 z-10">
+        {/* Price pill - bottom */}
+        <div className="relative flex items-center justify-center pb-2.5 z-10 w-full">
           <span
-            className="whitespace-nowrap text-xs sm:text-sm rounded-full px-2.5 py-1 bg-gradient-to-r from-gold/90 to-amber-500/90 text-black shadow-[0_2px_10px_rgba(212,168,75,0.45)]"
+            className="whitespace-nowrap text-xs sm:text-sm rounded-full px-3 py-1 bg-gradient-to-r from-gold/90 to-amber-500/90 text-black shadow-[0_2px_10px_rgba(212,168,75,0.45)]"
             style={{
               color: settings.packagePriceColor || undefined,
               fontWeight: settings.packagePriceWeight || 800,
