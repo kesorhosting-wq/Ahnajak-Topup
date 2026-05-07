@@ -1398,7 +1398,7 @@ const TopupPage: React.FC = () => {
           {/* Step 3: Payment Method */}
           <div
             id="payment-method-section"
-            className="mb-6 sm:mb-8 p-5 sm:p-6 rounded-3xl scroll-mt-24 relative overflow-hidden border border-white/40 shadow-xl backdrop-blur-xl bg-white/70"
+            className="mb-6 sm:mb-8 p-5 sm:p-6 rounded-[28px] scroll-mt-24 relative overflow-hidden border border-white/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] backdrop-blur-2xl bg-white/75 animate-fade-in-up"
             style={{
               backgroundColor: settings.paymentSectionBgColor || undefined,
               backgroundImage: settings.paymentSectionBgImage ? `url(${settings.paymentSectionBgImage})` : undefined,
@@ -1407,11 +1407,12 @@ const TopupPage: React.FC = () => {
               color: settings.paymentSectionTextColor || undefined,
             }}
           >
-            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-emerald-400/15 blur-3xl pointer-events-none" />
+            <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-emerald-400/20 blur-3xl pointer-events-none animate-float-slow" />
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-sky-400/15 blur-3xl pointer-events-none animate-float-slow" style={{ animationDelay: '1s' }} />
             <div className="relative z-10">
               <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
                 <span
-                  className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-md ring-2 ring-white/60"
+                  className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-lg ring-2 ring-white/70"
                   style={{
                     backgroundColor: settings.frameColor || "hsl(43 74% 49%)",
                     color: "hsl(var(--primary-foreground))",
@@ -1422,38 +1423,83 @@ const TopupPage: React.FC = () => {
                 <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសធនាគារបង់ប្រាក់</h2>
               </div>
 
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
-                {paymentMethods.map((method) => (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 sm:gap-3">
+                {paymentMethods.map((method, idx) => (
                   <button
                     key={method.id}
                     onClick={() => setSelectedPayment(method.id)}
                     className={cn(
-                      "group relative px-2 sm:px-4 py-3 sm:py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-1.5 sm:gap-2 hover:-translate-y-0.5",
+                      "group relative px-2 sm:px-4 py-3 sm:py-4 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-1.5 sm:gap-2 hover:-translate-y-1 hover:shadow-xl backdrop-blur-md animate-fade-in-up overflow-hidden",
                       selectedPayment === method.id
-                        ? "border-gold bg-gradient-to-br from-gold/25 to-amber-300/15 shadow-md"
-                        : "border-border/60 bg-white/70 hover:border-gold/60 hover:shadow-md",
+                        ? "border-gold/80 bg-gradient-to-br from-gold/30 via-amber-200/20 to-amber-300/10 shadow-[0_8px_24px_-6px_hsl(43_74%_49%/.5)] ring-1 ring-gold/40"
+                        : "border-white/70 bg-white/80 hover:border-gold/50",
                     )}
+                    style={{ animationDelay: `${idx * 40}ms` }}
                   >
+                    <span className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full" />
                     {selectedPayment === method.id && (
-                      <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-gold flex items-center justify-center text-black text-[10px] font-bold shadow">✓</span>
+                      <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-gradient-to-br from-gold to-amber-500 flex items-center justify-center text-black text-[10px] font-bold shadow-md z-10">✓</span>
                     )}
                     {method.icon.startsWith("http") ? (
                       <img
                         src={method.icon}
                         alt={method.name}
-                        className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl object-cover shadow-sm"
+                        className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl object-cover shadow-sm transition-transform group-hover:scale-110 z-10"
                       />
                     ) : (
                       <img
                         src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwG-Zx92YNnU6BuabALnRRwBqX_5USd3AJJw&s"
                         alt="phone"
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg z-10"
                       />
                     )}
-                    <span className="text-[11px] sm:text-sm font-semibold text-center truncate w-full">{method.name}</span>
+                    <span className="text-[11px] sm:text-sm font-semibold text-center truncate w-full z-10">{method.name}</span>
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Terms & Submit */}
+          <div className="rounded-[28px] p-5 sm:p-6 border border-white/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.15)] backdrop-blur-2xl bg-white/75 relative overflow-hidden animate-fade-in-up">
+            <div className="absolute -bottom-12 -right-12 w-56 h-56 rounded-full bg-gold/25 blur-3xl pointer-events-none animate-float-slow" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <span className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-gold to-amber-500 text-black flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0 shadow-lg ring-2 ring-white/70">
+                  4
+                </span>
+                <span className="font-khmer text-sm sm:text-base font-bold text-foreground">ចុច​ ✔ នៅខាងក្រោម​</span>
+              </div>
+              <label className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 cursor-pointer group">
+                <button
+                  onClick={() => setAgreedToTerms(!agreedToTerms)}
+                  className={cn(
+                    "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
+                    agreedToTerms ? "bg-gradient-to-br from-gold to-amber-500 border-gold scale-110 shadow-md" : "border-muted-foreground group-hover:border-gold",
+                  )}
+                >
+                  {agreedToTerms && <CheckCircle className="w-4 h-4 text-primary-foreground" />}
+                </button>
+                <span className="font-khmer text-sm sm:text-base">យកព្រមទទួលលក្ខខណ្ឌ</span>
+              </label>
+
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting || !agreedToTerms || !selectedPackage || !selectedPayment || !verifiedUser}
+                className="group relative w-full py-5 sm:py-7 text-base sm:text-lg font-bold rounded-2xl bg-gradient-to-r from-gold via-amber-400 to-gold-dark bg-[length:200%_100%] hover:bg-[position:100%_0] text-primary-foreground shadow-gold hover:shadow-2xl transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+              >
+                <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2 relative z-10">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    កំពុងដំណើរការ...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2 relative z-10">
+                    🚀 សម្រេចទិញ
+                  </span>
+                )}
+              </Button>
             </div>
           </div>
 
