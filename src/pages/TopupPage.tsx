@@ -1067,63 +1067,45 @@ const TopupPage: React.FC = () => {
             <span>ត្រលប់ក្រោយ</span>
           </Link>
 
-          {/* Game Header — modern cinematic cover */}
-          <div className="relative mb-6 sm:mb-8 overflow-hidden rounded-[28px] shadow-2xl ring-1 ring-white/20 animate-fade-in-up">
+          {/* Game Header — logo + text only (no cover) */}
+          <div className="relative mb-6 sm:mb-8 overflow-hidden rounded-[28px] shadow-xl ring-1 ring-white/40 animate-fade-in-up bg-white/75 backdrop-blur-2xl border border-white/60">
             {/* Animated gradient border glow */}
-            <div className="pointer-events-none absolute -inset-[1px] rounded-[28px] bg-[linear-gradient(120deg,hsl(43_74%_49%/.6),transparent_30%,transparent_70%,hsl(43_74%_49%/.6))] bg-[length:200%_100%] animate-gradient-shift opacity-70" />
-            <div
-              className="relative w-full h-56 sm:h-80"
-              style={{
-                backgroundImage: game.coverImage
-                  ? `url(${game.coverImage})`
-                  : settings.topupBannerImage
-                    ? `url(${settings.topupBannerImage})`
-                    : `url(${game.image})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              {/* Layered gradient overlays */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(43_74%_49%/.25),transparent_60%)]" />
+            <div className="pointer-events-none absolute -inset-[1px] rounded-[28px] bg-[linear-gradient(120deg,hsl(43_74%_49%/.6),transparent_30%,transparent_70%,hsl(43_74%_49%/.6))] bg-[length:200%_100%] animate-gradient-shift opacity-60" />
 
-              {/* Floating gold orbs */}
-              <div className="absolute top-6 right-6 w-24 h-24 rounded-full bg-gold/30 blur-3xl animate-float-slow" />
-              <div className="absolute bottom-10 left-10 w-32 h-32 rounded-full bg-amber-500/20 blur-3xl animate-float-slow" style={{ animationDelay: '1.5s' }} />
+            {/* Floating gold orbs */}
+            <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-gold/25 blur-3xl animate-float-slow" />
+            <div className="pointer-events-none absolute -bottom-12 -left-12 w-44 h-44 rounded-full bg-amber-400/20 blur-3xl animate-float-slow" style={{ animationDelay: '1.5s' }} />
 
-              {/* Content */}
-              <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 sm:gap-5 p-4 sm:p-6">
-                <div className="relative shrink-0 animate-float-slow">
-                  <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-br from-gold via-amber-400 to-gold-dark blur-md opacity-80 animate-pulse-gold" />
-                  <img
-                    src={game.image}
-                    alt={game.name}
-                    className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 shadow-2xl"
-                    style={{ borderColor: settings.topupBannerColor || "hsl(43 74% 49%)" }}
-                  />
-                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 ring-2 ring-black/60 animate-pulse" />
+            {/* Content */}
+            <div className="relative flex items-center gap-3 sm:gap-5 p-4 sm:p-6">
+              <div className="relative shrink-0 animate-float-slow">
+                <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-br from-gold via-amber-400 to-gold-dark blur-md opacity-80 animate-pulse-gold" />
+                <img
+                  src={game.image}
+                  alt={game.name}
+                  className="relative w-16 h-16 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 shadow-xl"
+                  style={{ borderColor: settings.topupBannerColor || "hsl(43 74% 49%)" }}
+                />
+                <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-gradient-to-r from-gold to-amber-400 text-black shadow-md">
+                    ⚡ Instant Top-Up
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-foreground/10 text-foreground backdrop-blur-md ring-1 ring-foreground/15">
+                    🔒 Secure
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-500/90 text-white shadow ring-1 ring-emerald-300/40">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Online
+                  </span>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-gradient-to-r from-gold to-amber-400 text-black shadow-lg">
-                      ⚡ Instant Top-Up
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-white/15 text-white backdrop-blur-md ring-1 ring-white/25">
-                      🔒 Secure
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-500/90 text-white shadow ring-1 ring-emerald-300/40">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Online
-                    </span>
-                  </div>
-                  <h1
-                    className="font-display text-2xl sm:text-4xl font-extrabold leading-tight drop-shadow-lg truncate text-white"
-                  >
-                    {game.name}
-                  </h1>
-                  <p className="text-[11px] sm:text-sm text-white/80 mt-1 hidden sm:block">
-                    Choose a package and pay securely in seconds.
-                  </p>
-                </div>
+                <h1 className="font-display text-xl sm:text-3xl font-extrabold leading-tight truncate text-foreground">
+                  {game.name}
+                </h1>
+                <p className="text-[11px] sm:text-sm text-muted-foreground mt-0.5 hidden sm:block">
+                  Choose a package and pay securely in seconds.
+                </p>
               </div>
             </div>
           </div>
