@@ -12,6 +12,7 @@ import CustomFontLoader from "./components/CustomFontLoader";
 import FallingFlowers from "./components/FallingFlowers";
 import ContactButton from "./components/ContactButton";
 import AuroraBackground from "./components/AuroraBackground";
+import ClickSpark from "./components/ClickSpark";
 import Index from "./pages/Index";
 import TopupPage from "./pages/TopupPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -37,6 +38,7 @@ const App = () => (
                 <CustomFontLoader />
                 <AuroraBackground />
                 <FallingFlowers />
+                <ClickSpark sparkColor="#E6B93F" sparkCount={10} sparkRadius={20} sparkSize={12} duration={500} />
                 <Toaster />
                 <Sonner />
                 <Routes>
