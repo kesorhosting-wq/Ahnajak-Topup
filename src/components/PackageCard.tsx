@@ -74,7 +74,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
                 <img
                   src={iconSrc}
                   alt=""
-                  className="w-full h-full object-contain drop-shadow-lg"
+                  className="w-full h-full object-contain drop-shadow-lg animate-icon-jump"
                   style={{ opacity: iconLoaded ? 1 : 0, transition: "opacity 200ms" }}
                   loading={priority ? "eager" : "lazy"}
                   decoding="async"
