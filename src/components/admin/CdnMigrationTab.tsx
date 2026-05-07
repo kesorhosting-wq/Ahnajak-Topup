@@ -53,17 +53,28 @@ const CdnMigrationTab: React.FC = () => {
   const handleMigrate = async () => {
     setMigrating(true);
     setMigrationResults(null);
+    const allResults: MigrationResult[] = [];
+    let totalMigrated = 0;
+    let totalFailed = 0;
     try {
-      const { data, error } = await supabase.functions.invoke('migrate-images-cdn', {
-        body: { action: 'migrate' },
-      });
-      if (error) throw error;
-      setMigrationResults(data.results || []);
+      // Loop in batches until the function reports done
+      // Safety cap to prevent runaway loops
+      for (let i = 0; i < 200; i++) {
+        const { data, error } = await supabase.functions.invoke('migrate-images-cdn', {
+          body: { action: 'migrate' },
+        });
+        if (error) throw error;
+        allResults.push(...(data.results || []));
+        totalMigrated += data.migrated || 0;
+        totalFailed += data.failed || 0;
+        setMigrationResults([...allResults]);
+        toast({
+          title: data.done ? 'Migration complete' : `Batch ${i + 1} done — continuing…`,
+          description: `✅ ${totalMigrated} migrated, ❌ ${totalFailed} failed`,
+        });
+        if (data.done) break;
+      }
       setScanResults(null);
-      toast({
-        title: `Migration complete`,
-        description: `✅ ${data.migrated} migrated, ❌ ${data.failed} failed`,
-      });
     } catch (err) {
       toast({ title: 'Migration failed', description: String(err), variant: 'destructive' });
     } finally {

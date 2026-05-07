@@ -97,9 +97,12 @@ Deno.serve(async (req) => {
     }
 
     if (action === "migrate") {
+      const BATCH_LIMIT = 25; // process at most 25 images per invocation to avoid 150s timeout
       const results: MigrationResult[] = [];
+      let processed = 0;
+      let done = true;
 
-      for (const { table, columns, idCol } of IMAGE_COLUMNS) {
+      outer: for (const { table, columns, idCol } of IMAGE_COLUMNS) {
         const { data: rows, error } = await supabase.from(table).select("*");
         if (error || !rows) continue;
 
@@ -108,8 +111,10 @@ Deno.serve(async (req) => {
             const url = row[col];
             if (!url || isStorageUrl(url, supabaseUrl)) continue;
 
+            if (processed >= BATCH_LIMIT) { done = false; break outer; }
+            processed++;
+
             try {
-              // Download the image
               const imgResponse = await fetch(url);
               if (!imgResponse.ok) {
                 results.push({ table, column: col, id: row[idCol], old_url: url, new_url: "", status: "failed", error: `HTTP ${imgResponse.status}` });
@@ -132,7 +137,6 @@ Deno.serve(async (req) => {
 
               const { data: { publicUrl } } = supabase.storage.from("site-assets").getPublicUrl(fileName);
 
-              // Update the database record
               const { error: updateError } = await supabase
                 .from(table)
                 .update({ [col]: publicUrl })
@@ -150,8 +154,8 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Migrate site_settings images
-      const { data: settingsRows } = await supabase.from("site_settings").select("*");
+      // Migrate site_settings images (only when main batch is done)
+      const { data: settingsRows } = done ? await supabase.from("site_settings").select("*") : { data: null };
       if (settingsRows) {
         for (const row of settingsRows) {
           let val = row.value;
@@ -212,7 +216,7 @@ Deno.serve(async (req) => {
       const migrated = results.filter(r => r.status === "migrated").length;
       const failed = results.filter(r => r.status === "failed").length;
 
-      return new Response(JSON.stringify({ migrated, failed, total: results.length, results }), {
+      return new Response(JSON.stringify({ migrated, failed, total: results.length, done, results }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
