@@ -1339,7 +1339,7 @@ const TopupPage: React.FC = () => {
                 </div>
                 {game.specialPackages && game.specialPackages.length > 0 && (
                   <span className="px-3 h-6 sm:h-7 rounded-full bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-[length:200%_100%] animate-gradient-shift text-white flex items-center font-bold text-[10px] sm:text-xs shadow-lg ring-1 ring-white/40">
-                    🔥 Special Price
+                    ✨ Special Items
                   </span>
                 )}
               </div>
@@ -1351,45 +1351,96 @@ const TopupPage: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="max-h-[480px] sm:max-h-[580px] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 auto-rows-fr">
-                    {[
-                      ...(game.specialPackages || []).map((p) => ({ ...p, __special: true })),
-                      ...game.packages.map((p) => ({ ...p, __special: false })),
-                    ]
-                      .sort((a, b) => {
-                        if (a.__special !== b.__special) return a.__special ? -1 : 1;
-                        return a.price - b.price;
-                      })
-                      .map((pkg, index) => {
-                        // Bento: first special package spans 2 cols on desktop
-                        const featured = pkg.__special && index === 0;
-                        return (
-                          <div
-                            key={`${pkg.__special ? 'sp' : 'pk'}-${pkg.id}`}
-                            className={cn(
-                              "animate-fade-in-up",
-                              featured ? "col-span-3 sm:col-span-4" : "sm:col-span-2",
-                            )}
-                            style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
-                          >
-                            <PackageCard
-                              pkg={pkg}
-                              selected={selectedPackage === pkg.id}
-                              onSelect={() => {
-                                setSelectedPackage(pkg.id);
-                                setTimeout(() => {
-                                  document.getElementById('payment-method-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                }, 150);
-                              }}
-                              priority={index < 6}
-                              gameDefaultIcon={game.defaultPackageIcon}
-                              isSpecial={pkg.__special}
-                            />
-                          </div>
-                        );
-                      })}
-                  </div>
+                <div className="max-h-[480px] sm:max-h-[580px] overflow-y-auto pr-1 sm:pr-2 -mr-1 sm:-mr-2 space-y-5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gold/40 [&::-webkit-scrollbar-thumb]:rounded-full">
+                  {/* Special Items Section */}
+                  {game.specialPackages && game.specialPackages.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3 sticky top-0 z-20 bg-white/80 backdrop-blur-md py-1.5 -mx-1 px-1 rounded-lg">
+                        <span className="text-base sm:text-lg">🔥</span>
+                        <h3 className="font-bold text-sm sm:text-base bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 bg-clip-text text-transparent">
+                          Special Items
+                        </h3>
+                        <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">
+                          ({game.specialPackages.length})
+                        </span>
+                        <div className="flex-1 h-px bg-gradient-to-r from-orange-400/40 to-transparent ml-2" />
+                      </div>
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 auto-rows-fr">
+                        {game.specialPackages
+                          .slice()
+                          .sort((a, b) => a.price - b.price)
+                          .map((pkg, index) => {
+                            const featured = index === 0;
+                            return (
+                              <div
+                                key={`sp-${pkg.id}`}
+                                className={cn(
+                                  "animate-fade-in-up",
+                                  featured ? "col-span-3 sm:col-span-4" : "sm:col-span-2",
+                                )}
+                                style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+                              >
+                                <PackageCard
+                                  pkg={pkg}
+                                  selected={selectedPackage === pkg.id}
+                                  onSelect={() => {
+                                    setSelectedPackage(pkg.id);
+                                    setTimeout(() => {
+                                      document.getElementById('payment-method-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    }, 150);
+                                  }}
+                                  priority={index < 6}
+                                  gameDefaultIcon={game.defaultPackageIcon}
+                                  isSpecial={true}
+                                />
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Regular Packages Section */}
+                  {game.packages.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3 sticky top-0 z-20 bg-white/80 backdrop-blur-md py-1.5 -mx-1 px-1 rounded-lg">
+                        <span className="text-base sm:text-lg">💎</span>
+                        <h3 className="font-bold text-sm sm:text-base bg-gradient-to-r from-gold to-amber-600 bg-clip-text text-transparent">
+                          Packages
+                        </h3>
+                        <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">
+                          ({game.packages.length})
+                        </span>
+                        <div className="flex-1 h-px bg-gradient-to-r from-gold/40 to-transparent ml-2" />
+                      </div>
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 auto-rows-fr">
+                        {game.packages
+                          .slice()
+                          .sort((a, b) => a.price - b.price)
+                          .map((pkg, index) => (
+                            <div
+                              key={`pk-${pkg.id}`}
+                              className="sm:col-span-2 animate-fade-in-up"
+                              style={{ animationDelay: `${Math.min(index * 25, 300)}ms` }}
+                            >
+                              <PackageCard
+                                pkg={pkg}
+                                selected={selectedPackage === pkg.id}
+                                onSelect={() => {
+                                  setSelectedPackage(pkg.id);
+                                  setTimeout(() => {
+                                    document.getElementById('payment-method-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                  }, 150);
+                                }}
+                                priority={index < 6}
+                                gameDefaultIcon={game.defaultPackageIcon}
+                                isSpecial={false}
+                              />
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
