@@ -118,8 +118,8 @@ const PackageCard: React.FC<PackageCardProps> = ({
 
         {/* Special corner ribbon */}
         {isSpecial && (
-          <div className="absolute top-0 right-0 overflow-hidden w-[48px] h-[48px] rounded-tr-[12px] z-20 pointer-events-none">
-            <div className="absolute top-[8px] right-[-22px] w-[120px] rotate-45 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[8px] sm:text-[9px] font-black uppercase tracking-widest py-[2px] text-center shadow-md ring-1 ring-white/40">
+          <div className="absolute top-0 right-0 overflow-hidden w-[56px] h-[56px] z-20 pointer-events-none">
+            <div className="absolute top-[10px] right-[-26px] w-[90px] rotate-45 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[8px] font-black uppercase tracking-wider py-[2px] text-center shadow-md">
               ★ Hot
             </div>
           </div>
