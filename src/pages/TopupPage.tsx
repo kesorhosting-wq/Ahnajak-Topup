@@ -1531,7 +1531,18 @@ const TopupPage: React.FC = () => {
                 >
                   {agreedToTerms && <CheckCircle className="w-4 h-4 text-primary-foreground" />}
                 </button>
-                <span className="font-khmer text-sm sm:text-base">យកព្រមទទួលលក្ខខណ្ឌ</span>
+                <span className="font-khmer text-sm sm:text-base">
+                  យកព្រមទទួល
+                  <Link
+                    to="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-gold font-bold underline underline-offset-4 decoration-gold/50 hover:decoration-gold hover:text-amber-600 transition-colors mx-1"
+                  >
+                    លក្ខខណ្ឌ
+                  </Link>
+                </span>
               </label>
 
               <Button

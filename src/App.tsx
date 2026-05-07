@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import EventsPage from "./pages/EventsPage";
 import PreorderPage from "./pages/PreorderPage";
 import PreorderTopupPage from "./pages/PreorderTopupPage";
+import TermsPage from "./pages/TermsPage";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -48,6 +49,8 @@ const App = () => (
                 <Route path="/preorder" element={<PreorderPage />} />
                 <Route path="/preorder/:gameSlug" element={<PreorderTopupPage />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<TermsPage />} />
                   <Route 
                     path="/admin" 
                     element={
