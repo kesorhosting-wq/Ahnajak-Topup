@@ -154,8 +154,8 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Migrate site_settings images
-      const { data: settingsRows } = await supabase.from("site_settings").select("*");
+      // Migrate site_settings images (only when main batch is done)
+      const { data: settingsRows } = done ? await supabase.from("site_settings").select("*") : { data: null };
       if (settingsRows) {
         for (const row of settingsRows) {
           let val = row.value;
