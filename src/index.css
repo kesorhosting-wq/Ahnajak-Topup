@@ -305,7 +305,7 @@
   50%      { transform: translate(-7vw, -5vh) scale(1.2); }
 }
 
-/* Khmer kbach drift + lotus pulse */
+/* Khmer kbach drift + lotus pulse + light rays */
 @keyframes kbachDrift {
   0%   { transform: translate(0, 0) rotate(0deg); }
   100% { transform: translate(-160px, -160px) rotate(2deg); }
@@ -316,16 +316,61 @@
 
 @keyframes lotusPulse {
   0%, 100% { transform: scale(1); opacity: 0.55; }
-  50%      { transform: scale(1.25); opacity: 0.9; }
+  50%      { transform: scale(1.15); opacity: 0.9; }
 }
 .animate-lotus-pulse {
-  animation: lotusPulse 5s ease-in-out infinite;
+  animation: lotusPulse 6s ease-in-out infinite;
+}
+
+/* Light rays — fanning conic gradients with slow rotation */
+.light-rays {
+  background:
+    conic-gradient(from 200deg at 50% -10%,
+      transparent 0deg,
+      rgba(255, 200, 100, 0.18) 8deg,
+      transparent 14deg,
+      transparent 28deg,
+      rgba(255, 170, 60, 0.22) 36deg,
+      transparent 44deg,
+      transparent 60deg,
+      rgba(255, 220, 140, 0.16) 70deg,
+      transparent 80deg,
+      transparent 110deg,
+      rgba(255, 180, 80, 0.20) 120deg,
+      transparent 130deg,
+      transparent 360deg
+    );
+  mix-blend-mode: screen;
+  filter: blur(2px);
+  transform-origin: 50% 0%;
+  will-change: transform, opacity;
+}
+.light-rays--a {
+  animation: raysSweepA 18s ease-in-out infinite, raysFlicker 4s ease-in-out infinite;
+}
+.light-rays--b {
+  opacity: 0.7;
+  transform: scaleX(-1);
+  animation: raysSweepB 24s ease-in-out infinite, raysFlicker 5.5s ease-in-out infinite;
+}
+@keyframes raysSweepA {
+  0%, 100% { transform: rotate(-6deg); }
+  50%      { transform: rotate(6deg); }
+}
+@keyframes raysSweepB {
+  0%, 100% { transform: scaleX(-1) rotate(-4deg); }
+  50%      { transform: scaleX(-1) rotate(8deg); }
+}
+@keyframes raysFlicker {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .aurora-blob,
   .animate-kbach-drift,
-  .animate-lotus-pulse { animation: none !important; }
+  .animate-lotus-pulse,
+  .light-rays { animation: none !important; }
 }
 
 @keyframes contactJump {
