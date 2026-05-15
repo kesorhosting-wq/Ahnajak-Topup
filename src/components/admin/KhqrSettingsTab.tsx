@@ -60,12 +60,12 @@ const KhqrSettingsTab = () => {
     const { error } = await supabase
       .from("payment_gateways")
       .upsert(
-        {
+        [{
           slug: "ahnajak-khqr",
           name: "KHQR",
           enabled,
-          config,
-        },
+          config: config as any,
+        }],
         { onConflict: "slug" },
       );
     setSaving(false);
