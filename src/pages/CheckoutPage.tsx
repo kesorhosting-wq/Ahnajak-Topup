@@ -17,7 +17,7 @@ import KHQRPaymentCard from "@/components/KHQRPaymentCard";
 
 interface GeneratedQR {
   qrCodeData: string;
-  wsUrl?: string;
+  md5?: string;
   orderId: string;
   amount: number;
 }
