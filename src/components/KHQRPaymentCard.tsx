@@ -91,9 +91,8 @@ const KHQRPaymentCard = ({
       if (!silent) setChecking(true);
 
       try {
-        // Prefer checking through the payment backend (works even if direct table reads are blocked)
-        const { data: statusData, error: statusError } = await supabase.functions.invoke("ikhode-payment", {
-          body: { action: "check-status", orderId, is_preorder: isPreorder },
+        const { data: statusData, error: statusError } = await supabase.functions.invoke("ahnajak-khqr", {
+          body: { action: "check-status", orderId, md5, is_preorder: isPreorder },
         });
 
         if (statusError) throw statusError;
