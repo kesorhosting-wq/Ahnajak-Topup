@@ -444,18 +444,11 @@ const AdminPage: React.FC = () => {
                 <span>Games</span>
               </TabsTrigger>
               <TabsTrigger
-                value="payments"
-                className="w-full justify-start data-[state=active]:bg-gold data-[state=active]:text-primary-foreground text-xs sm:text-sm"
-              >
-                <CreditCard className="w-4 h-4 mr-2 shrink-0" />
-                <span>Payments</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="qr-settings"
+                value="khqr"
                 className="w-full justify-start data-[state=active]:bg-gold data-[state=active]:text-primary-foreground text-xs sm:text-sm"
               >
                 <QrCode className="w-4 h-4 mr-2 shrink-0" />
-                <span>QR Settings</span>
+                <span>KHQR</span>
               </TabsTrigger>
               <TabsTrigger
                 value="orders"
