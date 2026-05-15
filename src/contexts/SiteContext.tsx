@@ -276,16 +276,8 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const specialPackagesData = specialPackagesResult.data;
       const ikhodeGateway = (ikhodeGatewayResult as any)?.data;
 
-      // Load IKhode payment gateway config (public view only exposes websocket_url, not secrets)
-      if (ikhodeGateway?.success && ikhodeGateway?.enabled) {
-        setIkhodePayment({
-          id: ikhodeGateway.id || undefined,
-          isEnabled: true,
-          websocketUrl: ikhodeGateway.websocket_url || undefined,
-        });
-      } else {
-        setIkhodePayment({ isEnabled: false });
-      }
+      // KHQR is the only payment method - always enabled (admin configures keys in Admin → KHQR tab)
+      setIkhodePayment({ isEnabled: true });
 
       if (settingsData && settingsData.length > 0) {
         const loadedSettings: Partial<SiteSettings> = {};
