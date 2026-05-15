@@ -22,6 +22,7 @@ export type ResolvePackageInput = {
   packageName: string;
   g2bulkProductId?: string | null;
   isPreorder: boolean;
+  requestedAmount?: number | null;
 };
 
 export function hasAmountMismatch(requestedAmount: number, authoritativeAmount: number, tolerance = 0.0001): boolean {
@@ -50,6 +51,8 @@ export function selectBestPackageMatch(
   const expectedGame = normalizeForCompare(expected.gameName);
   const expectedPackage = normalizeForCompare(expected.packageName);
   const expectedProduct = normalizeForCompare(expected.g2bulkProductId);
+  const expectedAmount = Number(expected.requestedAmount);
+  const hasExpectedAmount = Number.isFinite(expectedAmount);
 
   const allEquivalent = (rows: ResolvedPackage[]) =>
     rows.every(
@@ -58,6 +61,17 @@ export function selectBestPackageMatch(
         normalizeForCompare(r.g2bulkProductId) === normalizeForCompare(rows[0].g2bulkProductId),
     );
 
+  const pickFromGroup = (rows: ResolvedPackage[]): ResolvedPackage | null => {
+    if (rows.length === 0) return null;
+    if (rows.length === 1) return rows[0];
+    if (allEquivalent(rows)) return rows[0];
+    if (hasExpectedAmount) {
+      const amountMatch = rows.filter((r) => Math.abs(r.price - expectedAmount) < 0.0001);
+      if (amountMatch.length >= 1) return amountMatch[0];
+    }
+    return null;
+  };
+
   const exactProductMatch = candidates.filter(
     (candidate) =>
       normalizeForCompare(candidate.gameName) === expectedGame &&
@@ -65,16 +79,16 @@ export function selectBestPackageMatch(
       expectedProduct &&
       normalizeForCompare(candidate.g2bulkProductId) === expectedProduct,
   );
-  if (exactProductMatch.length === 1) return exactProductMatch[0];
-  if (exactProductMatch.length > 1 && allEquivalent(exactProductMatch)) return exactProductMatch[0];
+  const productPick = pickFromGroup(exactProductMatch);
+  if (productPick) return productPick;
 
   const exactNameMatch = candidates.filter(
     (candidate) =>
       normalizeForCompare(candidate.gameName) === expectedGame &&
       normalizeForCompare(candidate.packageName) === expectedPackage,
   );
-  if (exactNameMatch.length === 1) return exactNameMatch[0];
-  if (exactNameMatch.length > 1 && allEquivalent(exactNameMatch)) return exactNameMatch[0];
+  const namePick = pickFromGroup(exactNameMatch);
+  if (namePick) return namePick;
 
   return null;
 }

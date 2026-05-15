@@ -935,6 +935,7 @@ serve(async (req) => {
       packageName: package_name,
       g2bulkProductId: g2bulk_product_id,
       isPreorder: is_preorder === true,
+      requestedAmount: Number(amount),
     });
 
     if (!authoritativePackage) {
