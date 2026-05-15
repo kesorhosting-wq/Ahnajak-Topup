@@ -2782,50 +2782,11 @@ const AdminPage: React.FC = () => {
               </div>
             </TabsContent>
 
-            {/* Payment Methods */}
-            <TabsContent value="payments">
-              <Card className="border-gold/30 mb-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-gold" />
-                    Payment Method
-                  </CardTitle>
-                  <CardDescription>
-                    This site uses KHQR (Kesor) as the only payment method. Configure it in the "QR Settings" tab.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-lg border border-gold/20">
-                    <div className="w-12 h-12 rounded-lg bg-gold/20 flex items-center justify-center">
-                      <img
-                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwG-Zx92YNnU6BuabALnRRwBqX_5USd3AJJw&s"
-                        alt="phone"
-                        className="w-6 h-6 inline"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold">KHQR</h3>
-                      <p className="text-sm text-muted-foreground">Bakong KHQR Payment via Kesor</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs px-2 py-1 bg-green-500/20 text-green-600 rounded-full">Active</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                    <p className="text-sm text-blue-600 dark:text-blue-400">
-                      💡 To configure KHQR settings (API URL, WebSocket, etc.), go to the <strong>"QR Settings"</strong>{" "}
-                      tab.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* KHQR Payment Settings */}
+            <TabsContent value="khqr">
+              <KhqrSettingsTab />
             </TabsContent>
 
-            {/* Kesor Payment Settings */}
-            <TabsContent value="qr-settings">
-              <KesorSettingsTab />
-            </TabsContent>
 
             {/* Orders */}
             <TabsContent value="orders" className="space-y-6">
