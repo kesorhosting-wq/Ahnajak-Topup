@@ -75,7 +75,7 @@ const CheckoutPage = () => {
           player_name: firstItem.playerName,
           amount: getTotal(),
           currency: settings.packageCurrency || "USD",
-          payment_method: "Kesor KHQR",
+          payment_method: "KHQR",
           g2bulk_product_id: firstItem.g2bulkProductId || null,
           is_preorder: isPreorder,
           scheduled_fulfill_at: firstItem.scheduledFulfillAt || null,
@@ -89,14 +89,11 @@ const CheckoutPage = () => {
 
       setOrderId(newOrderId);
 
-      // Now generate KHQR
-      const { data, error } = await supabase.functions.invoke("ikhode-payment", {
+      // Generate KHQR via Ahnajak gateway (DB price is authoritative)
+      const { data, error } = await supabase.functions.invoke("ahnajak-khqr", {
         body: {
-          action: "generate-khqr",
-          amount: getTotal(),
+          action: "generate-qr",
           orderId: newOrderId,
-          playerName: firstItem.playerName,
-          gameName: firstItem.gameName,
         },
       });
 
@@ -105,7 +102,7 @@ const CheckoutPage = () => {
       if (data?.qrCodeData) {
         setGeneratedQR({
           qrCodeData: data.qrCodeData,
-          wsUrl: data.wsUrl,
+          md5: data.md5,
           orderId: newOrderId,
           amount: data.amount,
         });
