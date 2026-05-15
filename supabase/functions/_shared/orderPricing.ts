@@ -22,6 +22,7 @@ export type ResolvePackageInput = {
   packageName: string;
   g2bulkProductId?: string | null;
   isPreorder: boolean;
+  requestedAmount?: number | null;
 };
 
 export function hasAmountMismatch(requestedAmount: number, authoritativeAmount: number, tolerance = 0.0001): boolean {
