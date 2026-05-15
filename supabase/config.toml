@@ -1,2 +1,4 @@
-project_id = "mejmrckrsvvjrpmftdjo"[functions.ahnajak-khqr-webhook]
+project_id = "mejmrckrsvvjrpmftdjo"
+
+[functions.ahnajak-khqr-webhook]
 verify_jwt = false
