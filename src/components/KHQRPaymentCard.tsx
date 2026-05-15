@@ -18,7 +18,7 @@ interface KHQRPaymentCardProps {
   onCancel?: () => void;
   expiresIn?: number;
   paymentMethod?: string;
-  wsUrl?: string;
+  md5?: string;
   isPreorder?: boolean;
 }
 
@@ -30,9 +30,9 @@ const KHQRPaymentCard = ({
   description,
   onComplete,
   onCancel,
-  expiresIn = 120, // 5 minutes
-  paymentMethod = "Bakong",
-  wsUrl,
+  expiresIn = 300,
+  paymentMethod = "KHQR",
+  md5,
   isPreorder = false,
 }: KHQRPaymentCardProps) => {
   const { toast } = useToast();
@@ -91,9 +91,8 @@ const KHQRPaymentCard = ({
       if (!silent) setChecking(true);
 
       try {
-        // Prefer checking through the payment backend (works even if direct table reads are blocked)
-        const { data: statusData, error: statusError } = await supabase.functions.invoke("ikhode-payment", {
-          body: { action: "check-status", orderId, is_preorder: isPreorder },
+        const { data: statusData, error: statusError } = await supabase.functions.invoke("ahnajak-khqr", {
+          body: { action: "check-status", orderId, md5, is_preorder: isPreorder },
         });
 
         if (statusError) throw statusError;
@@ -135,42 +134,8 @@ const KHQRPaymentCard = ({
         if (!silent) setChecking(false);
       }
     },
-    [orderId, toast, handlePaymentSuccess, isSuccessStatus, normalizeStatus, isPreorder],
+    [orderId, md5, toast, handlePaymentSuccess, isSuccessStatus, normalizeStatus, isPreorder],
   );
-
-  // WebSocket for real-time payment updates
-  useEffect(() => {
-    if (!wsUrl || paymentStatus !== "pending") return;
-
-    try {
-      const ws = new WebSocket(wsUrl);
-
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          // Handle both payment_success (from your backend) and payment_confirmed
-          if (
-            (data.type === "payment_success" || data.type === "payment_confirmed") &&
-            (data.transactionId === orderId || data.orderId === orderId)
-          ) {
-            handlePaymentSuccess();
-          }
-        } catch (e) {
-          console.error("WebSocket message parse error:", e);
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-
-      return () => {
-        ws.close();
-      };
-    } catch (error) {
-      console.error("WebSocket connection error:", error);
-    }
-  }, [wsUrl, paymentStatus, orderId, handlePaymentSuccess]);
 
   // Supabase Realtime subscription for instant payment detection
   useEffect(() => {

@@ -17,7 +17,7 @@ import KHQRPaymentCard from "@/components/KHQRPaymentCard";
 
 interface GeneratedQR {
   qrCodeData: string;
-  wsUrl?: string;
+  md5?: string;
   orderId: string;
   amount: number;
 }
@@ -75,7 +75,7 @@ const CheckoutPage = () => {
           player_name: firstItem.playerName,
           amount: getTotal(),
           currency: settings.packageCurrency || "USD",
-          payment_method: "Kesor KHQR",
+          payment_method: "KHQR",
           g2bulk_product_id: firstItem.g2bulkProductId || null,
           is_preorder: isPreorder,
           scheduled_fulfill_at: firstItem.scheduledFulfillAt || null,
@@ -89,14 +89,11 @@ const CheckoutPage = () => {
 
       setOrderId(newOrderId);
 
-      // Now generate KHQR
-      const { data, error } = await supabase.functions.invoke("ikhode-payment", {
+      // Generate KHQR via Ahnajak gateway (DB price is authoritative)
+      const { data, error } = await supabase.functions.invoke("ahnajak-khqr", {
         body: {
-          action: "generate-khqr",
-          amount: getTotal(),
+          action: "generate-qr",
           orderId: newOrderId,
-          playerName: firstItem.playerName,
-          gameName: firstItem.gameName,
         },
       });
 
@@ -105,7 +102,7 @@ const CheckoutPage = () => {
       if (data?.qrCodeData) {
         setGeneratedQR({
           qrCodeData: data.qrCodeData,
-          wsUrl: data.wsUrl,
+          md5: data.md5,
           orderId: newOrderId,
           amount: data.amount,
         });
@@ -259,7 +256,7 @@ const CheckoutPage = () => {
 
                 {/* Payment Method Info */}
                 <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                  <p className="text-sm font-medium">វិធីបង់ប្រាក់: Kesor KHQR</p>
+                  <p className="text-sm font-medium">វិធីបង់ប្រាក់: KHQR</p>
                   <p className="text-xs text-muted-foreground">ស្កេន QR ជាមួយកម្មវិធី Bakong ឬធនាគារ</p>
                 </div>
               </CardContent>
@@ -294,15 +291,15 @@ const CheckoutPage = () => {
                   description={`${items.length} កញ្ចប់`}
                   onCancel={handleCancelPayment}
                   onComplete={handlePaymentComplete}
-                  paymentMethod="Kesor KHQR"
-                  wsUrl={generatedQR.wsUrl}
+                  paymentMethod="KHQR"
+                  md5={generatedQR.md5}
                   isPreorder={isPreorder}
                 />
               ) : !isIkhodeConfigured ? (
                 <Card>
                   <CardContent className="py-8 text-center">
                     <CreditCard className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground mb-4">Kesor KHQR មិនទាន់បានកំណត់។ សូមទាក់ទងអ្នកគ្រប់គ្រង។</p>
+                    <p className="text-muted-foreground mb-4">KHQR មិនទាន់បានកំណត់។ សូមទាក់ទងអ្នកគ្រប់គ្រង។</p>
                   </CardContent>
                 </Card>
               ) : (
