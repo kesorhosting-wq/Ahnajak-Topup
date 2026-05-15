@@ -18,7 +18,7 @@ interface KHQRPaymentCardProps {
   onCancel?: () => void;
   expiresIn?: number;
   paymentMethod?: string;
-  wsUrl?: string;
+  md5?: string;
   isPreorder?: boolean;
 }
 
@@ -30,9 +30,9 @@ const KHQRPaymentCard = ({
   description,
   onComplete,
   onCancel,
-  expiresIn = 120, // 5 minutes
-  paymentMethod = "Bakong",
-  wsUrl,
+  expiresIn = 300,
+  paymentMethod = "KHQR",
+  md5,
   isPreorder = false,
 }: KHQRPaymentCardProps) => {
   const { toast } = useToast();
