@@ -48,7 +48,7 @@ import BannerImagesUpload from "@/components/admin/BannerImagesUpload";
 import ApiSettingsTab from "@/components/admin/ApiSettingsTab";
 import GameVerificationConfigsTab from "@/components/admin/GameVerificationConfigsTab";
 import OrdersTab from "@/components/admin/OrdersTab";
-import KesorSettingsTab from "@/components/admin/KesorSettingsTab";
+import KhqrSettingsTab from "@/components/admin/KhqrSettingsTab";
 import G2BulkProductSelector from "@/components/admin/G2BulkProductSelector";
 import G2BulkBalanceDisplay from "@/components/admin/G2BulkBalanceDisplay";
 import G2BulkCategorySelector from "@/components/admin/G2BulkCategorySelector";
