@@ -134,42 +134,8 @@ const KHQRPaymentCard = ({
         if (!silent) setChecking(false);
       }
     },
-    [orderId, toast, handlePaymentSuccess, isSuccessStatus, normalizeStatus, isPreorder],
+    [orderId, md5, toast, handlePaymentSuccess, isSuccessStatus, normalizeStatus, isPreorder],
   );
-
-  // WebSocket for real-time payment updates
-  useEffect(() => {
-    if (!wsUrl || paymentStatus !== "pending") return;
-
-    try {
-      const ws = new WebSocket(wsUrl);
-
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          // Handle both payment_success (from your backend) and payment_confirmed
-          if (
-            (data.type === "payment_success" || data.type === "payment_confirmed") &&
-            (data.transactionId === orderId || data.orderId === orderId)
-          ) {
-            handlePaymentSuccess();
-          }
-        } catch (e) {
-          console.error("WebSocket message parse error:", e);
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-
-      return () => {
-        ws.close();
-      };
-    } catch (error) {
-      console.error("WebSocket connection error:", error);
-    }
-  }, [wsUrl, paymentStatus, orderId, handlePaymentSuccess]);
 
   // Supabase Realtime subscription for instant payment detection
   useEffect(() => {
