@@ -76,12 +76,13 @@ const CheckoutPage = () => {
       });
       if (error) throw error;
 
-      if (data.success) {
-        setDiscountAmount(data.discount_amount);
+      const result = data as any;
+      if (result?.success) {
+        setDiscountAmount(result.discount_amount);
         setAppliedCoupon(couponCode.trim().toUpperCase());
-        toast({ title: 'គូប៉ុងបានអនុវត្ត!', description: `អ្នកទទួលបានការបញ្ចុះតម្លៃ $${data.discount_amount.toFixed(2)}` });
+        toast({ title: 'គូប៉ុងបានអនុវត្ត!', description: `អ្នកទទួលបានការបញ្ចុះតម្លៃ $${Number(result.discount_amount).toFixed(2)}` });
       } else {
-        toast({ title: 'គូប៉ុងមិនត្រឹមត្រូវ', description: data.message, variant: 'destructive' });
+        toast({ title: 'គូប៉ុងមិនត្រឹមត្រូវ', description: result?.message, variant: 'destructive' });
       }
     } catch (err: any) {
       toast({ title: 'កំហុសគូប៉ុង', description: err.message, variant: 'destructive' });
