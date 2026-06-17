@@ -2397,6 +2397,7 @@ const AdminPage: React.FC = () => {
                                                   g2bulkProductId: pkg.g2bulkProductId,
                                                   g2bulkTypeId: pkg.g2bulkTypeId,
                                                   quantity: pkg.quantity,
+                                                  points: pkg.points || 0,
                                                 });
                                                 toast({ title: "Package cloned!" });
                                               }}
