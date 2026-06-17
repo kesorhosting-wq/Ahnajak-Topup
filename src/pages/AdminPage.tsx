@@ -2136,6 +2136,7 @@ const AdminPage: React.FC = () => {
                                           currency: "USD",
                                           g2bulkProductId: product.g2bulkProductId,
                                           g2bulkTypeId: product.g2bulkTypeId,
+                                          points: 0,
                                         });
                                       }
                                     }}
