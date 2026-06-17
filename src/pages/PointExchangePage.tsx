@@ -81,11 +81,12 @@ const PointExchangePage: React.FC = () => {
 
       if (error) throw error;
 
-      if (data.success) {
-        toast({ title: 'Exchange successful!', description: `Your coupon code is: ${data.coupon_code}` });
+      const result = data as any;
+      if (result?.success) {
+        toast({ title: 'Exchange successful!', description: `Your coupon code is: ${result.coupon_code}` });
         fetchData(); // Refresh points and coupons
       } else {
-        toast({ title: 'Exchange failed', description: data.message, variant: 'destructive' });
+        toast({ title: 'Exchange failed', description: result?.message, variant: 'destructive' });
       }
     } catch (error: any) {
       toast({ title: 'Error processing exchange', description: error.message, variant: 'destructive' });
