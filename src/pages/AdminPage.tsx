@@ -353,6 +353,7 @@ const AdminPage: React.FC = () => {
       labelIcon: pkg.labelIcon || "",
       g2bulkProductId: pkg.g2bulkProductId || "",
       g2bulkTypeId: pkg.g2bulkTypeId || "",
+      points: pkg.points || 0,
     });
   };
 
