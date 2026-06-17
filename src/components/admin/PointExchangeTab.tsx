@@ -59,7 +59,7 @@ const PointExchangeTab: React.FC = () => {
 
     const { error } = await supabase
       .from('point_exchange_configs')
-      .insert([newData]);
+      .insert([newData as any]);
 
     if (error) {
       toast({ title: 'Error adding config', variant: 'destructive' });
