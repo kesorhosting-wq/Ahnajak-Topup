@@ -320,6 +320,7 @@ const AdminPage: React.FC = () => {
       labelIcon: newSpecialPackage.labelIcon || undefined,
       g2bulkProductId: newSpecialPackage.g2bulkProductId || undefined,
       g2bulkTypeId: newSpecialPackage.g2bulkTypeId || undefined,
+      points: newSpecialPackage.points || 0,
     });
     setNewSpecialPackage({
       name: "",
@@ -333,6 +334,7 @@ const AdminPage: React.FC = () => {
       labelIcon: "",
       g2bulkProductId: "",
       g2bulkTypeId: "",
+      points: 0,
     });
     toast({ title: "Special package added!" });
   };
