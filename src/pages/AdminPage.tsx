@@ -68,6 +68,8 @@ import PreorderOrdersTab from "@/components/admin/PreorderOrdersTab";
 import SalesActivityTab from "@/components/admin/SalesActivityTab";
 import PriceUpdateTab from "@/components/admin/PriceUpdateTab";
 import CdnMigrationTab from "@/components/admin/CdnMigrationTab";
+import PointExchangeTab from "@/components/admin/PointExchangeTab";
+import { Coins } from "lucide-react";
 
 const AdminPage: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -131,6 +133,7 @@ const AdminPage: React.FC = () => {
     g2bulkProductId: "",
     g2bulkTypeId: "",
     quantity: null as number | null,
+    points: 0,
   });
   const [editPackageData, setEditPackageData] = useState({
     name: "",
@@ -145,6 +148,7 @@ const AdminPage: React.FC = () => {
     g2bulkProductId: "",
     g2bulkTypeId: "",
     quantity: null as number | null,
+    points: 0,
   });
 
   // Special Package state
@@ -161,6 +165,7 @@ const AdminPage: React.FC = () => {
     labelIcon: "",
     g2bulkProductId: "",
     g2bulkTypeId: "",
+    points: 0,
   });
   const [editSpecialPackageData, setEditSpecialPackageData] = useState({
     name: "",
@@ -174,6 +179,7 @@ const AdminPage: React.FC = () => {
     labelIcon: "",
     g2bulkProductId: "",
     g2bulkTypeId: "",
+    points: 0,
   });
 
   // Payment state
@@ -250,6 +256,7 @@ const AdminPage: React.FC = () => {
       g2bulkProductId: newPackage.g2bulkProductId || undefined,
       g2bulkTypeId: newPackage.g2bulkTypeId || undefined,
       quantity: newPackage.quantity,
+      points: newPackage.points,
     });
     setNewPackage({
       name: "",
@@ -264,6 +271,7 @@ const AdminPage: React.FC = () => {
       g2bulkProductId: "",
       g2bulkTypeId: "",
       quantity: null,
+      points: 0,
     });
     toast({ title: "Package added!" });
   };
@@ -283,6 +291,7 @@ const AdminPage: React.FC = () => {
       g2bulkProductId: pkg.g2bulkProductId || "",
       g2bulkTypeId: pkg.g2bulkTypeId || "",
       quantity: pkg.quantity ?? null,
+      points: pkg.points || 0,
     });
   };
 
@@ -519,6 +528,13 @@ const AdminPage: React.FC = () => {
               >
                 <CloudUpload className="w-4 h-4 mr-2 shrink-0" />
                 <span>CDN</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="point-exchange"
+                className="w-full justify-start data-[state=active]:bg-gold data-[state=active]:text-primary-foreground text-xs sm:text-sm"
+              >
+                <Coins className="w-4 h-4 mr-2 shrink-0" />
+                <span>Points</span>
               </TabsTrigger>
             </TabsList>
 
@@ -2005,6 +2021,15 @@ const AdminPage: React.FC = () => {
                                       }
                                       className="border-gold/50 text-sm"
                                     />
+                                    <Input
+                                      type="number"
+                                      placeholder="Points"
+                                      value={newPackage.points || ""}
+                                      onChange={(e) =>
+                                        setNewPackage((prev) => ({ ...prev, points: Number(e.target.value) }))
+                                      }
+                                      className="border-gold/50 text-sm"
+                                    />
                                   </div>
                                   {/* G2Bulk Product Selector for new package */}
                                   {game.g2bulkCategoryId && (
@@ -2182,6 +2207,18 @@ const AdminPage: React.FC = () => {
                                                 setEditPackageData((prev) => ({
                                                   ...prev,
                                                   quantity: e.target.value ? Number(e.target.value) : null,
+                                                }))
+                                              }
+                                              className="border-gold/50 text-sm"
+                                            />
+                                            <Input
+                                              type="number"
+                                              placeholder="Points"
+                                              value={editPackageData.points || ""}
+                                              onChange={(e) =>
+                                                setEditPackageData((prev) => ({
+                                                  ...prev,
+                                                  points: Number(e.target.value),
                                                 }))
                                               }
                                               className="border-gold/50 text-sm"
@@ -2457,6 +2494,15 @@ const AdminPage: React.FC = () => {
                                         }
                                         className="border-orange-500/50 text-sm"
                                       />
+                                      <Input
+                                        type="number"
+                                        placeholder="Points"
+                                        value={newSpecialPackage.points || ""}
+                                        onChange={(e) =>
+                                          setNewSpecialPackage((prev) => ({ ...prev, points: Number(e.target.value) }))
+                                        }
+                                        className="border-orange-500/50 text-sm"
+                                      />
                                     </div>
                                     {/* G2Bulk Product Selector for new special package */}
                                     {game.g2bulkCategoryId && (
@@ -2590,8 +2636,21 @@ const AdminPage: React.FC = () => {
                                                   }))
                                                 }
                                                 className="border-orange-500/50 text-sm"
-                                              />
-                                            </div>
+                                                />
+                                                <Input
+                                                type="number"
+                                                placeholder="Points"
+                                                value={editSpecialPackageData.points || ""}
+                                                onChange={(e) =>
+                                                  setEditSpecialPackageData((prev) => ({
+                                                    ...prev,
+                                                    points: Number(e.target.value),
+                                                  }))
+                                                }
+                                                className="border-orange-500/50 text-sm"
+                                                />
+                                                </div>
+
                                             <div className="flex gap-2 items-center flex-wrap">
                                               <div className="w-12">
                                                 <ImageUpload
@@ -2837,6 +2896,11 @@ const AdminPage: React.FC = () => {
             {/* CDN Migration */}
             <TabsContent value="cdn-migration">
               <CdnMigrationTab />
+            </TabsContent>
+
+            {/* Point Exchange */}
+            <TabsContent value="point-exchange">
+              <PointExchangeTab />
             </TabsContent>
 
             {/* Font Settings */}

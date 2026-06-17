@@ -21,6 +21,7 @@ export interface Package {
   amount: string;
   price: number;
   currency: string;
+  points: number;
   icon?: string;
   label?: string;
   labelBgColor?: string;
@@ -373,6 +374,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               amount: pkg.amount,
               price: parseFloat(String(pkg.price)),
               currency: 'USD',
+              points: (pkg as any).points || 0,
               icon: pkg.icon || undefined,
               label: (pkg as any).label || undefined,
               labelBgColor: (pkg as any).label_bg_color || undefined,
@@ -390,6 +392,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               amount: pkg.amount,
               price: parseFloat(String(pkg.price)),
               currency: 'USD',
+              points: (pkg as any).points || 0,
               icon: pkg.icon || undefined,
               label: (pkg as any).label || undefined,
               labelBgColor: (pkg as any).label_bg_color || undefined,
@@ -439,6 +442,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               amount: pkg.amount,
               price: parseFloat(String(pkg.price)),
               currency: 'USD',
+              points: (pkg as any).points || 0,
               icon: pkg.icon || undefined,
               label: (pkg as any).label || undefined,
               labelBgColor: (pkg as any).label_bg_color || undefined,
@@ -456,6 +460,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               amount: pkg.amount,
               price: parseFloat(String(pkg.price)),
               currency: 'USD',
+              points: (pkg as any).points || 0,
               icon: pkg.icon || undefined,
               label: (pkg as any).label || undefined,
               labelBgColor: (pkg as any).label_bg_color || undefined,
@@ -611,7 +616,8 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           label_icon: pkg.labelIcon || null,
           g2bulk_product_id: pkg.g2bulkProductId || null,
           g2bulk_type_id: pkg.g2bulkTypeId || null,
-          quantity: pkg.quantity ?? null
+          quantity: pkg.quantity ?? null,
+          points: pkg.points || 0
         })
         .select()
         .single();
@@ -634,6 +640,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 g2bulkProductId: (data as any).g2bulk_product_id || undefined,
                 g2bulkTypeId: (data as any).g2bulk_type_id || undefined,
                 quantity: (data as any).quantity ?? null,
+                points: (data as any).points || 0,
               }] }
             : g
         ));
@@ -657,6 +664,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (updatedPkg.g2bulkProductId !== undefined) updateData.g2bulk_product_id = updatedPkg.g2bulkProductId || null;
       if (updatedPkg.g2bulkTypeId !== undefined) updateData.g2bulk_type_id = updatedPkg.g2bulkTypeId || null;
       if (updatedPkg.quantity !== undefined) updateData.quantity = updatedPkg.quantity ?? null;
+      if (updatedPkg.points !== undefined) updateData.points = updatedPkg.points;
 
       const { error } = await supabase
         .from('packages')
@@ -736,7 +744,8 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           label_icon: pkg.labelIcon || null,
           g2bulk_product_id: pkg.g2bulkProductId || null,
           g2bulk_type_id: pkg.g2bulkTypeId || null,
-          quantity: pkg.quantity ?? null
+          quantity: pkg.quantity ?? null,
+          points: pkg.points || 0
         })
         .select()
         .single();
@@ -759,6 +768,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 g2bulkProductId: (data as any).g2bulk_product_id || undefined,
                 g2bulkTypeId: (data as any).g2bulk_type_id || undefined,
                 quantity: (data as any).quantity ?? null,
+                points: (data as any).points || 0,
               }] }
             : g
         ));
@@ -782,6 +792,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (updatedPkg.g2bulkProductId !== undefined) updateData.g2bulk_product_id = updatedPkg.g2bulkProductId || null;
       if (updatedPkg.g2bulkTypeId !== undefined) updateData.g2bulk_type_id = updatedPkg.g2bulkTypeId || null;
       if (updatedPkg.quantity !== undefined) updateData.quantity = updatedPkg.quantity ?? null;
+      if (updatedPkg.points !== undefined) updateData.points = updatedPkg.points;
 
       const { error } = await supabase
         .from('special_packages')

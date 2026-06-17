@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Settings, Receipt, User, Menu, LogOut, Home, CalendarDays, ShoppingBag } from 'lucide-react';
+import { Settings, Receipt, User, Menu, LogOut, Home, CalendarDays, ShoppingBag, Coins } from 'lucide-react';
 import { useSite } from '@/contexts/SiteContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -157,6 +157,26 @@ const Header: React.FC = () => {
               </Link>
             )}
 
+            {/* Exchange */}
+            <Link 
+              to="/exchange" 
+              className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
+              title="Point Exchange"
+            >
+              <Coins className="w-5 h-5 text-gold" />
+            </Link>
+
+            {/* Profile - only for logged in users */}
+            {user && (
+              <Link 
+                to="/profile" 
+                className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
+                title="គណនីរបស់ខ្ញុំ"
+              >
+                <User className="w-5 h-5 text-gold" />
+              </Link>
+            )}
+
             {/* Login link for non-logged in users */}
             {!user && (
               <Link 
@@ -215,6 +235,22 @@ const Header: React.FC = () => {
                     <span>បញ្ជាទិញមុន</span>
                   </Link>
                 </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link to="/exchange" className="flex items-center gap-2 cursor-pointer">
+                    <Coins className="w-4 h-4" />
+                    <span>Point Exchange</span>
+                  </Link>
+                </DropdownMenuItem>
+                
+                {user && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                      <User className="w-4 h-4" />
+                      <span>គណនីរបស់ខ្ញុំ</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 
                 {user && (
                   <DropdownMenuItem asChild>

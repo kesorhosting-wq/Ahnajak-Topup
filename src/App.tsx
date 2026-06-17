@@ -25,6 +25,8 @@ import EventsPage from "./pages/EventsPage";
 import PreorderPage from "./pages/PreorderPage";
 import PreorderTopupPage from "./pages/PreorderTopupPage";
 import TermsPage from "./pages/TermsPage";
+import ProfilePage from "./pages/ProfilePage";
+import PointExchangePage from "./pages/PointExchangePage";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -53,6 +55,22 @@ const App = () => (
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/privacy" element={<TermsPage />} />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/exchange" 
+                  element={
+                    <ProtectedRoute>
+                      <PointExchangePage />
+                    </ProtectedRoute>
+                  } 
+                />
                   <Route 
                     path="/admin" 
                     element={

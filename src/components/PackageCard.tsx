@@ -106,7 +106,12 @@ const PackageCard: React.FC<PackageCardProps> = ({
         </div>
 
         {/* Bottom: Price pill */}
-        <div className="z-10 w-full flex justify-center">
+        <div className="z-10 w-full flex flex-col items-center gap-1">
+          {pkg.points > 0 && (
+            <div className="flex items-center gap-1 text-[9px] font-bold text-white bg-black/30 px-1.5 py-0.5 rounded-md backdrop-blur-sm">
+              <span className="text-gold">★</span> {pkg.points} Points
+            </div>
+          )}
           <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#FFD96A] to-[#F5A623] text-black text-[10px] sm:text-[12px] font-extrabold shadow whitespace-nowrap">
             {settings.packageCurrencySymbol || "$"}{" "}
             {pkg.price.toLocaleString(undefined, {
