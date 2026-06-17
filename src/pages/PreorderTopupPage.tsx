@@ -121,6 +121,7 @@ const PreorderTopupPage: React.FC = () => {
         g2bulkProductId: pkg.g2bulk_product_id || undefined,
         g2bulkTypeId: pkg.g2bulk_type_id || undefined,
         quantity: pkg.quantity || undefined,
+        points: (pkg as any).points || 0,
       }));
   }, [preorderPackages]);
 
