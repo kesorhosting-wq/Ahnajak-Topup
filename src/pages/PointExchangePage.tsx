@@ -44,7 +44,7 @@ const PointExchangePage: React.FC = () => {
         .from('point_exchange_configs')
         .select('*')
         .eq('is_active', true);
-      setConfigs(configData || []);
+      setConfigs((configData || []) as ExchangeConfig[]);
 
       if (user) {
         // Fetch user points
