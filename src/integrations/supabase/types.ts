@@ -47,6 +47,42 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_used: boolean | null
+          used_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_type: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          used_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           content: string | null
@@ -226,6 +262,7 @@ export type Database = {
           label_icon: string | null
           label_text_color: string | null
           name: string
+          points: number | null
           price: number
           price_markup_percent: number | null
           quantity: number | null
@@ -245,6 +282,7 @@ export type Database = {
           label_icon?: string | null
           label_text_color?: string | null
           name: string
+          points?: number | null
           price: number
           price_markup_percent?: number | null
           quantity?: number | null
@@ -264,6 +302,7 @@ export type Database = {
           label_icon?: string | null
           label_text_color?: string | null
           name?: string
+          points?: number | null
           price?: number
           price_markup_percent?: number | null
           quantity?: number | null
@@ -346,6 +385,75 @@ export type Database = {
           payment_method?: string
           qr_code_image?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      point_exchange_configs: {
+        Row: {
+          coupon_valid_days: number | null
+          created_at: string
+          description: string | null
+          exchange_type: string
+          exchange_value: number
+          id: string
+          is_active: boolean | null
+          name: string
+          points_required: number
+          updated_at: string
+        }
+        Insert: {
+          coupon_valid_days?: number | null
+          created_at?: string
+          description?: string | null
+          exchange_type: string
+          exchange_value: number
+          id?: string
+          is_active?: boolean | null
+          name: string
+          points_required: number
+          updated_at?: string
+        }
+        Update: {
+          coupon_valid_days?: number | null
+          created_at?: string
+          description?: string | null
+          exchange_type?: string
+          exchange_value?: number
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          points_required?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      point_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          reference_id: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          transaction_type?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -461,6 +569,7 @@ export type Database = {
           label_icon: string | null
           label_text_color: string | null
           name: string
+          points: number | null
           price: number
           price_markup_percent: number | null
           quantity: number | null
@@ -481,6 +590,7 @@ export type Database = {
           label_icon?: string | null
           label_text_color?: string | null
           name: string
+          points?: number | null
           price: number
           price_markup_percent?: number | null
           quantity?: number | null
@@ -501,6 +611,7 @@ export type Database = {
           label_icon?: string | null
           label_text_color?: string | null
           name?: string
+          points?: number | null
           price?: number
           price_markup_percent?: number | null
           quantity?: number | null
@@ -524,6 +635,7 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          reward_points: number | null
           updated_at: string
           user_id: string
           wallet_balance: number
@@ -533,6 +645,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          reward_points?: number | null
           updated_at?: string
           user_id: string
           wallet_balance?: number
@@ -542,6 +655,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          reward_points?: number | null
           updated_at?: string
           user_id?: string
           wallet_balance?: number
@@ -586,6 +700,7 @@ export type Database = {
           label_icon: string | null
           label_text_color: string | null
           name: string
+          points: number | null
           price: number
           price_markup_percent: number | null
           quantity: number | null
@@ -605,6 +720,7 @@ export type Database = {
           label_icon?: string | null
           label_text_color?: string | null
           name: string
+          points?: number | null
           price: number
           price_markup_percent?: number | null
           quantity?: number | null
@@ -624,6 +740,7 @@ export type Database = {
           label_icon?: string | null
           label_text_color?: string | null
           name?: string
+          points?: number | null
           price?: number
           price_markup_percent?: number | null
           quantity?: number | null
@@ -791,6 +908,11 @@ export type Database = {
       }
     }
     Functions: {
+      apply_coupon: {
+        Args: { p_code: string; p_order_amount: number }
+        Returns: Json
+      }
+      exchange_points_for_coupon: { Args: { config_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

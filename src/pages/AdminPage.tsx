@@ -320,6 +320,7 @@ const AdminPage: React.FC = () => {
       labelIcon: newSpecialPackage.labelIcon || undefined,
       g2bulkProductId: newSpecialPackage.g2bulkProductId || undefined,
       g2bulkTypeId: newSpecialPackage.g2bulkTypeId || undefined,
+      points: newSpecialPackage.points || 0,
     });
     setNewSpecialPackage({
       name: "",
@@ -333,6 +334,7 @@ const AdminPage: React.FC = () => {
       labelIcon: "",
       g2bulkProductId: "",
       g2bulkTypeId: "",
+      points: 0,
     });
     toast({ title: "Special package added!" });
   };
@@ -351,6 +353,7 @@ const AdminPage: React.FC = () => {
       labelIcon: pkg.labelIcon || "",
       g2bulkProductId: pkg.g2bulkProductId || "",
       g2bulkTypeId: pkg.g2bulkTypeId || "",
+      points: pkg.points || 0,
     });
   };
 
@@ -2133,6 +2136,7 @@ const AdminPage: React.FC = () => {
                                           currency: "USD",
                                           g2bulkProductId: product.g2bulkProductId,
                                           g2bulkTypeId: product.g2bulkTypeId,
+                                          points: 0,
                                         });
                                       }
                                     }}
@@ -2393,6 +2397,7 @@ const AdminPage: React.FC = () => {
                                                   g2bulkProductId: pkg.g2bulkProductId,
                                                   g2bulkTypeId: pkg.g2bulkTypeId,
                                                   quantity: pkg.quantity,
+                                                  points: pkg.points || 0,
                                                 });
                                                 toast({ title: "Package cloned!" });
                                               }}
@@ -2418,6 +2423,7 @@ const AdminPage: React.FC = () => {
                                                   g2bulkProductId: pkg.g2bulkProductId,
                                                   g2bulkTypeId: pkg.g2bulkTypeId,
                                                   quantity: pkg.quantity,
+                                                  points: pkg.points || 0,
                                                 });
                                                 toast({ title: "Package cloned to Special Packages!" });
                                               }}

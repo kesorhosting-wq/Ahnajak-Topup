@@ -44,7 +44,7 @@ const PointExchangePage: React.FC = () => {
         .from('point_exchange_configs')
         .select('*')
         .eq('is_active', true);
-      setConfigs(configData || []);
+      setConfigs((configData || []) as ExchangeConfig[]);
 
       if (user) {
         // Fetch user points
@@ -62,7 +62,7 @@ const PointExchangePage: React.FC = () => {
           .eq('user_id', user.id)
           .eq('is_used', false)
           .order('created_at', { ascending: false });
-        setUserCoupons(couponData || []);
+        setUserCoupons((couponData || []) as UserCoupon[]);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -81,11 +81,12 @@ const PointExchangePage: React.FC = () => {
 
       if (error) throw error;
 
-      if (data.success) {
-        toast({ title: 'Exchange successful!', description: `Your coupon code is: ${data.coupon_code}` });
+      const result = data as any;
+      if (result?.success) {
+        toast({ title: 'Exchange successful!', description: `Your coupon code is: ${result.coupon_code}` });
         fetchData(); // Refresh points and coupons
       } else {
-        toast({ title: 'Exchange failed', description: data.message, variant: 'destructive' });
+        toast({ title: 'Exchange failed', description: result?.message, variant: 'destructive' });
       }
     } catch (error: any) {
       toast({ title: 'Error processing exchange', description: error.message, variant: 'destructive' });
