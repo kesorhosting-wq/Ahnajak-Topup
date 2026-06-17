@@ -62,7 +62,7 @@ const PointExchangePage: React.FC = () => {
           .eq('user_id', user.id)
           .eq('is_used', false)
           .order('created_at', { ascending: false });
-        setUserCoupons(couponData || []);
+        setUserCoupons((couponData || []) as UserCoupon[]);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
