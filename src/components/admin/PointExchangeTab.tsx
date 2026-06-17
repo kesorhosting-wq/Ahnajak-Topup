@@ -46,7 +46,7 @@ const PointExchangeTab: React.FC = () => {
     if (error) {
       toast({ title: 'Error fetching configs', variant: 'destructive' });
     } else {
-      setConfigs(data || []);
+      setConfigs((data || []) as PointExchangeConfig[]);
     }
     setIsLoading(false);
   };
