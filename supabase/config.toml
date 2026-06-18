@@ -2,3 +2,7 @@ project_id = "mejmrckrsvvjrpmftdjo"
 
 [functions.ahnajak-khqr-webhook]
 verify_jwt = false
+
+[functions.khqrcc-webhook]
+verify_jwt = false
+
