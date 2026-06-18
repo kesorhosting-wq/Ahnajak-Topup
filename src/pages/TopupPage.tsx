@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSite } from "@/contexts/SiteContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { useFavicon } from "@/hooks/useFavicon";
 import { useGameIdCache } from "@/hooks/useGameIdCache";
@@ -29,7 +30,8 @@ interface VerifiedUser {
 const TopupPage: React.FC = () => {
   const { gameSlug } = useParams();
   const navigate = useNavigate();
-  const { games, paymentMethods, settings, isLoading } = useSite();
+  const { user: authUser } = useAuth(); // Get authenticated user
+  const { games, paymentMethods, settings, khqrccPayment, isLoading } = useSite();
   const { addToCart } = useCart();
 
   // Update favicon dynamically
@@ -978,7 +980,7 @@ const TopupPage: React.FC = () => {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!userId) {
       toast({ title: "Please enter your Game ID", variant: "destructive" });
       return;
@@ -1006,8 +1008,49 @@ const TopupPage: React.FC = () => {
     if (!pkg) return;
 
     const paymentMethod = paymentMethods.find((p) => p.id === selectedPayment);
+    const isKhqrcc = selectedPayment === 'khqrcc';
 
-    // Add to cart with verified player info and G2Bulk product ID
+    if (isKhqrcc) {
+      // Trigger ABA Pay Redirect Flow via Edge Function
+      try {
+        setIsSubmitting(true);
+        const orderId = `ABA_${Date.now()}`;
+        const amount = pkg.price;
+        const remark = `Order ${pkg.name} for ${verifiedUser.username}`;
+
+        // 1. Create order in database
+        const { data: newOrder, error: orderError } = await supabase.from("topup_orders").insert({
+          user_id: authUser?.id || null, 
+          game_name: game.name,
+          package_name: pkg.name,
+          player_id: userId, 
+          amount: amount,
+          status: "pending",
+          payment_method: "khqrcc"
+        }).select('id').single();
+
+        if (orderError) throw orderError;
+        const dbOrderId = newOrder.id;
+
+        // 2. Request payment URL from Edge Function
+        const { data, error } = await supabase.functions.invoke("khqrcc-payment", {
+          body: { orderId: dbOrderId, amount, remark },
+        });
+
+        if (error) throw error;
+
+        // Redirect to ABA Checkout
+        window.location.href = data.url;
+        return; 
+      } catch (err: any) {
+        console.error("KHQRcc payment error:", err);
+        toast({ title: "កំហុសបង់ប្រាក់", description: err.message, variant: "destructive" });
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
+    // Add to cart for IKhode/Other (existing logic)
     addToCart({
       id: `${pkg.id}-${userId}-${Date.now()}`,
       packageId: pkg.id,
@@ -1452,7 +1495,7 @@ const TopupPage: React.FC = () => {
                 <h2 className="font-khmer text-base sm:text-lg font-bold">ជ្រើសរើសធនាគារបង់ប្រាក់</h2>
               </div>
 
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 sm:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                 {paymentMethods.map((method, idx) => (
                   <button
                     key={method.id}

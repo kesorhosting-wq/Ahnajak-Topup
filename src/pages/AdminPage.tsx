@@ -35,6 +35,7 @@ import {
   ShoppingBag,
   BarChart3,
   CloudUpload,
+  Globe,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ import ApiSettingsTab from "@/components/admin/ApiSettingsTab";
 import GameVerificationConfigsTab from "@/components/admin/GameVerificationConfigsTab";
 import OrdersTab from "@/components/admin/OrdersTab";
 import KhqrSettingsTab from "@/components/admin/KhqrSettingsTab";
+import KHQRccSettingsTab from "@/components/admin/KHQRccSettingsTab";
 import G2BulkProductSelector from "@/components/admin/G2BulkProductSelector";
 import G2BulkBalanceDisplay from "@/components/admin/G2BulkBalanceDisplay";
 import G2BulkCategorySelector from "@/components/admin/G2BulkCategorySelector";
@@ -461,6 +463,13 @@ const AdminPage: React.FC = () => {
               >
                 <QrCode className="w-4 h-4 mr-2 shrink-0" />
                 <span>KHQR</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="khqrcc"
+                className="w-full justify-start data-[state=active]:bg-gold data-[state=active]:text-primary-foreground text-xs sm:text-sm"
+              >
+                <Globe className="w-4 h-4 mr-2 shrink-0" />
+                <span>ABA Pay</span>
               </TabsTrigger>
               <TabsTrigger
                 value="orders"
@@ -2850,6 +2859,10 @@ const AdminPage: React.FC = () => {
             {/* KHQR Payment Settings */}
             <TabsContent value="khqr">
               <KhqrSettingsTab />
+            </TabsContent>
+
+            <TabsContent value="khqrcc">
+              <KHQRccSettingsTab />
             </TabsContent>
 
 

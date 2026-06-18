@@ -51,6 +51,12 @@ export interface IKhodePayment {
   // Note: webhook_secret removed - never expose secrets to frontend
 }
 
+export interface KHQRccPayment {
+  isEnabled: boolean;
+  profileId: string;
+  checkoutUrl: string;
+}
+
 export interface SiteSettings {
   siteName: string;
   logoUrl: string;
@@ -140,6 +146,7 @@ interface SiteContextType {
   games: Game[];
   paymentMethods: PaymentMethod[];
   ikhodePayment: IKhodePayment | null;
+  khqrccPayment: KHQRccPayment | null;
   isLoading: boolean;
   refreshGames: () => Promise<void>;
   updateSettings: (settings: Partial<SiteSettings>) => void;
@@ -243,6 +250,7 @@ const defaultSettings: SiteSettings = {
 
 const defaultPaymentMethods: PaymentMethod[] = [
   { id: 'khqr', name: 'KHQR', icon: '📱' },
+  { id: 'khqrcc', name: 'ABA Pay', icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_uN7Wp_iX6J-oR88t2n8U1F5b_5P-fR6y2A&s' },
 ];
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined);
@@ -252,6 +260,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [games, setGames] = useState<Game[]>([]);
   const [paymentMethods] = useState<PaymentMethod[]>(defaultPaymentMethods);
   const [ikhodePayment, setIkhodePayment] = useState<IKhodePayment | null>(null);
+  const [khqrccPayment, setKhqrccPayment] = useState<KHQRccPayment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load data from database on mount
@@ -262,13 +271,14 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loadData = async (gamesOnly = false) => {
     try {
       // Load all data in parallel for faster loading
-      const [settingsResult, gamesResult, packagesResult, specialPackagesResult, ikhodeGatewayResult] = await Promise.all([
+      const [settingsResult, gamesResult, packagesResult, specialPackagesResult, ikhodeGatewayResult, khqrccGatewayResult] = await Promise.all([
         supabase.from('site_settings').select('*'),
         supabase.from('games').select('*').order('sort_order', { ascending: true }),
         supabase.from('packages').select('*').order('sort_order', { ascending: true }),
         supabase.from('special_packages').select('*').order('sort_order', { ascending: true }),
         // Public-safe gateway config via backend function (bypasses RLS on payment_gateways)
         supabase.functions.invoke('get-ikhode-public-config'),
+        supabase.from('payment_gateways').select('*').eq('slug', 'khqrcc').maybeSingle(),
       ]);
       
       const settingsData = settingsResult.data;
@@ -276,9 +286,18 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const packagesData = packagesResult.data;
       const specialPackagesData = specialPackagesResult.data;
       const ikhodeGateway = (ikhodeGatewayResult as any)?.data;
+      const khqrccGateway = khqrccGatewayResult.data;
 
       // KHQR is the only payment method - always enabled (admin configures keys in Admin → KHQR tab)
       setIkhodePayment({ isEnabled: true });
+
+      if (khqrccGateway) {
+        setKhqrccPayment({
+          isEnabled: !!khqrccGateway.enabled,
+          profileId: (khqrccGateway.config as any)?.profile_id || '',
+          checkoutUrl: (khqrccGateway.config as any)?.checkout_url || 'https://khqr.cc/api/payment/requestv2'
+        });
+      }
 
       if (settingsData && settingsData.length > 0) {
         const loadedSettings: Partial<SiteSettings> = {};
@@ -860,6 +879,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       games,
       paymentMethods,
       ikhodePayment,
+      khqrccPayment,
       isLoading,
       refreshGames,
       updateSettings,
@@ -893,6 +913,7 @@ export const useSite = () => {
       games: [],
       paymentMethods: defaultPaymentMethods,
       ikhodePayment: null,
+      khqrccPayment: null,
       isLoading: false,
       refreshGames: async () => {},
       updateSettings: () => {},
