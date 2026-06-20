@@ -59,7 +59,7 @@ async function sendTelegramNotification(message: string, isError: boolean = fals
   }
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -95,22 +95,6 @@ serve(async (req) => {
     
     console.log('[G2Bulk-Webhook] Received callback:', JSON.stringify(payload));
 
-    // G2Bulk callback payload structure:
-    // {
-    //   "order_id": 42,
-    //   "game_code": "pubgm",
-    //   "game_name": "PUBG Mobile",
-    //   "player_id": "5679523421",
-    //   "player_name": "PlayerName",
-    //   "server_id": "2001",
-    //   "denom_id": "60 UC",
-    //   "price": 0.88,
-    //   "status": "COMPLETED",
-    //   "message": "Order completed successfully",
-    //   "remark": "order_id:uuid-here",
-    //   "timestamp": "2024-01-15T10:30:00Z"
-    // }
-
     const g2bulkOrderId = String(payload.order_id || '');
     const status = String(payload.status || '');
     const message = String(payload.message || '');
@@ -125,9 +109,6 @@ serve(async (req) => {
     });
 
     // Extract our internal order ID from remark if present
-    // Supports both formats:
-    // - order_id:<uuid>
-    // - order_id:<uuid>_1of2
     let internalOrderId = '';
     if (remark.startsWith('order_id:')) {
       const raw = remark.replace('order_id:', '').trim();
@@ -135,22 +116,57 @@ serve(async (req) => {
       internalOrderId = match?.[1] || raw;
     }
 
-    // Find the order in our database
-    let orderQuery = supabase.from('topup_orders').select('*');
-    
+    // Find the order in our database (check both tables)
+    let order = null;
+    let orderTable: 'topup_orders' | 'preorder_orders' = 'topup_orders';
+
     if (internalOrderId) {
-      orderQuery = orderQuery.eq('id', internalOrderId);
+      const { data: topup } = await supabase
+        .from('topup_orders')
+        .select('*')
+        .eq('id', internalOrderId)
+        .maybeSingle();
+      if (topup) {
+        order = topup;
+        orderTable = 'topup_orders';
+      } else {
+        const { data: preorder } = await supabase
+          .from('preorder_orders')
+          .select('*')
+          .eq('id', internalOrderId)
+          .maybeSingle();
+        if (preorder) {
+          order = preorder;
+          orderTable = 'preorder_orders';
+        }
+      }
     } else if (g2bulkOrderId) {
-      orderQuery = orderQuery.eq('g2bulk_order_id', g2bulkOrderId);
+      const { data: topup } = await supabase
+        .from('topup_orders')
+        .select('*')
+        .eq('g2bulk_order_id', g2bulkOrderId)
+        .maybeSingle();
+      if (topup) {
+        order = topup;
+        orderTable = 'topup_orders';
+      } else {
+        const { data: preorder } = await supabase
+          .from('preorder_orders')
+          .select('*')
+          .eq('g2bulk_order_id', g2bulkOrderId)
+          .maybeSingle();
+        if (preorder) {
+          order = preorder;
+          orderTable = 'preorder_orders';
+        }
+      }
     } else {
       console.error('[G2Bulk-Webhook] No order ID in callback');
       return new Response('OK', { status: 200 });
     }
 
-    const { data: order, error: orderError } = await orderQuery.maybeSingle();
-
-    if (orderError || !order) {
-      console.error('[G2Bulk-Webhook] Order not found:', orderError);
+    if (!order) {
+      console.error('[G2Bulk-Webhook] Order not found');
       return new Response('OK', { status: 200 });
     }
 
@@ -214,7 +230,7 @@ serve(async (req) => {
     }
 
     const { error: updateError } = await supabase
-      .from('topup_orders')
+      .from(orderTable)
       .update(updateData)
       .eq('id', order.id);
 

@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import HeaderSpacer from '@/components/HeaderSpacer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, History, User as UserIcon, Wallet } from 'lucide-react';
+import { Coins, History, User as UserIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface Profile {
@@ -77,7 +77,7 @@ const ProfilePage: React.FC = () => {
       <main className="flex-grow container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8 text-gold">User Profile</h1>
         
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* User Info */}
           <Card className="border-gold/30 bg-card/50 backdrop-blur-sm">
             <CardHeader>
@@ -103,20 +103,6 @@ const ProfilePage: React.FC = () => {
             <CardContent>
               <p className="text-4xl font-bold text-gold">{profile?.reward_points || 0}</p>
               <p className="text-xs text-muted-foreground mt-2">Earned from topups</p>
-            </CardContent>
-          </Card>
-
-          {/* Wallet Balance */}
-          <Card className="border-gold/30 bg-card/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Wallet className="w-5 h-5 text-gold" />
-                Wallet Balance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-gold">${profile?.wallet_balance?.toFixed(2) || '0.00'}</p>
-              <p className="text-xs text-muted-foreground mt-2">Available for topups</p>
             </CardContent>
           </Card>
         </div>

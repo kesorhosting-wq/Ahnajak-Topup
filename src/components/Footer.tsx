@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSite } from '@/contexts/SiteContext';
+import { Zap, ShieldCheck, Sparkles } from 'lucide-react';
 
 interface FooterProps {
   backgroundColor?: string;
@@ -33,6 +34,54 @@ const Footer: React.FC<FooterProps> = ({
         }}
       >
         <div className="container mx-auto px-3 sm:px-4">
+          {/* Value Propositions Grid wrapped in a card with background and border */}
+          <div 
+            className="rounded-[24px] p-5 sm:p-6 mb-8 border backdrop-blur-sm"
+            style={{ 
+              backgroundColor: 'color-mix(in srgb, currentColor 7%, transparent)',
+              borderColor: 'color-mix(in srgb, currentColor 15%, transparent)'
+            }}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: 'color-mix(in srgb, currentColor 10%, transparent)' }}
+                >
+                  <Zap className="w-5 h-5 animate-pulse" style={{ color: settings.primaryColor || '#D4A84B' }} />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold" style={{ color: textColor }}>⚡ 30s Auto Delivery</h4>
+                  <p className="text-[10px] sm:text-xs opacity-90" style={{ color: textColor }}>Diamonds delivered instantly to game account.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: 'color-mix(in srgb, currentColor 10%, transparent)' }}
+                >
+                  <ShieldCheck className="w-5 h-5" style={{ color: settings.primaryColor || '#D4A84B' }} />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold" style={{ color: textColor }}>🛡️ Safe & Secure</h4>
+                  <p className="text-[10px] sm:text-xs opacity-90" style={{ color: textColor }}>ABA Pay, KHQR & major Cambodia bank portals.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: 'color-mix(in srgb, currentColor 10%, transparent)' }}
+                >
+                  <Sparkles className="w-5 h-5" style={{ color: settings.primaryColor || '#D4A84B' }} />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold" style={{ color: textColor }}>💎 Official Channels</h4>
+                  <p className="text-[10px] sm:text-xs opacity-90" style={{ color: textColor }}>100% legal game recharges & verified codes.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {/* Brand Section */}
             <div className="col-span-2 sm:col-span-1 space-y-2 sm:space-y-3">

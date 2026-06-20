@@ -250,7 +250,7 @@ const defaultSettings: SiteSettings = {
 
 const defaultPaymentMethods: PaymentMethod[] = [
   { id: 'khqr', name: 'KHQR', icon: '📱' },
-  { id: 'khqrcc', name: 'ABA Pay', icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_uN7Wp_iX6J-oR88t2n8U1F5b_5P-fR6y2A&s' },
+  { id: 'khqrcc', name: 'ABA Pay', icon: 'https://play-lh.googleusercontent.com/O7xMXY5ehCEVwpR0MlKYQOK5QJ1oFIw4EoXQqyt_vgDKT3Uvn1g8FIz_fNDDhWH4Zbdclp54WhRMnI8vzyE9OeU=w240-h480-rw' },
 ];
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined);

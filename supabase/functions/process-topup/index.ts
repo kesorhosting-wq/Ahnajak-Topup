@@ -506,7 +506,7 @@ async function fulfillG2BulkOrder(supabase: any, orderId: string, tableName: str
   // ATOMIC GUARD: Prevent double-execution by using conditional update.
   // Only proceed if we can atomically change status from an allowed state to 'processing'.
   // This prevents race conditions where two calls both see 'paid' before either updates.
-  const allowedStatuses = ['paid', 'pending', 'notpaid'];
+  const allowedStatuses = ['paid'];
   if (!allowedStatuses.includes(order.status)) {
     console.log(`[Fulfill] Order already ${order.status}, skipping to prevent double-execution`);
     return { success: true, status: order.status, message: 'Already processed' };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, LogIn, UserPlus, Eye, EyeOff, User, Wallet } from 'lucide-react';
+import { ArrowLeft, LogIn, UserPlus, Eye, EyeOff, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -110,7 +110,7 @@ const AuthPage: React.FC = () => {
     <>
       <Helmet>
         <title>Login / Register - {settings.siteName}</title>
-        <meta name="description" content="Sign in or create an account to access your wallet and order history" />
+        <meta name="description" content="Sign in or create an account to access your order history" />
       </Helmet>
       
       <Header />
@@ -125,7 +125,7 @@ const AuthPage: React.FC = () => {
                   <User className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <CardTitle className="font-display text-2xl gold-text">{settings.siteName}</CardTitle>
-                <CardDescription>Sign in to access your wallet and order history</CardDescription>
+                <CardDescription>Sign in to access your order history</CardDescription>
               </CardHeader>
               
               <CardContent>
@@ -249,9 +249,6 @@ const AuthPage: React.FC = () => {
                     Create an account to access:
                   </p>
                   <div className="flex justify-center gap-4 text-xs">
-                    <span className="flex items-center gap-1 text-gold">
-                      <Wallet className="w-3 h-3" /> Kesor TP Wallet
-                    </span>
                     <span className="flex items-center gap-1 text-gold">
                       <User className="w-3 h-3" /> Order History
                     </span>
