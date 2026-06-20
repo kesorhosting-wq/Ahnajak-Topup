@@ -42,7 +42,7 @@ const WelcomeLoader: React.FC = () => {
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#0a0805] transition-all duration-700 ease-in-out",
+        "fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#0a0805]/40 backdrop-blur-3xl transition-all duration-700 ease-in-out",
         isFading ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"
       )}
     >
