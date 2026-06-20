@@ -5,6 +5,7 @@ import HeaderSpacer from '@/components/HeaderSpacer';
 import HeroBanner from '@/components/HeroBanner';
 import GameCard from '@/components/GameCard';
 import Footer from '@/components/Footer';
+import WelcomeLoader from '@/components/WelcomeLoader';
 import { useSite } from '@/contexts/SiteContext';
 import { useFavicon } from '@/hooks/useFavicon';
 import { 
@@ -87,6 +88,7 @@ const Index: React.FC = () => {
 
   return (
     <>
+      <WelcomeLoader />
       <Helmet>
         <title>{settings.browserTitle || `${settings.siteName} - Game Topup Cambodia`}</title>
         <meta name="description" content="Top up your favorite games instantly. Mobile Legends, Free Fire, PUBG, and more. Fast, secure, and affordable." />
