@@ -53,7 +53,7 @@ serve(async (req: Request) => {
       });
     }
 
-    const success_url = returnUrl || `${Deno.env.get("SUPABASE_URL")}/functions/v1/khqrcc-webhook`;
+    const success_url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/khqrcc-webhook?transaction_id=${orderId}`;
     const safeRemark = String(remark ?? "");
     const plainHash = config.secret_key + orderId + amount + success_url + safeRemark;
     const hash = await sha1Hex(plainHash);
