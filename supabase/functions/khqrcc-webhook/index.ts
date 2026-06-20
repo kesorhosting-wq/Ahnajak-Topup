@@ -19,9 +19,22 @@ serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ message: "KesorTopup Webhook Handler (POST only)" }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const url = new URL(req.url);
+    const transactionId = url.searchParams.get("transaction_id") || 
+                          url.searchParams.get("transactionId") || 
+                          url.searchParams.get("order_id") || 
+                          url.searchParams.get("orderId");
+
+    const redirectUrl = transactionId 
+      ? `https://www.kesortopup.cam/invoice/${transactionId}`
+      : "https://www.kesortopup.cam";
+
+    return new Response(null, {
+      status: 302,
+      headers: {
+        ...corsHeaders,
+        "Location": redirectUrl,
+      },
     });
   }
 
