@@ -1024,10 +1024,13 @@ const TopupPage: React.FC = () => {
           user_id: authUser?.id || null, 
           game_name: game.name,
           package_name: pkg.name,
-          player_id: userId, 
+          player_id: userId.trim(),
+          server_id: serverId.trim() || null,
+          player_name: verifiedUser?.username || null,
           amount: amount,
           status: "pending",
-          payment_method: "khqrcc"
+          payment_method: "khqrcc",
+          g2bulk_product_id: pkg.g2bulkProductId || null
         }).select('id').single();
 
         if (orderError) throw orderError;
@@ -1035,7 +1038,12 @@ const TopupPage: React.FC = () => {
 
         // 2. Request payment URL from Edge Function
         const { data, error } = await supabase.functions.invoke("khqrcc-payment", {
-          body: { orderId: dbOrderId, amount, remark },
+          body: { 
+            orderId: dbOrderId, 
+            amount, 
+            remark,
+            returnUrl: `${window.location.origin}/invoice/${dbOrderId}`
+          },
         });
 
         if (error) throw error;

@@ -15,7 +15,7 @@ async function sha1Hex(input: string): Promise<string> {
   return toHex(buf);
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -24,7 +24,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { orderId, amount, remark } = await req.json();
+    const { orderId, amount, remark, returnUrl } = await req.json();
     if (!orderId || amount == null) {
       return new Response(JSON.stringify({ error: "Missing orderId or amount" }), {
         status: 400,
@@ -53,7 +53,7 @@ serve(async (req) => {
       });
     }
 
-    const success_url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/khqrcc-webhook`;
+    const success_url = returnUrl || `${Deno.env.get("SUPABASE_URL")}/functions/v1/khqrcc-webhook`;
     const safeRemark = String(remark ?? "");
     const plainHash = config.secret_key + orderId + amount + success_url + safeRemark;
     const hash = await sha1Hex(plainHash);

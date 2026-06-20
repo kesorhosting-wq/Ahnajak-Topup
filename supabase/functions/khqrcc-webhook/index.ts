@@ -15,12 +15,29 @@ async function sha256Hex(input: string): Promise<string> {
   return toHex(buf);
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ message: "KesorTopup Webhook Handler (POST only)" }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
-    const body = await req.json();
-    const { transaction_id, amount, status, req_time, hash: received_hash } = body;
+    const rawBody = await req.text();
+    const body = JSON.parse(rawBody);
+    const { transaction_id, status, req_time, hash: received_hash } = body;
+
+    // Extract exact raw amount string to prevent decimal truncation issues (e.g. 5.00 parsing to 5)
+    let amountStr = "";
+    const amountMatch = rawBody.match(/"amount"\s*:\s*([0-9.]+)/);
+    if (amountMatch) {
+      amountStr = amountMatch[1];
+    } else {
+      amountStr = String(body.amount ?? "");
+    }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -36,7 +53,7 @@ serve(async (req) => {
     const secret = (gateway?.config as any)?.secret_key;
     if (!secret) return new Response("Gateway config missing", { status: 500, headers: corsHeaders });
 
-    const expectedHash = await sha256Hex(secret + req_time + transaction_id + amount + status);
+    const expectedHash = await sha256Hex(secret + req_time + transaction_id + amountStr + status);
     if (expectedHash !== received_hash) {
       return new Response("Invalid hash", { status: 403, headers: corsHeaders });
     }
