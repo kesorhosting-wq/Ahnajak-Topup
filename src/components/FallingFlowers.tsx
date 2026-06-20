@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSite } from '@/contexts/SiteContext';
+import { useLocation } from 'react-router-dom';
 
 const FLOWER_IMAGES = [
   '/images/flower1.png',
@@ -24,6 +25,7 @@ interface Petal {
 let petalId = 0;
 
 const FallingFlowers: React.FC = () => {
+  const location = useLocation();
   const { settings } = useSite();
   const intensity = Math.max(0, Math.min(100, settings.fallingIntensity ?? 30));
   const speed = Math.max(0.2, Math.min(3, settings.fallingSpeed ?? 1));
@@ -44,7 +46,7 @@ const FallingFlowers: React.FC = () => {
   }, [speed]);
 
   useEffect(() => {
-    if (intensity <= 0) {
+    if (location.pathname !== '/' || intensity <= 0) {
       setPetals([]);
       return;
     }
@@ -69,7 +71,11 @@ const FallingFlowers: React.FC = () => {
     }, intervalMs);
 
     return () => clearInterval(interval);
-  }, [createPetal, intensity]);
+  }, [createPetal, intensity, location.pathname]);
+
+  if (location.pathname !== '/') {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
