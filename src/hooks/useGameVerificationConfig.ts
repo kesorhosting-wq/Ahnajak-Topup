@@ -40,24 +40,29 @@ export const useGameVerificationConfig = (gameName: string | undefined): UseGame
       setIsLoading(true);
       try {
         // Try exact match first
-        let { data, error } = await supabase
+        const { data: exactMatches } = await supabase
           .from('game_verification_configs')
           .select('*')
           .eq('is_active', true)
-          .ilike('game_name', gameName)
-          .maybeSingle();
+          .ilike('game_name', gameName);
+
+        let data = null;
+        if (exactMatches && exactMatches.length > 0) {
+          // Prioritize the one requiring zone or having zone options
+          data = exactMatches.find(m => m.requires_zone) || exactMatches[0];
+        }
 
         // If not found, try partial match
         if (!data) {
-          const { data: partialMatch } = await supabase
+          const { data: partialMatches } = await supabase
             .from('game_verification_configs')
             .select('*')
             .eq('is_active', true)
-            .ilike('game_name', `%${gameName}%`)
-            .limit(1)
-            .maybeSingle();
+            .ilike('game_name', `%${gameName}%`);
           
-          data = partialMatch;
+          if (partialMatches && partialMatches.length > 0) {
+            data = partialMatches.find(m => m.requires_zone) || partialMatches[0];
+          }
         }
 
         const configData = data ? {

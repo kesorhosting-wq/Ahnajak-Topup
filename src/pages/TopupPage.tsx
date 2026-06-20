@@ -709,11 +709,12 @@ const TopupPage: React.FC = () => {
   
   // Check if zone is required - prioritize database config, fallback to hardcoded
   const hardcodedRequiresZone = gameIdConfig && gameIdConfig.fields.length > 1;
-  const requiresZone = dbRequiresZone || hardcodedRequiresZone;
+  const dbHasZoneOptions = !!(zoneOptions && zoneOptions.length > 0);
+  const requiresZone = dbRequiresZone || hardcodedRequiresZone || dbHasZoneOptions;
   
   // Build dynamic fields based on DB config (no useMemo needed here since it's after early returns)
   let dynamicFields = gameIdConfig;
-  if (gameIdConfig && dbRequiresZone && gameIdConfig.fields.length === 1) {
+  if (gameIdConfig && requiresZone && gameIdConfig.fields.length === 1) {
     dynamicFields = {
       ...gameIdConfig,
       fields: [
