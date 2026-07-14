@@ -3,7 +3,7 @@ import { Save, Type, Upload, Loader2, X, Globe, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { api } from '@/lib/api';
+import api from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { useSite } from '@/contexts/SiteContext';
 

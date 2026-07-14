@@ -3,7 +3,7 @@ import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { handleApiError, isValidImageFile, isValidFileSize, MAX_FILE_SIZE } from '@/lib/errorHandler';
-import { api } from '@/lib/api';
+import api from '@/lib/api';
 
 interface ImageUploadProps {
   value?: string;

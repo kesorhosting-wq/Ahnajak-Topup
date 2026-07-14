@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { api } from '@/lib/api';
+import api from '@/lib/api';
 
 interface BannerImagesUploadProps {
   value: string[];
