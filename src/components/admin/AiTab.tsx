@@ -8,7 +8,7 @@ import { Sparkles, Save, RefreshCw, Paintbrush, ShieldCheck } from 'lucide-react
 import { supabase } from '@/integrations/supabase/client';
 
 const AiTab: React.FC = () => {
-  const { settings, refreshSettings } = useSite();
+  const { settings, updateSettings } = useSite();
   const [siteName, setSiteName] = useState(settings.siteName || 'Ahnajak Topup');
   const [primaryColor, setPrimaryColor] = useState(settings.primaryColor || '#0ea5e9');
   const [accentColor, setAccentColor] = useState(settings.accentColor || '#0284c7');
@@ -68,7 +68,7 @@ const AiTab: React.FC = () => {
         throw new Error('Failed to update AI guidelines file');
       }
 
-      await refreshSettings();
+      updateSettings({ siteName, primaryColor, accentColor });
       toast({
         title: 'Settings saved & AI Trained! 🤖',
         description: `Successfully renamed brand to "${siteName}" and updated styling. Future AI agents will adapt to this configuration automatically.`,
