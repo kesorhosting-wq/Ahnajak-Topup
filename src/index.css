@@ -124,7 +124,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    background-color: transparent;
+    @apply text-foreground font-sans;
     min-height: 100vh;
   }
 

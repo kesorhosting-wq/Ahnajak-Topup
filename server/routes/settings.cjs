@@ -76,7 +76,7 @@ router.delete('/:key', requireAuth, requireAdmin, async (req, res) => {
 
 // Train AI with active branding and colors (admin)
 router.post('/ai-train', requireAuth, requireAdmin, async (req, res) => {
-  const { siteName, primaryColor, accentColor } = req.body;
+  const { siteName, primaryColor, accentColor, bgType, backgroundColor, bgImageUrl, bgVideoUrl } = req.body;
   if (!siteName) return res.status(400).json({ error: 'siteName is required' });
 
   try {
@@ -97,6 +97,10 @@ This file is automatically updated by the AI Admin Panel. It instructs future de
 - **Primary Color**: "${primaryColor || '#0ea5e9'}"
 - **Accent Color**: "${accentColor || '#0284c7'}"
 - **Background Theme**: "Dark (Pitch Black)"
+- **Background Mode**: "${bgType || 'color'}"
+- **Background Color**: "${backgroundColor || '#000000'}"
+- **Background Image URL**: "${bgImageUrl || 'None'}"
+- **Background Video URL**: "${bgVideoUrl || 'None'}"
 
 ## Guidelines for AI Developer Agents
 1. When generating new components, pages, or layouts, always use the active brand name: "${siteName}".

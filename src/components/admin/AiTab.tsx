@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSite } from '@/contexts/SiteContext';
 import { toast } from '@/hooks/use-toast';
-import { Sparkles, Save, RefreshCw, Paintbrush, ShieldCheck } from 'lucide-react';
+import { Sparkles, Save, RefreshCw, Paintbrush, ShieldCheck, Image, Video, MonitorPlay } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const AiTab: React.FC = () => {
@@ -12,6 +12,10 @@ const AiTab: React.FC = () => {
   const [siteName, setSiteName] = useState(settings.siteName || 'Ahnajak Topup');
   const [primaryColor, setPrimaryColor] = useState(settings.primaryColor || '#0ea5e9');
   const [accentColor, setAccentColor] = useState(settings.accentColor || '#0284c7');
+  const [bgType, setBgType] = useState<'color' | 'gradient' | 'image' | 'video'>(settings.bgType || 'color');
+  const [backgroundColor, setBackgroundColor] = useState(settings.backgroundColor || '#000000');
+  const [bgImageUrl, setBgImageUrl] = useState(settings.bgImageUrl || '');
+  const [bgVideoUrl, setBgVideoUrl] = useState(settings.bgVideoUrl || '');
   const [saving, setSaving] = useState(false);
 
   // Common premium dark theme presets
@@ -41,6 +45,10 @@ const AiTab: React.FC = () => {
         browserTitle: `${siteName} - Game Topup Cambodia`,
         primaryColor: primaryColor,
         accentColor: accentColor,
+        bgType: bgType,
+        backgroundColor: backgroundColor,
+        bgImageUrl: bgImageUrl,
+        bgVideoUrl: bgVideoUrl,
       };
 
       for (const [key, value] of Object.entries(updates)) {
@@ -61,6 +69,10 @@ const AiTab: React.FC = () => {
           siteName,
           primaryColor,
           accentColor,
+          bgType,
+          backgroundColor,
+          bgImageUrl,
+          bgVideoUrl,
         }),
       });
 
@@ -68,10 +80,10 @@ const AiTab: React.FC = () => {
         throw new Error('Failed to update AI guidelines file');
       }
 
-      updateSettings({ siteName, primaryColor, accentColor });
+      updateSettings(updates);
       toast({
         title: 'Settings saved & AI Trained! 🤖',
-        description: `Successfully renamed brand to "${siteName}" and updated styling. Future AI agents will adapt to this configuration automatically.`,
+        description: `Successfully renamed brand to "${siteName}" and updated background/colors. Future AI agents will adapt to this configuration automatically.`,
       });
     } catch (error: any) {
       console.error(error);
@@ -95,7 +107,7 @@ const AiTab: React.FC = () => {
             AI Customization & Training Center
           </CardTitle>
           <CardDescription>
-            Configure your brand name, color codes, and automatically write instructions that train future AI developer agents to match your styling requirements.
+            Configure your brand name, page background types, color codes, and automatically write instructions that train future AI developer agents to match your styling requirements.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -136,14 +148,14 @@ const AiTab: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Paintbrush className="w-5 h-5 text-cyan-400" />
-              Theme Colors
+              Accent Colors
             </CardTitle>
             <CardDescription>Set the colors and accents for your client pages</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-zinc-400">Primary Color</label>
+                <label className="text-sm font-semibold text-zinc-400">Primary Accent</label>
                 <div className="flex gap-2">
                   <input
                     type="color"
@@ -159,7 +171,7 @@ const AiTab: React.FC = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-zinc-400">Accent Color</label>
+                <label className="text-sm font-semibold text-zinc-400">Secondary Accent</label>
                 <div className="flex gap-2">
                   <input
                     type="color"
@@ -200,6 +212,116 @@ const AiTab: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Global Background Settings Card */}
+      <Card className="border-zinc-800 bg-zinc-950">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MonitorPlay className="w-5 h-5 text-cyan-400" />
+            Global Website Background Manager (All Pages)
+          </CardTitle>
+          <CardDescription>Configure the background style that applies to every page on your client website</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Background Type Selection */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-zinc-400">Background Mode</label>
+            <div className="flex gap-2">
+              {(['color', 'gradient', 'image', 'video'] as const).map((type) => (
+                <Button
+                  key={type}
+                  variant={bgType === type ? 'default' : 'outline'}
+                  onClick={() => setBgType(type)}
+                  className={`flex-1 capitalize ${
+                    bgType === type 
+                      ? 'bg-cyan-500 text-black hover:bg-cyan-600 font-bold' 
+                      : 'border-zinc-800 hover:bg-zinc-900 text-zinc-300'
+                  }`}
+                >
+                  {type}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Color & Gradient Settings */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-zinc-400">
+                  {bgType === 'gradient' ? 'Base Gradient Color' : 'Background Solid Color'}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={backgroundColor}
+                    onChange={(e) => setBackgroundColor(e.target.value)}
+                    className="w-10 h-10 border border-zinc-800 rounded bg-transparent cursor-pointer"
+                  />
+                  <Input
+                    value={backgroundColor}
+                    onChange={(e) => setBackgroundColor(e.target.value)}
+                    className="bg-zinc-900 border-zinc-800 text-sm"
+                  />
+                </div>
+                <p className="text-xs text-zinc-500">
+                  {bgType === 'gradient' 
+                    ? 'Determines the starting color of the linear background gradient.' 
+                    : 'The base color of the page. Acts as the backing layer behind image and video modes too.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Media URLs */}
+            <div className="space-y-4">
+              {/* Background Image URL */}
+              {bgType === 'image' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-zinc-400 flex items-center gap-1.5">
+                    <Image className="w-4 h-4 text-cyan-400" />
+                    Background Image URL
+                  </label>
+                  <Input
+                    value={bgImageUrl}
+                    onChange={(e) => setBgImageUrl(e.target.value)}
+                    placeholder="Enter image URL (e.g. https://example.com/bg.jpg)"
+                    className="bg-zinc-900 border-zinc-800 focus:border-cyan-500"
+                  />
+                  <p className="text-xs text-zinc-500">
+                    Provide a public image web address. The image will be centered, stretched, and layered at 40% opacity.
+                  </p>
+                </div>
+              )}
+
+              {/* Background Video URL */}
+              {bgType === 'video' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-zinc-400 flex items-center gap-1.5">
+                    <Video className="w-4 h-4 text-cyan-400" />
+                    Background Video URL
+                  </label>
+                  <Input
+                    value={bgVideoUrl}
+                    onChange={(e) => setBgVideoUrl(e.target.value)}
+                    placeholder="Enter video URL (e.g. https://example.com/bg.mp4)"
+                    className="bg-zinc-900 border-zinc-800 focus:border-cyan-500"
+                  />
+                  <p className="text-xs text-zinc-500">
+                    Provide a direct link to an MP4 video. The video will autoplay, loop, and run muted in the background.
+                  </p>
+                </div>
+              )}
+
+              {/* Inactive Mode Message */}
+              {(bgType === 'color' || bgType === 'gradient') && (
+                <div className="h-full flex items-center justify-center border border-dashed border-zinc-800 rounded-xl p-6 text-center text-sm text-zinc-500">
+                  No background media required. Using CSS {bgType} mode.
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Save Button */}
       <div className="flex justify-end pt-2">

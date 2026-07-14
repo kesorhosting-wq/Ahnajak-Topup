@@ -71,6 +71,9 @@ export interface SiteSettings {
   primaryColor: string;
   accentColor: string;
   backgroundColor: string;
+  bgType?: 'color' | 'gradient' | 'image' | 'video';
+  bgImageUrl?: string;
+  bgVideoUrl?: string;
   // Browser settings
   siteIcon: string;
   browserTitle: string;
@@ -183,6 +186,9 @@ const defaultSettings: SiteSettings = {
   primaryColor: '#0ea5e9',
   accentColor: '#0284c7',
   backgroundColor: '#FFFFFF',
+  bgType: 'color',
+  bgImageUrl: '',
+  bgVideoUrl: '',
   // Browser settings
   siteIcon: '',
   browserTitle: 'Ahnajak Topup - Game Topup Cambodia',
@@ -334,6 +340,9 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (row.key === 'primaryColor') loadedSettings.primaryColor = row.value as string;
           if (row.key === 'accentColor') loadedSettings.accentColor = row.value as string;
           if (row.key === 'backgroundColor') loadedSettings.backgroundColor = row.value as string;
+          if (row.key === 'bgType') loadedSettings.bgType = row.value as any;
+          if (row.key === 'bgImageUrl') loadedSettings.bgImageUrl = row.value as string;
+          if (row.key === 'bgVideoUrl') loadedSettings.bgVideoUrl = row.value as string;
           if (row.key === 'backgroundImage') loadedSettings.backgroundImage = row.value as string;
           if (row.key === 'headerImage') loadedSettings.headerImage = row.value as string;
           if (row.key === 'bannerImage') loadedSettings.bannerImage = row.value as string;

@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CustomFontLoader from "./components/CustomFontLoader";
+import GlobalBackground from "./components/GlobalBackground";
 import ContactButton from "./components/ContactButton";
 import ClickSpark from "./components/ClickSpark";
 import Index from "./pages/Index";
@@ -36,6 +37,7 @@ const App = () => (
             <CartProvider>
               <TooltipProvider>
                 <CustomFontLoader />
+                <GlobalBackground />
                 <ClickSpark sparkColor="#E6B93F" sparkCount={10} sparkRadius={20} sparkSize={12} duration={500} />
                 <Toaster />
                 <Sonner />
