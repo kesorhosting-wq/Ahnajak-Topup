@@ -42,6 +42,15 @@ show_menu() {
 install_app() {
   echo -e "\n${BLUE}>>> [STEP 1/6] Gathering Configuration Settings${NC}"
   
+  # App Folder Name
+  read -p "Enter Application Folder Name under /var/www/ [default: ahnajak-topup]: " APP_FOLDER
+  APP_FOLDER=${APP_FOLDER:-ahnajak-topup}
+  APP_DIR="/var/www/${APP_FOLDER}"
+
+  # App Port
+  read -p "Enter Application Port [default: 9911]: " APP_PORT
+  APP_PORT=${APP_PORT:-9911}
+
   # DB Name
   read -p "Enter Database Name [default: ahnajak_topup]: " DB_NAME
   DB_NAME=${DB_NAME:-ahnajak_topup}
@@ -115,7 +124,6 @@ install_app() {
   mysql -e "FLUSH PRIVILEGES;"
 
   echo -e "\n${BLUE}>>> [STEP 4/6] Deploying Application Code${NC}"
-  APP_DIR="/var/www/ahnajak-topup"
   mkdir -p "$APP_DIR"
   if [ "$(pwd)" != "$APP_DIR" ]; then
     cp -r . "$APP_DIR"
@@ -130,7 +138,7 @@ DB_PORT=3306
 DB_USER=${DB_USER}
 DB_PASSWORD=${DB_PASSWORD}
 DB_NAME=${DB_NAME}
-PORT=9911
+PORT=${APP_PORT}
 JWT_SECRET=${JWT_SECRET}
 EOT
 
@@ -160,7 +168,7 @@ EOT
     NGINX_DOMAIN="${DOMAIN_NAME} www.${DOMAIN_NAME}"
   fi
 
-  cat <<EOT > /etc/nginx/sites-available/ahnajak-topup
+  cat <<EOT > /etc/nginx/sites-available/${APP_FOLDER}
 server {
     listen 80;
     server_name ${NGINX_DOMAIN};
@@ -173,7 +181,7 @@ server {
     }
 
     location /api/ {
-        proxy_pass http://localhost:9911;
+        proxy_pass http://localhost:${APP_PORT};
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -191,13 +199,13 @@ server {
 }
 EOT
 
-  ln -sf /etc/nginx/sites-available/ahnajak-topup /etc/nginx/sites-enabled/
+  ln -sf /etc/nginx/sites-available/${APP_FOLDER} /etc/nginx/sites-enabled/
   systemctl restart nginx
 
   # PM2 Configuration
   npm install -g pm2
-  pm2 delete ahnajak-api 2>/dev/null || true
-  pm2 start server/index.cjs --name "ahnajak-api"
+  pm2 delete "${APP_FOLDER}-api" 2>/dev/null || true
+  pm2 start server/index.cjs --name "${APP_FOLDER}-api"
   pm2 save
   pm2 startup || true
 
@@ -238,6 +246,8 @@ EOT
 
 setup_ssl_only() {
   echo -e "\n${BLUE}>>> Setting up SSL (HTTPS Only)${NC}"
+  read -p "Enter Application Folder Name [default: ahnajak-topup]: " APP_FOLDER
+  APP_FOLDER=${APP_FOLDER:-ahnajak-topup}
   read -p "Enter Domain Name (e.g., yoursite.com): " DOM_NAME
   read -p "Enter Email Address: " E_ADDR
   if [ -z "$DOM_NAME" ] || [ -z "$E_ADDR" ]; then
@@ -245,7 +255,7 @@ setup_ssl_only() {
     return
   fi
   # Replace server_name in nginx configuration
-  sed -i "s/server_name _;/server_name ${DOM_NAME} www.${DOM_NAME};/g" /etc/nginx/sites-available/ahnajak-topup 2>/dev/null || true
+  sed -i "s/server_name _;/server_name ${DOM_NAME} www.${DOM_NAME};/g" "/etc/nginx/sites-available/${APP_FOLDER}" 2>/dev/null || true
   systemctl restart nginx
   apt install -y certbot python3-certbot-nginx
   certbot --nginx --non-interactive --agree-tos -m "$E_ADDR" -d "$DOM_NAME" -d "www.$DOM_NAME" || certbot --nginx --non-interactive --agree-tos -m "$E_ADDR" -d "$DOM_NAME"
@@ -253,21 +263,24 @@ setup_ssl_only() {
 }
 
 uninstall_app() {
-  read -p "Are you sure you want to delete the entire application, database, and configurations? (y/N): " CONFIRM
+  read -p "Enter Application Folder Name to uninstall [default: ahnajak-topup]: " APP_FOLDER
+  APP_FOLDER=${APP_FOLDER:-ahnajak-topup}
+
+  read -p "Are you sure you want to delete the entire application, database, and configurations for ${APP_FOLDER}? (y/N): " CONFIRM
   if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
     echo -e "${RED}[*] Stopping and removing PM2 instances...${NC}"
-    pm2 delete ahnajak-api 2>/dev/null || true
+    pm2 delete "${APP_FOLDER}-api" 2>/dev/null || true
     pm2 save
     
     echo -e "${RED}[*] Removing Nginx configurations...${NC}"
-    rm -f /etc/nginx/sites-enabled/ahnajak-topup
-    rm -f /etc/nginx/sites-available/ahnajak-topup
+    rm -f "/etc/nginx/sites-enabled/${APP_FOLDER}"
+    rm -f "/etc/nginx/sites-available/${APP_FOLDER}"
     systemctl restart nginx
     
     echo -e "${RED}[*] Removing application folder...${NC}"
-    rm -rf /var/www/ahnajak-topup
+    rm -rf "/var/www/${APP_FOLDER}"
     
-    echo -e "${GREEN}[✓] Ahnajak Topup uninstalled successfully.${NC}"
+    echo -e "${GREEN}[✓] ${APP_FOLDER} uninstalled successfully.${NC}"
   else
     echo -e "Uninstall canceled."
   fi
