@@ -103,6 +103,10 @@ install_app() {
     systemctl enable mysql
   fi
 
+  # Ensure MySQL service is running
+  systemctl start mysql || service mysql start
+  systemctl enable mysql || true
+
   echo -e "\n${BLUE}>>> [STEP 3/6] Configuring Database & Users${NC}"
   # Setup MySQL schema
   mysql -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;"
