@@ -68,12 +68,23 @@ async function requireAuth(req, res, next) {
 
 /**
  * Express middleware: require the 'admin' role.
- * Must be used after requireAuth.
+ * Automatically validates JWT token if not already run by requireAuth.
  */
 async function requireAdmin(req, res, next) {
   if (!req.user) {
-    return res.status(401).json({ error: 'Authentication required' });
+    const header = req.headers.authorization || '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+    if (!token) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      req.user = { id: decoded.id, email: decoded.email, display_name: decoded.display_name };
+    } catch (err) {
+      return res.status(401).json({ error: 'Invalid or expired session' });
+    }
   }
+  
   const isAdmin = await hasRole(req.user.id, 'admin');
   if (!isAdmin) {
     return res.status(403).json({ error: 'Admin access required' });
