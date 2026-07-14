@@ -72,7 +72,8 @@ import SalesActivityTab from "@/components/admin/SalesActivityTab";
 import PriceUpdateTab from "@/components/admin/PriceUpdateTab";
 import CdnMigrationTab from "@/components/admin/CdnMigrationTab";
 import PointExchangeTab from "@/components/admin/PointExchangeTab";
-import { Coins } from "lucide-react";
+import AiTab from "@/components/admin/AiTab";
+import { Coins, Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -604,6 +605,13 @@ const AdminPage: React.FC = () => {
               >
                 <Coins className="w-4 h-4 mr-2 shrink-0" />
                 <span>Points</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="ai-customization"
+                className="w-full justify-start data-[state=active]:bg-gold data-[state=active]:text-primary-foreground text-xs sm:text-sm text-cyan-400 hover:text-cyan-300"
+              >
+                <Sparkles className="w-4 h-4 mr-2 shrink-0 animate-pulse" />
+                <span>AI</span>
               </TabsTrigger>
             </TabsList>
 
@@ -3086,6 +3094,11 @@ const AdminPage: React.FC = () => {
               {/* Point Exchange */}
               <TabsContent value="point-exchange">
                 <PointExchangeTab />
+              </TabsContent>
+
+              {/* AI Customization */}
+              <TabsContent value="ai-customization">
+                <AiTab />
               </TabsContent>
 
               {/* Font Settings */}

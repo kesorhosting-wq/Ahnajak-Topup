@@ -6,6 +6,8 @@
  * DELETE /api/settings/:key   — delete a setting (admin)
  */
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const { query, queryOne } = require('../db.cjs');
 const { requireAdmin, optionalAuth } = require('../auth.cjs');
 
@@ -66,6 +68,41 @@ router.delete('/:key', requireAdmin, async (req, res) => {
   const { key } = req.params;
   try {
     await query('DELETE FROM site_settings WHERE `key` = ?', [key]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+// Train AI with active branding and colors (admin)
+router.post('/ai-train', requireAdmin, async (req, res) => {
+  const { siteName, primaryColor, accentColor } = req.body;
+  if (!siteName) return res.status(400).json({ error: 'siteName is required' });
+
+  try {
+    const agentsDir = path.resolve(process.cwd(), '.agents');
+    if (!fs.existsSync(agentsDir)) {
+      fs.mkdirSync(agentsDir, { recursive: true });
+    }
+
+    const guidelines = `# Ahnajak Topup AI Customization Guidelines
+
+This file is automatically updated by the AI Admin Panel. It instructs future developer AI agents on the active branding and theme configuration of the application.
+
+## Active Branding
+- **Brand Name**: "${siteName}"
+- **Browser Title**: "${siteName} - Game Topup Cambodia"
+
+## Active Theme Colors
+- **Primary Color**: "${primaryColor || '#0ea5e9'}"
+- **Accent Color**: "${accentColor || '#0284c7'}"
+- **Background Theme**: "Dark (Pitch Black)"
+
+## Guidelines for AI Developer Agents
+1. When generating new components, pages, or layouts, always use the active brand name: "${siteName}".
+2. Use the primary color token \`var(--primary)\` or \`text-gold\` (which resolves to the active color ${primaryColor}) for all accents.
+3. Keep the dark theme active (pitch black background \`#000000\`).
+`;
+
+    fs.writeFileSync(path.join(agentsDir, 'AGENTS.md'), guidelines, 'utf8');
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
