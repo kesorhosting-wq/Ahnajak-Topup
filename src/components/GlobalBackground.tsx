@@ -21,9 +21,9 @@ const GlobalBackground: React.FC = () => {
       {/* 2. Gradient background */}
       {bgType === 'gradient' && (
         <div 
-          className="absolute inset-0 w-full h-full transition-all duration-500 opacity-60"
+          className="absolute inset-0 w-full h-full transition-all duration-500"
           style={{ 
-            background: `linear-gradient(135deg, ${bgColor} 0%, ${primaryColor}40 50%, ${accentColor}20 100%)` 
+            background: `linear-gradient(135deg, ${bgColor} 0%, ${primaryColor}60 50%, ${accentColor}40 100%)` 
           }}
         />
       )}
@@ -31,7 +31,7 @@ const GlobalBackground: React.FC = () => {
       {/* 3. Image background */}
       {bgType === 'image' && bgImageUrl && (
         <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-500 opacity-40"
+          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-500"
           style={{ backgroundImage: `url(${bgImageUrl})` }}
         />
       )}
@@ -44,9 +44,12 @@ const GlobalBackground: React.FC = () => {
           loop 
           muted 
           playsInline
-          className="absolute inset-0 w-full h-full object-cover transition-all duration-500 opacity-30"
+          className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
         />
       )}
+
+      {/* 5. Premium Dark Overlay (protects text readability and enforces dark theme consistency across all pages) */}
+      <div className="absolute inset-0 w-full h-full bg-zinc-950/85 z-10 transition-all duration-500" />
     </div>
   );
 };

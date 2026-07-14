@@ -41,7 +41,7 @@ const Header: React.FC = () => {
 
   return (
     <header 
-      className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 flex items-center bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md border-b border-zinc-200/40 dark:border-zinc-800/40 shadow-sm transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 flex items-center bg-zinc-950/20 backdrop-blur-md border-b border-zinc-800/30 transition-all duration-300"
       style={{
         height: `${headerHeight}px`,
         backgroundImage: settings.headerImage ? `url(${settings.headerImage})` : undefined,
@@ -51,7 +51,7 @@ const Header: React.FC = () => {
     >
       {/* Background overlay for readability when image is present */}
       {settings.headerImage && (
-        <div className="absolute inset-0 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md" />
+        <div className="absolute inset-0 bg-zinc-950/40 backdrop-blur-md" />
       )}
       
       {/* Dynamic top accent line */}
