@@ -3,7 +3,7 @@ import { Save, Type, Upload, Loader2, X, Globe, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { useSite } from '@/contexts/SiteContext';
 
@@ -48,22 +48,11 @@ const FontUpload: React.FC<FontUploadProps> = ({ label, description, value, onCh
     setIsUploading(true);
 
     try {
-      const fileName = `fonts/${Date.now()}-${Math.random().toString(36).substring(7)}${fileExt}`;
+      const { data, error: uploadError } = await api.upload(file);
+      if (uploadError) throw new Error(uploadError.message || 'Upload failed');
+      if (!data) throw new Error('Upload failed');
 
-      const { error: uploadError } = await supabase.storage
-        .from('site-assets')
-        .upload(fileName, file, {
-          cacheControl: '31536000', // Cache for 1 year
-          upsert: false
-        });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('site-assets')
-        .getPublicUrl(fileName);
-
-      onChange(publicUrl);
+      onChange(data.url);
       toast({ title: 'Font uploaded successfully!' });
     } catch (error) {
       console.error('Font upload error:', error);
@@ -83,11 +72,10 @@ const FontUpload: React.FC<FontUploadProps> = ({ label, description, value, onCh
   const handleRemove = async () => {
     if (!value) return;
     
-    // Extract file path from URL
-    const urlParts = value.split('/site-assets/');
-    if (urlParts.length > 1) {
-      const filePath = urlParts[1];
-      await supabase.storage.from('site-assets').remove([filePath]);
+    // Extract file name from URL
+    const fileName = value.split('/').pop();
+    if (fileName) {
+      await api.deleteUpload(fileName);
     }
     
     onChange('');

@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
-import { Plus, Trash2, GripVertical, ImageIcon, Loader2 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
 
 interface BannerImagesUploadProps {
   value: string[];
@@ -50,13 +48,7 @@ const BannerImagesUpload: React.FC<BannerImagesUploadProps> = ({
           continue;
         }
 
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = `${folder}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('site-assets')
-          .upload(filePath, file);
+        const { data, error: uploadError } = await api.upload(file);
 
         if (uploadError) {
           console.error('Upload error:', uploadError);
@@ -68,11 +60,9 @@ const BannerImagesUpload: React.FC<BannerImagesUploadProps> = ({
           continue;
         }
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('site-assets')
-          .getPublicUrl(filePath);
-
-        newUrls.push(publicUrl);
+        if (data) {
+          newUrls.push(data.url);
+        }
       }
 
       if (newUrls.length > 0) {
@@ -102,9 +92,9 @@ const BannerImagesUpload: React.FC<BannerImagesUploadProps> = ({
     
     // Try to delete from storage
     try {
-      const path = urlToRemove.split('/site-assets/')[1];
-      if (path) {
-        await supabase.storage.from('site-assets').remove([path]);
+      const fileName = urlToRemove.split('/').pop();
+      if (fileName) {
+        await api.deleteUpload(fileName);
       }
     } catch (error) {
       console.error('Failed to delete from storage:', error);

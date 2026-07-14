@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { handleApiError, isValidImageFile, isValidFileSize, MAX_FILE_SIZE } from '@/lib/errorHandler';
+import { api } from '@/lib/api';
 
 interface ImageUploadProps {
   value?: string;
@@ -65,25 +65,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     setIsUploading(true);
 
     try {
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const { data, error: uploadError } = await api.upload(file);
+      if (uploadError) throw new Error(uploadError.message || 'Upload failed');
+      if (!data) throw new Error('Upload failed');
 
-      const { error: uploadError } = await supabase.storage
-        .from('site-assets')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('site-assets')
-        .getPublicUrl(fileName);
-
-      onChange(publicUrl);
+      onChange(data.url);
       toast({ title: 'Image uploaded!' });
     } catch (error: unknown) {
       const errorMessage = handleApiError(error, 'ImageUpload');
@@ -103,11 +89,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleRemove = async () => {
     if (!value) return;
     
-    // Extract file path from URL
-    const urlParts = value.split('/site-assets/');
-    if (urlParts.length > 1) {
-      const filePath = urlParts[1];
-      await supabase.storage.from('site-assets').remove([filePath]);
+    // Extract file name from URL
+    const fileName = value.split('/').pop();
+    if (fileName) {
+      await api.deleteUpload(fileName);
     }
     
     onChange('');
