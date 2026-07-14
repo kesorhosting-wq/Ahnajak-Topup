@@ -9,7 +9,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { query, queryOne } = require('../db.cjs');
-const { requireAdmin, optionalAuth } = require('../auth.cjs');
+const { requireAuth, requireAdmin, optionalAuth } = require('../auth.cjs');
 
 const router = express.Router();
 
@@ -30,7 +30,7 @@ router.get('/', optionalAuth, async (req, res) => {
 });
 
 // Bulk upsert (admin)
-router.put('/', requireAdmin, async (req, res) => {
+router.put('/', requireAuth, requireAdmin, async (req, res) => {
   const entries = req.body;
   if (!entries || typeof entries !== 'object') {
     return res.status(400).json({ error: 'Expected a JSON object of key/value pairs' });
@@ -49,7 +49,7 @@ router.put('/', requireAdmin, async (req, res) => {
 });
 
 // Upsert single setting (admin)
-router.put('/:key', requireAdmin, async (req, res) => {
+router.put('/:key', requireAuth, requireAdmin, async (req, res) => {
   const { key } = req.params;
   const { value } = req.body;
   try {
@@ -64,7 +64,7 @@ router.put('/:key', requireAdmin, async (req, res) => {
 });
 
 // Delete single setting (admin)
-router.delete('/:key', requireAdmin, async (req, res) => {
+router.delete('/:key', requireAuth, requireAdmin, async (req, res) => {
   const { key } = req.params;
   try {
     await query('DELETE FROM site_settings WHERE `key` = ?', [key]);
@@ -75,7 +75,7 @@ router.delete('/:key', requireAdmin, async (req, res) => {
 });
 
 // Train AI with active branding and colors (admin)
-router.post('/ai-train', requireAdmin, async (req, res) => {
+router.post('/ai-train', requireAuth, requireAdmin, async (req, res) => {
   const { siteName, primaryColor, accentColor } = req.body;
   if (!siteName) return res.status(400).json({ error: 'siteName is required' });
 
