@@ -146,6 +146,11 @@ EOT
   # Build frontend static files
   npm run build
 
+  # Create uploads directories and grant proper permissions for Nginx/Express
+  mkdir -p "$APP_DIR/uploads/site-assets"
+  chown -R www-data:www-data "$APP_DIR/uploads"
+  chmod -R 755 "$APP_DIR/uploads"
+
   echo -e "\n${BLUE}>>> [STEP 5/6] Configuring Nginx Web Server Proxy${NC}"
   rm -f /etc/nginx/sites-enabled/default
   rm -f /etc/nginx/sites-available/default
