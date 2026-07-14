@@ -100,7 +100,7 @@ const PointExchangePage: React.FC = () => {
   const primaryColor = settings.primaryColor || '#E53E3E';
 
   return (
-    <div className="min-h-screen flex flex-col bg-background theme-accented-page" style={{ '--primary-color': primaryColor } as React.CSSProperties}>
+    <div className="min-h-screen flex flex-col bg-transparent theme-accented-page" style={{ '--primary-color': primaryColor } as React.CSSProperties}>
       <Header />
       <HeaderSpacer />
       <main className="flex-grow container mx-auto px-4 py-8">

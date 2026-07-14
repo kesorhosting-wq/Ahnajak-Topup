@@ -89,7 +89,7 @@ const Index: React.FC = () => {
         <meta name="description" content="Top up your favorite games instantly. Mobile Legends, Free Fire, PUBG, and more. Fast, secure, and affordable." />
       </Helmet>
 
-      <div className="min-h-screen flex flex-col bg-background text-foreground relative">
+      <div className="min-h-screen flex flex-col bg-transparent text-foreground relative">
         {/* Ambient Glow Lights for Premium Dark Theme */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none -z-30">
           <div className="absolute top-[5%] left-[5%] w-[45vw] h-[45vw] rounded-full bg-gold/10 blur-[130px]" />

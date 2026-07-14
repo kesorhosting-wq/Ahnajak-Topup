@@ -53,7 +53,7 @@ const Footer: React.FC<FooterProps> = ({
       <div 
         className="py-12 sm:py-16"
         style={{ 
-          backgroundColor: bg, 
+          backgroundColor: settings.bgType === 'color' ? bg : 'transparent',
           color: textCol
         }}
       >
