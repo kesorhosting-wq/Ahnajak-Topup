@@ -4,8 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { Key, Eye, EyeOff, Save, RefreshCw, Check, X, Wallet, Download, Package } from 'lucide-react';
+
+const BASE = '/api';
+const TOKEN_KEY = 'auth_token';
+
+function getToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function authHeaders(): Record<string, string> {
+  const h: Record<string, string> = { 'Content-Type': 'application/json' };
+  const t = getToken();
+  if (t) h['Authorization'] = `Bearer ${t}`;
+  return h;
+}
 
 interface ApiConfig {
   id?: string;
@@ -45,13 +58,10 @@ const ApiSettingsTab: React.FC = () => {
 
   const loadApiConfig = async () => {
     try {
-      const { data, error } = await supabase
-        .from('api_configurations')
-        .select('*')
-        .eq('api_name', 'g2bulk')
-        .maybeSingle();
-
-      if (error) throw error;
+      const res = await fetch(`${BASE}/admin/api-configs`, { headers: authHeaders() });
+      if (!res.ok) throw new Error('Failed to load');
+      const rows = await res.json();
+      const data = Array.isArray(rows) ? rows.find((r: any) => r.api_name === 'g2bulk') : null;
 
       if (data) {
         setG2bulkConfig({
@@ -59,7 +69,7 @@ const ApiSettingsTab: React.FC = () => {
           api_name: data.api_name,
           api_uid: data.api_uid || '',
           api_secret: data.api_secret || '',
-          is_enabled: data.is_enabled || false,
+          is_enabled: !!data.is_enabled,
           use_sandbox: false,
         });
       }
@@ -72,10 +82,10 @@ const ApiSettingsTab: React.FC = () => {
 
   const loadProductCount = async () => {
     try {
-      const { count } = await supabase
-        .from('g2bulk_products')
-        .select('*', { count: 'exact', head: true });
-      setProductCount(count || 0);
+      const res = await fetch(`${BASE}/admin/g2bulk-products`, { headers: authHeaders() });
+      if (!res.ok) return;
+      const rows = await res.json();
+      setProductCount(Array.isArray(rows) ? rows.length : 0);
     } catch (error) {
       console.error('Error loading product count:', error);
     }
@@ -84,19 +94,18 @@ const ApiSettingsTab: React.FC = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const payload = {
-        api_name: 'g2bulk',
-        api_uid: g2bulkConfig.api_uid,
-        api_secret: g2bulkConfig.api_secret,
-        is_enabled: g2bulkConfig.is_enabled,
-        use_sandbox: false,
-      };
+      const res = await fetch(`${BASE}/admin/api-configs/g2bulk`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          api_uid: g2bulkConfig.api_uid,
+          api_secret: g2bulkConfig.api_secret,
+          is_enabled: g2bulkConfig.is_enabled,
+          use_sandbox: false,
+        }),
+      });
 
-      const { error } = await supabase
-        .from('api_configurations')
-        .upsert(payload, { onConflict: 'api_name' });
-
-      if (error) throw error;
+      if (!res.ok) throw new Error('Save failed');
 
       toast({ title: 'G2Bulk API configuration saved!' });
       setTestResult(null);
@@ -112,19 +121,29 @@ const ApiSettingsTab: React.FC = () => {
     setIsTesting(true);
     setTestResult(null);
     try {
-      const { data, error } = await supabase.functions.invoke('g2bulk-api', {
-        body: { action: 'get_account_balance' },
+      const res = await fetch(`${BASE}/g2bulk-api`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ action: 'get_account_balance' }),
       });
 
-      if (error) throw error;
+      const data = await res.json();
 
       if (data?.success && data?.data) {
         const apiData = data.data;
         const balance = apiData.balance || 'Connected';
-        setTestResult({ 
-          success: true, 
+        setTestResult({
+          success: true,
           balance: String(balance),
-          message: `Connected as ${apiData.username || 'user'}!` 
+          message: `Connected as ${apiData.username || 'user'}!`,
+        });
+        toast({ title: 'API connection successful!' });
+      } else if (data?.success && data?.username) {
+        // Direct API response format
+        setTestResult({
+          success: true,
+          balance: String(data.balance || 'Connected'),
+          message: `Connected as ${data.username || 'user'}!`,
         });
         toast({ title: 'API connection successful!' });
       } else {
@@ -145,19 +164,23 @@ const ApiSettingsTab: React.FC = () => {
     setSyncStats(null);
     try {
       toast({ title: 'Syncing products...', description: 'This may take a few minutes.' });
-      
-      const { data, error } = await supabase.functions.invoke('g2bulk-api', {
-        body: { action: 'sync_products' },
+
+      const res = await fetch(`${BASE}/g2bulk-api`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ action: 'sync_products' }),
       });
 
-      if (error) throw error;
+      const data = await res.json();
 
-      if (data?.success && data?.data) {
-        setSyncStats(data.data);
-        setProductCount(data.data.synced);
-        toast({ 
-          title: 'Products synced successfully!', 
-          description: `${data.data.synced} products from ${data.data.categories} categories` 
+      if (data?.success) {
+        const synced = data.synced || data.data?.synced || 0;
+        const categories = data.categories || data.data?.categories || 0;
+        setSyncStats({ synced, categories });
+        setProductCount(synced);
+        toast({
+          title: 'Products synced successfully!',
+          description: `${synced} products synced`,
         });
       } else {
         toast({ title: 'Sync failed', description: data?.error, variant: 'destructive' });
@@ -274,8 +297,8 @@ const ApiSettingsTab: React.FC = () => {
               <h4 className="font-semibold">Synced Products</h4>
               <p className="text-sm text-muted-foreground">{productCount} products in database</p>
             </div>
-            <Button 
-              onClick={handleSyncProducts} 
+            <Button
+              onClick={handleSyncProducts}
               disabled={isSyncing || !g2bulkConfig.is_enabled}
               variant="outline"
             >
