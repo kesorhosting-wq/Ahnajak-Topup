@@ -72,6 +72,8 @@ router.delete('/:key', requireAdmin, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
 // Train AI with active branding and colors (admin)
 router.post('/ai-train', requireAdmin, async (req, res) => {
   const { siteName, primaryColor, accentColor } = req.body;
