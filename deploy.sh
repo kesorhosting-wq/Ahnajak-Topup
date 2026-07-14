@@ -113,7 +113,9 @@ install_app() {
   echo -e "\n${BLUE}>>> [STEP 4/6] Deploying Application Code${NC}"
   APP_DIR="/var/www/ahnajak-topup"
   mkdir -p "$APP_DIR"
-  cp -r . "$APP_DIR"
+  if [ "$(pwd)" != "$APP_DIR" ]; then
+    cp -r . "$APP_DIR"
+  fi
   cd "$APP_DIR"
 
   # Create .env config
