@@ -108,8 +108,8 @@ install_app() {
   systemctl enable mysql || true
 
   echo -e "\n${BLUE}>>> [STEP 3/6] Configuring Database & Users${NC}"
-  # Setup MySQL schema
-  mysql -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;"
+  # Setup MySQL schema cleanly (drops old database if exists to prevent foreign key errors with leftover tables)
+  mysql -e "DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\`;"
   mysql -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
   mysql -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost';"
   mysql -e "FLUSH PRIVILEGES;"
