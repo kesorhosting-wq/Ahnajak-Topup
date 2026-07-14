@@ -273,11 +273,28 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [khqrccPayment, setKhqrccPayment] = useState<KHQRccPayment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Update CSS variable --primary-color dynamically on document root
+  // Update CSS variable --primary-color dynamically on document root and toggle dark/light theme
   useEffect(() => {
     const color = settings.primaryColor || (settings.siteName === 'KESOR TOPUP' ? '#D4A84B' : '#E53E3E');
     document.documentElement.style.setProperty('--primary-color', color);
-  }, [settings.primaryColor, settings.siteName]);
+
+    const bgColor = settings.backgroundColor || '#000000';
+    let isLight = false;
+    if (bgColor && bgColor.startsWith('#') && bgColor.length === 7) {
+      const hex = bgColor.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      isLight = yiq >= 128;
+    }
+
+    if ((settings.bgType === 'color' || settings.bgType === 'gradient') && isLight) {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  }, [settings.primaryColor, settings.siteName, settings.backgroundColor, settings.bgType]);
 
   // Load data from database on mount
   useEffect(() => {

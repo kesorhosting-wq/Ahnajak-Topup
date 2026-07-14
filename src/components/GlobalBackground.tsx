@@ -10,6 +10,17 @@ const GlobalBackground: React.FC = () => {
   const bgImageUrl = settings.bgImageUrl || '';
   const bgVideoUrl = settings.bgVideoUrl || '';
 
+  // Determine if the background color is light
+  const isLight = (bgType === 'color' || bgType === 'gradient') && (() => {
+    if (!bgColor.startsWith('#') || bgColor.length !== 7) return false;
+    const hex = bgColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return yiq >= 128;
+  })();
+
   return (
     <div className="fixed inset-0 w-full h-full z-[-9999] pointer-events-none overflow-hidden">
       {/* 1. Base solid background color */}
@@ -48,8 +59,10 @@ const GlobalBackground: React.FC = () => {
         />
       )}
 
-      {/* 5. Premium Dark Overlay (protects text readability and enforces dark theme consistency across all pages) */}
-      <div className="absolute inset-0 w-full h-full bg-zinc-950/85 z-10 transition-all duration-500" />
+      {/* 5. Premium Dark Overlay (protects text readability and enforces dark theme consistency across all dark pages) */}
+      {!isLight && (
+        <div className="absolute inset-0 w-full h-full bg-zinc-950/85 z-10 transition-all duration-500" />
+      )}
     </div>
   );
 };
