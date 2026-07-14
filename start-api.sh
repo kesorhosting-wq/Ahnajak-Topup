@@ -1,4 +1,11 @@
 #!/bin/bash
-export KHQRCC_PROFILE_ID="IZn3r0Mgn6PsfX6UtEYbgjQ9SJkCe0nd"
-export KHQRCC_SECRET_KEY="pFkeCKwfXGhd4sPZivs3wxqbAwNzxjcf"
-node /root/angkor-topup-hub/api-server.cjs
+# Start the Ahnajak Topup API server (MySQL edition)
+# Usage: ./start-api.sh
+
+# Load environment from .env if it exists
+if [ -f .env ]; then
+  export $(grep -v '^#' .env | xargs)
+fi
+
+echo "Starting Ahnajak Topup API server..."
+node server/index.cjs

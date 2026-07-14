@@ -1,16 +1,14 @@
-import React, { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Package } from "@/contexts/SiteContext";
-import { useSite } from "@/contexts/SiteContext";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { resolveIconUrl } from "@/lib/icon-url";
+import React, { useState } from 'react';
+import { cn } from '@/lib/utils';
+import { Package, useSite } from '@/contexts/SiteContext';
+import { resolveIconUrl } from '@/lib/icon-url';
 
 interface PackageCardProps {
   pkg: Package;
   selected: boolean;
   onSelect: () => void;
-  priority?: boolean;
   gameDefaultIcon?: string;
+  priority?: boolean;
   isSpecial?: boolean;
 }
 
@@ -18,63 +16,54 @@ const PackageCard: React.FC<PackageCardProps> = ({
   pkg,
   selected,
   onSelect,
-  priority = false,
   gameDefaultIcon,
+  priority = false,
   isSpecial = false,
 }) => {
   const { settings } = useSite();
-  const isMobile = useIsMobile();
   const [iconLoaded, setIconLoaded] = useState(false);
   const [iconError, setIconError] = useState(false);
 
   const iconSrc = resolveIconUrl(pkg.icon || gameDefaultIcon || settings.packageIconUrl, settings.iconCdnBaseUrl);
-
-  const gameTextStyle = {
-    color: "#ffffff",
-    fontWeight: 900,
-    fontFamily: '"Nunito", "Arial Rounded MT Bold", sans-serif',
-    textShadow: `
-      -1.5px -1.5px 0 #794D00,
-       1.5px -1.5px 0 #794D00,
-      -1.5px  1.5px 0 #794D00,
-       1.5px  1.5px 0 #794D00,
-       0px    3px   3px rgba(0,0,0,0.5)
-    `,
-    lineHeight: "1.1",
-  };
+  const primaryColor = settings.primaryColor || (settings.siteName === 'KESOR TOPUP' ? '#D4A84B' : '#E53E3E');
 
   return (
     <button
       onClick={onSelect}
       className={cn(
-        "group relative w-full rounded-[14px] transition-transform duration-200 ease-out",
-        "hover:-translate-y-1 active:scale-[0.98]",
-        selected && "ring-2 ring-white ring-offset-2 ring-offset-[#D4A84B]",
-        isSpecial && "shadow-[0_0_0_2px_rgba(255,69,0,0.85),0_0_18px_rgba(255,120,0,0.45)]",
+        "group relative w-full rounded-2xl transition-[transform] duration-200 ease-out text-center sm:text-left",
+        "hover:-translate-y-0.5 active:scale-[0.99] focus:outline-none",
       )}
     >
       <div
-        className="relative flex flex-col items-center justify-between w-full overflow-hidden rounded-[12px] shadow-md border border-[#FDE08B]/50 p-1.5 sm:p-2"
+        className={cn(
+          "relative flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full overflow-hidden rounded-2xl p-2 sm:p-3 border shadow-sm transition-[border-color,box-shadow] duration-200",
+          !settings.packageBgImage && !settings.packageBgColor && (
+            selected
+              ? "bg-zinc-50/50 dark:bg-zinc-900/60"
+              : "bg-white/80 dark:bg-zinc-900/20 hover:border-zinc-300 dark:hover:border-zinc-800"
+          )
+        )}
         style={{
-          background: settings.packageBgImage
-            ? `url(${settings.packageBgImage})`
-            : "linear-gradient(135deg, #E6B93F 0%, #C99622 100%)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          minHeight: isMobile ? "130px" : "150px",
+          borderColor: selected ? primaryColor : (settings.packageBorderColor || 'rgba(228, 228, 231, 0.6)'),
+          borderWidth: settings.packageBorderWidth !== undefined ? `${settings.packageBorderWidth}px` : undefined,
+          boxShadow: selected ? `0 4px 20px -2px ${primaryColor}15, 0 0 0 2px ${primaryColor}10` : undefined,
+          backgroundColor: settings.packageBgColor || undefined,
+          backgroundImage: settings.packageBgImage ? `url(${settings.packageBgImage})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
         }}
       >
-        {/* Top: Icon */}
-        <div className="w-[60px] h-[60px] sm:w-[70px] sm:h-[70px] flex-shrink-0 z-10 relative">
-          <div className="absolute inset-0 bg-white/20 rounded-lg backdrop-blur-[2px] shadow-inner"></div>
-          <div className="relative w-full h-full flex items-center justify-center p-1">
+        {/* Left: Icon */}
+        <div className="w-[90%] sm:w-[35%] aspect-square flex-shrink-0 z-10 relative">
+          <div className="relative w-full h-full flex items-center justify-center p-0.5">
             {iconSrc && !iconError ? (
               <>
-                {!iconLoaded && <div className="absolute inset-1 rounded-md bg-white/20 animate-pulse" />}
+                {!iconLoaded && <div className="absolute inset-1 rounded-lg bg-zinc-100 dark:bg-zinc-900 animate-pulse" />}
                 <img
                   src={iconSrc}
                   alt=""
-                  className="w-full h-full object-contain drop-shadow-lg animate-icon-jump"
+                  className="max-w-full max-h-full object-contain drop-shadow-md"
                   style={{ opacity: iconLoaded ? 1 : 0, transition: "opacity 200ms" }}
                   loading={priority ? "eager" : "lazy"}
                   decoding="async"
@@ -87,53 +76,76 @@ const PackageCard: React.FC<PackageCardProps> = ({
                 />
               </>
             ) : iconError ? (
-              <span className="text-2xl drop-shadow-md">💎</span>
+              <span className="text-lg">💎</span>
             ) : null}
           </div>
         </div>
 
-        {/* Middle: Amount + Name */}
-        <div className="flex-1 flex flex-col justify-center items-center z-10 min-w-0 w-full px-0.5 py-1">
-          <div style={gameTextStyle} className="text-[16px] sm:text-[20px] leading-none tracking-wide">
+        {/* Right: Info */}
+        <div className="flex-1 flex flex-col items-center sm:items-start justify-center z-10 min-w-0 w-full">
+          <div
+            className="text-sm sm:text-base font-extrabold text-white leading-tight truncate drop-shadow-[0_1.5px_3px_rgba(0,0,0,0.4)]"
+            style={settings.packageTextColor ? { color: settings.packageTextColor } : {}}
+          >
             {pkg.amount.toLocaleString()}
           </div>
           <div
-            style={gameTextStyle}
-            className="text-[9px] sm:text-[10px] leading-tight text-center mt-0.5 px-0.5 line-clamp-2 break-words w-full"
+            className="text-[10px] sm:text-xs text-white/95 font-medium leading-none mt-0.5 truncate drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]"
+            style={settings.packageTextColor ? { color: settings.packageTextColor, opacity: 0.8 } : {}}
           >
             {pkg.name}
           </div>
-        </div>
-
-        {/* Bottom: Price pill */}
-        <div className="z-10 w-full flex flex-col items-center gap-1">
-          {pkg.points > 0 && (
-            <div className="flex items-center gap-1 text-[9px] font-bold text-white bg-black/30 px-1.5 py-0.5 rounded-md backdrop-blur-sm">
-              <span className="text-gold">★</span> {pkg.points} Points
-            </div>
-          )}
-          <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#FFD96A] to-[#F5A623] text-black text-[10px] sm:text-[12px] font-extrabold shadow whitespace-nowrap">
-            {settings.packageCurrencySymbol || "$"}{" "}
-            {pkg.price.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+          <div className="mt-1.5 flex items-center">
+            <span
+              className="inline-block px-2.5 py-0.5 rounded-lg text-xs sm:text-sm font-bold shadow-sm whitespace-nowrap text-zinc-950 transition-colors"
+              style={{
+                backgroundImage: 'url(https://i.pinimg.com/736x/b9/ee/c3/b9eec36215e74a45f4654a6c328a2f11.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                border: '1px solid #c5861b',
+                ...(settings.packagePriceColor ? { color: settings.packagePriceColor } : {})
+              }}
+            >
+              {settings.packageCurrencySymbol || "$"}{" "}
+              {pkg.price.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
           </div>
         </div>
 
-        {/* Special corner ribbon */}
-        {isSpecial && (
-          <div className="absolute top-0 right-0 overflow-hidden w-[56px] h-[56px] z-20 pointer-events-none">
-            <div className="absolute top-[10px] right-[-26px] w-[90px] rotate-45 bg-gradient-to-r from-red-600 to-orange-500 text-white text-[8px] font-black uppercase tracking-wider py-[2px] text-center shadow-md">
-              ★ Hot
+        {/* Points badge */}
+        {pkg.points > 0 && (
+          <div className="absolute top-1 right-2 flex items-center gap-0.5 text-[8px] font-bold text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-1 py-0.5 rounded-md border border-zinc-200/50 dark:border-zinc-800/50 z-20">
+            <span className="text-amber-500">★</span> {pkg.points}
+          </div>
+        )}
+
+        {/* Label ribbon - bottom left */}
+        {(isSpecial || pkg.label) && (
+          <div className="absolute bottom-0 left-0 z-20 pointer-events-none">
+            <div
+              className="px-2 py-0.5 text-[7px] sm:text-[8px] font-black uppercase tracking-wider rounded-tr-md shadow-sm"
+              style={{
+                background: pkg.labelBgColor
+                  ? pkg.labelBgColor
+                  : `linear-gradient(to right, ${primaryColor}, color-mix(in srgb, ${primaryColor} 60%, white))`,
+                color: pkg.labelTextColor || "#ffffff",
+              }}
+            >
+              {pkg.label || "★ Hot"}
             </div>
           </div>
         )}
 
-        {/* Selected Checkmark */}
+        {/* Selected Checkmark indicator inside right section */}
         {selected && (
-          <div className="absolute top-1 left-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center z-20 border border-white shadow-sm">
-            <span className="text-white text-xs font-bold">✓</span>
+          <div
+            className="absolute bottom-2.5 right-2.5 w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-bold shadow-sm z-20 animate-fade-in"
+            style={{ backgroundColor: primaryColor }}
+          >
+            ✓
           </div>
         )}
       </div>

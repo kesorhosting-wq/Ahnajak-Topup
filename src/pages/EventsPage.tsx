@@ -50,16 +50,20 @@ const EventsPage: React.FC = () => {
       </Helmet>
 
       <div
-        className="min-h-screen flex flex-col"
-        style={{
-          backgroundImage: settings.backgroundImage ? `url(${settings.backgroundImage})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-        }}
+        className="min-h-screen flex flex-col relative"
       >
         {settings.backgroundImage && (
-          <div className="fixed inset-0 bg-background/80 -z-10" />
+          <>
+            <div 
+              className="fixed inset-0 -z-20 pointer-events-none"
+              style={{
+                backgroundImage: `url(${settings.backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            />
+            <div className="fixed inset-0 bg-background/80 -z-10 pointer-events-none" />
+          </>
         )}
         <Header />
         <HeaderSpacer />

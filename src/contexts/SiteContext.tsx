@@ -13,6 +13,7 @@ export interface Game {
   specialPackages: Package[];
   g2bulkCategoryId?: string;
   defaultPackageIcon?: string;
+  tags?: string[];
 }
 
 export interface Package {
@@ -139,6 +140,8 @@ export interface SiteSettings {
   iconCdnBaseUrl: string;
   // Contact button icon (overrides default Telegram icon)
   contactButtonIcon: string;
+  // Featured games title customization
+  featuredGamesTitle?: string;
 }
 
 interface SiteContextType {
@@ -168,7 +171,7 @@ interface SiteContextType {
 }
 
 const defaultSettings: SiteSettings = {
-  siteName: 'KESOR TOPUP',
+  siteName: 'Ahnajak Topup',
   logoUrl: '',
   logoSize: 64,
   logoMobilePosition: 50,
@@ -177,12 +180,12 @@ const defaultSettings: SiteSettings = {
   footerLogoUrl: '',
   footerLogoSize: 32,
   heroText: 'ជ្រើសរើសទំនិញ',
-  primaryColor: '#D4A84B',
-  accentColor: '#8B4513',
-  backgroundColor: '#F5F0E6',
+  primaryColor: '#0ea5e9',
+  accentColor: '#0284c7',
+  backgroundColor: '#FFFFFF',
   // Browser settings
   siteIcon: '',
-  browserTitle: 'KESOR TOPUP - Game Topup Cambodia',
+  browserTitle: 'Ahnajak Topup - Game Topup Cambodia',
   // Home Edit defaults
   backgroundImage: '',
   headerImage: '',
@@ -242,10 +245,11 @@ const defaultSettings: SiteSettings = {
   // Custom font defaults
   customKhmerFont: '',
   customEnglishFont: '',
-  fallingIntensity: 30,
+  fallingIntensity: 0,
   fallingSpeed: 1,
   iconCdnBaseUrl: '',
   contactButtonIcon: '',
+  featuredGamesTitle: 'Featured Games',
 };
 
 const defaultPaymentMethods: PaymentMethod[] = [
@@ -258,10 +262,16 @@ const SiteContext = createContext<SiteContextType | undefined>(undefined);
 export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
   const [games, setGames] = useState<Game[]>([]);
-  const [paymentMethods] = useState<PaymentMethod[]>(defaultPaymentMethods);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(defaultPaymentMethods);
   const [ikhodePayment, setIkhodePayment] = useState<IKhodePayment | null>(null);
   const [khqrccPayment, setKhqrccPayment] = useState<KHQRccPayment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Update CSS variable --primary-color dynamically on document root
+  useEffect(() => {
+    const color = settings.primaryColor || (settings.siteName === 'KESOR TOPUP' ? '#D4A84B' : '#E53E3E');
+    document.documentElement.style.setProperty('--primary-color', color);
+  }, [settings.primaryColor, settings.siteName]);
 
   // Load data from database on mount
   useEffect(() => {
@@ -278,9 +288,9 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         supabase.from('special_packages').select('*').order('sort_order', { ascending: true }),
         // Public-safe gateway config via backend function (bypasses RLS on payment_gateways)
         supabase.functions.invoke('get-ikhode-public-config'),
-        supabase.from('payment_gateways').select('*').eq('slug', 'khqrcc').maybeSingle(),
+        supabase.from('payment_gateways_public').select('*').eq('slug', 'khqrcc').maybeSingle(),
       ]);
-      
+
       const settingsData = settingsResult.data;
       const gamesData = gamesResult.data;
       const packagesData = packagesResult.data;
@@ -298,6 +308,18 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           checkoutUrl: (khqrccGateway.config as any)?.checkout_url || 'https://khqr.cc/api/payment/requestv2'
         });
       }
+
+      // Filter payment methods based on gateway enabled status
+      const filteredMethods = defaultPaymentMethods.filter(method => {
+        if (method.id === 'khqr') {
+          return false;
+        }
+        if (method.id === 'khqrcc') {
+          return khqrccGateway ? !!khqrccGateway.enabled : false;
+        }
+        return true;
+      });
+      setPaymentMethods(filteredMethods);
 
       if (settingsData && settingsData.length > 0) {
         const loadedSettings: Partial<SiteSettings> = {};
@@ -349,6 +371,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (row.key === 'packageIconSizeDesktop') loadedSettings.packageIconSizeDesktop = row.value as number;
           if (row.key === 'packageIconSizeMobile') loadedSettings.packageIconSizeMobile = row.value as number;
           if (row.key === 'packageTextSize') loadedSettings.packageTextSize = row.value as number;
+          if (row.key === 'featuredGamesTitle') loadedSettings.featuredGamesTitle = row.value as string;
           if (row.key === 'packagePriceSize') loadedSettings.packagePriceSize = row.value as number;
           if (row.key === 'packageTextWeight') loadedSettings.packageTextWeight = row.value as number;
           if (row.key === 'packagePriceWeight') loadedSettings.packagePriceWeight = row.value as number;
@@ -385,6 +408,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           g2bulkCategoryId: (game as any).g2bulk_category_id || undefined,
           defaultPackageIcon: (game as any).default_package_icon || undefined,
           coverImage: (game as any).cover_image || undefined,
+          tags: (game as any).tags || [],
           packages: (packagesData || [])
             .filter(pkg => pkg.game_id === game.id)
             .map(pkg => ({
@@ -453,6 +477,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           g2bulkCategoryId: (game as any).g2bulk_category_id || undefined,
           defaultPackageIcon: (game as any).default_package_icon || undefined,
           coverImage: (game as any).cover_image || undefined,
+          tags: (game as any).tags || [],
           packages: (packagesData || [])
             .filter(pkg => pkg.game_id === game.id)
             .map(pkg => ({
@@ -523,24 +548,24 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const { data, error } = await supabase
         .from('games')
-        .insert({ 
-          name: game.name, 
+        .insert({
+          name: game.name,
           image: game.image,
           slug: game.slug,
           g2bulk_category_id: game.g2bulkCategoryId || null
         })
         .select()
         .single();
-      
+
       if (error) throw error;
       if (data) {
-        setGames(prev => [...prev, { 
-          ...data, 
+        setGames(prev => [...prev, {
+          ...data,
           id: data.id,
           slug: (data as any).slug || data.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-'),
           g2bulkCategoryId: (data as any).g2bulk_category_id || undefined,
-          packages: [], 
-          specialPackages: [] 
+          packages: [],
+          specialPackages: []
         }]);
       }
     } catch (error) {
@@ -557,16 +582,30 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (updatedGame.g2bulkCategoryId !== undefined) updateData.g2bulk_category_id = updatedGame.g2bulkCategoryId || null;
       if (updatedGame.defaultPackageIcon !== undefined) updateData.default_package_icon = updatedGame.defaultPackageIcon || null;
       if (updatedGame.coverImage !== undefined) updateData.cover_image = updatedGame.coverImage || null;
+      if (updatedGame.tags !== undefined) updateData.tags = updatedGame.tags || [];
 
-      const { error } = await supabase
+      let updatePayload = { ...updateData };
+      let { error } = await supabase
         .from('games')
-        .update(updateData)
+        .update(updatePayload)
         .eq('id', id);
-      
+
+      // Self-healing: if the 'tags' column doesn't exist, retry without it
+      if (error && error.message && (error.message.includes("column 'tags'") || error.code === 'PGRST204')) {
+        console.warn("Table 'games' is missing the 'tags' column. Retrying update without it.");
+        delete updatePayload.tags;
+        const retryResult = await supabase
+          .from('games')
+          .update(updatePayload)
+          .eq('id', id);
+        error = retryResult.error;
+      }
+
       if (error) throw error;
       setGames(prev => prev.map(g => g.id === id ? { ...g, ...updatedGame } : g));
     } catch (error) {
       handleApiError(error, 'SiteContext.updateGame');
+      throw error;
     }
   };
 
@@ -576,7 +615,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .from('games')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
       setGames(prev => prev.filter(g => g.id !== id));
     } catch (error) {
@@ -587,13 +626,13 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const moveGame = async (id: string, direction: 'up' | 'down') => {
     const currentIndex = games.findIndex(g => g.id === id);
     if (currentIndex === -1) return;
-    
+
     const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     if (targetIndex < 0 || targetIndex >= games.length) return;
-    
+
     const newGames = [...games];
     [newGames[currentIndex], newGames[targetIndex]] = [newGames[targetIndex], newGames[currentIndex]];
-    
+
     try {
       // Update sort_order for both games
       await Promise.all([
@@ -623,10 +662,10 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const { data, error } = await supabase
         .from('packages')
-        .insert({ 
-          game_id: gameId, 
-          name: pkg.name, 
-          amount: String(pkg.amount), 
+        .insert({
+          game_id: gameId,
+          name: pkg.name,
+          amount: String(pkg.amount),
           price: pkg.price,
           icon: pkg.icon || null,
           label: pkg.label || null,
@@ -640,16 +679,17 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         })
         .select()
         .single();
-      
+
       if (error) throw error;
       if (data) {
-        setGames(prev => prev.map(g => 
-          g.id === gameId 
-            ? { ...g, packages: [...g.packages, { 
-                id: data.id, 
-                name: data.name, 
-                amount: data.amount, 
-                price: parseFloat(String(data.price)), 
+        setGames(prev => prev.map(g =>
+          g.id === gameId
+            ? {
+              ...g, packages: [...g.packages, {
+                id: data.id,
+                name: data.name,
+                amount: data.amount,
+                price: parseFloat(String(data.price)),
                 currency: 'USD',
                 icon: data.icon || undefined,
                 label: (data as any).label || undefined,
@@ -660,7 +700,8 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 g2bulkTypeId: (data as any).g2bulk_type_id || undefined,
                 quantity: (data as any).quantity ?? null,
                 points: (data as any).points || 0,
-              }] }
+              }]
+            }
             : g
         ));
       }
@@ -689,15 +730,16 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .from('packages')
         .update(updateData)
         .eq('id', packageId);
-      
+
       if (error) throw error;
-      setGames(prev => prev.map(g => 
-        g.id === gameId 
+      setGames(prev => prev.map(g =>
+        g.id === gameId
           ? { ...g, packages: g.packages.map(p => p.id === packageId ? { ...p, ...updatedPkg } : p) }
           : g
       ));
     } catch (error) {
       handleApiError(error, 'SiteContext.updatePackage');
+      throw error;
     }
   };
 
@@ -707,10 +749,10 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .from('packages')
         .delete()
         .eq('id', packageId);
-      
+
       if (error) throw error;
-      setGames(prev => prev.map(g => 
-        g.id === gameId 
+      setGames(prev => prev.map(g =>
+        g.id === gameId
           ? { ...g, packages: g.packages.filter(p => p.id !== packageId) }
           : g
       ));
@@ -722,23 +764,23 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const movePackage = async (gameId: string, packageId: string, direction: 'up' | 'down') => {
     const game = games.find(g => g.id === gameId);
     if (!game) return;
-    
+
     const currentIndex = game.packages.findIndex(p => p.id === packageId);
     if (currentIndex === -1) return;
-    
+
     const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     if (targetIndex < 0 || targetIndex >= game.packages.length) return;
-    
+
     const newPackages = [...game.packages];
     [newPackages[currentIndex], newPackages[targetIndex]] = [newPackages[targetIndex], newPackages[currentIndex]];
-    
+
     try {
       // Update sort_order for both packages
       await Promise.all([
         supabase.from('packages').update({ sort_order: targetIndex }).eq('id', game.packages[currentIndex].id),
         supabase.from('packages').update({ sort_order: currentIndex }).eq('id', game.packages[targetIndex].id),
       ]);
-      setGames(prev => prev.map(g => 
+      setGames(prev => prev.map(g =>
         g.id === gameId ? { ...g, packages: newPackages } : g
       ));
     } catch (error) {
@@ -751,10 +793,10 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const { data, error } = await supabase
         .from('special_packages')
-        .insert({ 
-          game_id: gameId, 
-          name: pkg.name, 
-          amount: String(pkg.amount), 
+        .insert({
+          game_id: gameId,
+          name: pkg.name,
+          amount: String(pkg.amount),
           price: pkg.price,
           icon: pkg.icon || null,
           label: pkg.label || null,
@@ -768,16 +810,17 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         })
         .select()
         .single();
-      
+
       if (error) throw error;
       if (data) {
-        setGames(prev => prev.map(g => 
-          g.id === gameId 
-            ? { ...g, specialPackages: [...g.specialPackages, { 
-                id: data.id, 
-                name: data.name, 
-                amount: data.amount, 
-                price: parseFloat(String(data.price)), 
+        setGames(prev => prev.map(g =>
+          g.id === gameId
+            ? {
+              ...g, specialPackages: [...g.specialPackages, {
+                id: data.id,
+                name: data.name,
+                amount: data.amount,
+                price: parseFloat(String(data.price)),
                 currency: 'USD',
                 icon: data.icon || undefined,
                 label: (data as any).label || undefined,
@@ -788,7 +831,8 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 g2bulkTypeId: (data as any).g2bulk_type_id || undefined,
                 quantity: (data as any).quantity ?? null,
                 points: (data as any).points || 0,
-              }] }
+              }]
+            }
             : g
         ));
       }
@@ -817,15 +861,16 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .from('special_packages')
         .update(updateData)
         .eq('id', packageId);
-      
+
       if (error) throw error;
-      setGames(prev => prev.map(g => 
-        g.id === gameId 
+      setGames(prev => prev.map(g =>
+        g.id === gameId
           ? { ...g, specialPackages: g.specialPackages.map(p => p.id === packageId ? { ...p, ...updatedPkg } : p) }
           : g
       ));
     } catch (error) {
       handleApiError(error, 'SiteContext.updateSpecialPackage');
+      throw error;
     }
   };
 
@@ -835,10 +880,10 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .from('special_packages')
         .delete()
         .eq('id', packageId);
-      
+
       if (error) throw error;
-      setGames(prev => prev.map(g => 
-        g.id === gameId 
+      setGames(prev => prev.map(g =>
+        g.id === gameId
           ? { ...g, specialPackages: g.specialPackages.filter(p => p.id !== packageId) }
           : g
       ));
@@ -850,22 +895,22 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const moveSpecialPackage = async (gameId: string, packageId: string, direction: 'up' | 'down') => {
     const game = games.find(g => g.id === gameId);
     if (!game) return;
-    
+
     const currentIndex = game.specialPackages.findIndex(p => p.id === packageId);
     if (currentIndex === -1) return;
-    
+
     const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     if (targetIndex < 0 || targetIndex >= game.specialPackages.length) return;
-    
+
     const newPackages = [...game.specialPackages];
     [newPackages[currentIndex], newPackages[targetIndex]] = [newPackages[targetIndex], newPackages[currentIndex]];
-    
+
     try {
       await Promise.all([
         supabase.from('special_packages').update({ sort_order: targetIndex }).eq('id', game.specialPackages[currentIndex].id),
         supabase.from('special_packages').update({ sort_order: currentIndex }).eq('id', game.specialPackages[targetIndex].id),
       ]);
-      setGames(prev => prev.map(g => 
+      setGames(prev => prev.map(g =>
         g.id === gameId ? { ...g, specialPackages: newPackages } : g
       ));
     } catch (error) {
@@ -915,23 +960,23 @@ export const useSite = () => {
       ikhodePayment: null,
       khqrccPayment: null,
       isLoading: false,
-      refreshGames: async () => {},
-      updateSettings: () => {},
-      addGame: async () => {},
-      updateGame: async () => {},
-      deleteGame: async () => {},
-      moveGame: async () => {},
-      addPaymentMethod: () => {},
-      updatePaymentMethod: () => {},
-      deletePaymentMethod: () => {},
-      addPackage: async () => {},
-      updatePackage: async () => {},
-      deletePackage: async () => {},
-      movePackage: async () => {},
-      addSpecialPackage: async () => {},
-      updateSpecialPackage: async () => {},
-      deleteSpecialPackage: async () => {},
-      moveSpecialPackage: async () => {},
+      refreshGames: async () => { },
+      updateSettings: () => { },
+      addGame: async () => { },
+      updateGame: async () => { },
+      deleteGame: async () => { },
+      moveGame: async () => { },
+      addPaymentMethod: () => { },
+      updatePaymentMethod: () => { },
+      deletePaymentMethod: () => { },
+      addPackage: async () => { },
+      updatePackage: async () => { },
+      deletePackage: async () => { },
+      movePackage: async () => { },
+      addSpecialPackage: async () => { },
+      updateSpecialPackage: async () => { },
+      deleteSpecialPackage: async () => { },
+      moveSpecialPackage: async () => { },
     } as SiteContextType;
   }
   return context;

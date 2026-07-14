@@ -190,15 +190,21 @@ const CheckoutPage = () => {
         </Helmet>
 
         <div
-          className="min-h-screen pb-8"
+          className="min-h-screen pb-8 relative"
           style={{
             backgroundColor: settings.topupBackgroundColor || undefined,
-            backgroundImage: settings.topupBackgroundImage ? `url(${settings.topupBackgroundImage})` : undefined,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundAttachment: "fixed",
           }}
         >
+          {settings.topupBackgroundImage && (
+            <div 
+              className="fixed inset-0 -z-20 pointer-events-none"
+              style={{
+                backgroundImage: `url(${settings.topupBackgroundImage})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+          )}
           <Header />
           <HeaderSpacer />
 
@@ -231,15 +237,21 @@ const CheckoutPage = () => {
       </Helmet>
 
       <div
-        className="min-h-screen pb-8"
+        className="min-h-screen pb-8 relative"
         style={{
           backgroundColor: settings.topupBackgroundColor || undefined,
-          backgroundImage: settings.topupBackgroundImage ? `url(${settings.topupBackgroundImage})` : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
         }}
       >
+        {settings.topupBackgroundImage && (
+          <div 
+            className="fixed inset-0 -z-20 pointer-events-none"
+            style={{
+              backgroundImage: `url(${settings.topupBackgroundImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+        )}
         <Header />
         <HeaderSpacer />
 

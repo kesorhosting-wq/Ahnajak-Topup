@@ -5,19 +5,13 @@ import HeaderSpacer from '@/components/HeaderSpacer';
 import HeroBanner from '@/components/HeroBanner';
 import GameCard from '@/components/GameCard';
 import Footer from '@/components/Footer';
-import WelcomeLoader from '@/components/WelcomeLoader';
 import { useSite } from '@/contexts/SiteContext';
 import { useFavicon } from '@/hooks/useFavicon';
-import { 
-  Search, 
-  X, 
-  Sparkles, 
-  Clock, 
-  TrendingUp, 
-  Smartphone, 
-  Laptop, 
-  Gamepad2, 
-  CheckCircle,
+import {
+  Search,
+  X,
+  Sparkles,
+  Gamepad2,
   AlertCircle
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -37,9 +31,11 @@ const mockActivities = [
 const Index: React.FC = () => {
   const { settings, games, isLoading } = useSite();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'popular' | 'mobile' | 'pc'>('all');
   const [activityIndex, setActivityIndex] = useState(0);
   const [animateActivity, setAnimateActivity] = useState(true);
+
+  const isKesor = settings.siteName?.toLowerCase().includes('kesor');
+  const primaryColor = settings.primaryColor || (isKesor ? '#D4A84B' : '#E53E3E');
 
   // Update favicon dynamically
   useFavicon(settings.siteIcon);
@@ -56,132 +52,109 @@ const Index: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Filter games based on category and search query
+  // Filter games based on search query
   const filteredGames = useMemo(() => {
     let result = games;
-    
-    // Apply category filter
-    if (selectedCategory === 'popular') {
-      const popularIdentifiers = ['mobile-legends', 'free-fire', 'pubg', 'valorant', 'honor-of-kings', 'mlbb', 'ff'];
-      result = result.filter(game => 
-        popularIdentifiers.some(ident => game.slug.toLowerCase().includes(ident) || game.name.toLowerCase().includes(ident))
-      );
-    } else if (selectedCategory === 'mobile') {
-      const pcIdentifiers = ['valorant', 'steam', 'pc'];
-      result = result.filter(game => 
-        !pcIdentifiers.some(ident => game.slug.toLowerCase().includes(ident) || game.name.toLowerCase().includes(ident))
-      );
-    } else if (selectedCategory === 'pc') {
-      const pcIdentifiers = ['valorant', 'steam', 'pc'];
-      result = result.filter(game => 
-        pcIdentifiers.some(ident => game.slug.toLowerCase().includes(ident) || game.name.toLowerCase().includes(ident))
+
+    // Apply search query filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(game =>
+        (game.name || '').toLowerCase().includes(query)
       );
     }
 
+    return result;
+  }, [games, searchQuery]);
+
+  // Filter featured games based on search query
+  const featuredGames = useMemo(() => {
+    let result = games.filter(game => game.tags?.includes('featured'));
+
     // Apply search query filter
-    if (!searchQuery.trim()) return result;
-    const query = searchQuery.toLowerCase();
-    return result.filter(game => 
-      game.name.toLowerCase().includes(query)
-    );
-  }, [games, selectedCategory, searchQuery]);
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(game =>
+        (game.name || '').toLowerCase().includes(query)
+      );
+    }
+
+    return result;
+  }, [games, searchQuery]);
 
   return (
     <>
-      <WelcomeLoader />
       <Helmet>
         <title>{settings.browserTitle || `${settings.siteName} - Game Topup Cambodia`}</title>
         <meta name="description" content="Top up your favorite games instantly. Mobile Legends, Free Fire, PUBG, and more. Fast, secure, and affordable." />
       </Helmet>
-      
-      <div 
-        className="min-h-screen flex flex-col"
-        style={{
-          backgroundImage: settings.backgroundImage ? `url(${settings.backgroundImage})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      >
+
+      <div className="min-h-screen flex flex-col bg-background text-foreground relative">
+        {/* Ambient Glow Lights for Premium Dark Theme */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none -z-30">
+          <div className="absolute top-[5%] left-[5%] w-[45vw] h-[45vw] rounded-full bg-gold/10 blur-[130px]" />
+          <div className="absolute top-[35%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-amber-500/5 blur-[160px]" />
+          <div className="absolute bottom-[5%] left-[-10%] w-[45vw] h-[45vw] rounded-full bg-gold/5 blur-[140px]" />
+        </div>
         {settings.backgroundImage && (
-          <div className="fixed inset-0 bg-background/80 -z-10" />
+          <>
+            <div 
+              className="fixed inset-0 -z-20 pointer-events-none"
+              style={{
+                backgroundImage: `url(${settings.backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            />
+            <div className="fixed inset-0 bg-background/80 -z-10 pointer-events-none" />
+          </>
         )}
         <Header />
         <HeaderSpacer />
-        
+
         {/* Carousel Banner */}
-        <HeroBanner 
-          bannerImage={settings.bannerImage} 
+        <HeroBanner
+          bannerImage={settings.bannerImage}
           bannerImages={settings.bannerImages}
-          bannerHeight={settings.bannerHeight} 
+          bannerHeight={settings.bannerHeight}
         />
-
-        {/* Live Activity Ticker Section (Signature Feature) */}
-        <div className="container mx-auto px-3 sm:px-4 mb-6">
-          <div className="max-w-4xl mx-auto rounded-full bg-white/60 dark:bg-black/30 border border-gold/25 backdrop-blur-xl shadow-md px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 overflow-hidden">
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 text-gold animate-pulse" />
-                Live Topups
-              </span>
-            </div>
-            
-            <div className="h-px w-6 bg-gold/30 shrink-0 hidden sm:block" />
-
-            {/* Scrolling Feed */}
-            <div className="flex-1 min-w-0 flex items-center justify-center sm:justify-start">
-              <p className={cn(
-                "text-xs sm:text-sm font-semibold truncate transition-all duration-300 flex items-center gap-2",
-                animateActivity ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
-              )}>
-                <span className="text-gold">{mockActivities[activityIndex].player}</span>
-                <span className="text-muted-foreground">successfully filled</span>
-                <span className="text-foreground font-bold underline decoration-gold/40 decoration-2">{mockActivities[activityIndex].name}</span>
-                <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold flex items-center gap-0.5 border border-emerald-500/20">
-                  <CheckCircle className="w-2.5 h-2.5" /> FULFILLED
-                </span>
-              </p>
-            </div>
-
-            <div className="shrink-0 text-[10px] sm:text-xs text-muted-foreground font-medium flex items-center gap-1">
-              <Clock className="w-3 h-3 text-gold" />
-              {mockActivities[activityIndex].time}
-            </div>
-          </div>
-        </div>
 
 
 
         {/* Games Showcase Section */}
-        <section className="container mx-auto px-3 sm:px-4 py-6 sm:py-10 flex-1">
-          <div className="max-w-6xl mx-auto">
-            
+        <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-12 flex-1">
+          <div>
             {/* Header Content */}
             <div className="flex flex-col items-center justify-center text-center mb-8 sm:mb-12">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gold/10 text-gold border border-gold/20 mb-3 animate-bounce">
+              <div 
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-3 animate-pulse"
+                style={{ 
+                  backgroundColor: `${primaryColor}10`,
+                  color: primaryColor,
+                  borderColor: `${primaryColor}25`
+                }}
+              >
                 🔥 TOP RECHARGES IN CAMBODIA
               </div>
-              <h2 className="font-display font-khmer text-2xl sm:text-4xl font-extrabold leading-tight text-foreground mb-4">
+              <h2 className="font-display text-2xl sm:text-4xl font-black leading-tight text-zinc-900 dark:text-zinc-50 mb-4">
                 {settings.heroText}
               </h2>
-              <div className="w-24 sm:w-32 h-1 bg-gradient-to-r from-transparent via-gold to-transparent rounded-full mb-6" />
-              
+              <div 
+                className="w-16 h-1 rounded-full mb-6"
+                style={{ backgroundColor: primaryColor }}
+              />
+
               {/* Search Bar & Categories Container */}
               <div className="w-full max-w-xl space-y-4">
-                
                 {/* Custom Search Input */}
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gold/80" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
                   <Input
                     type="text"
                     placeholder="ស្វែងរកហ្គេម... (Search games)"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-11 pr-11 h-12 bg-white/70 dark:bg-black/30 border-gold/20 focus:border-gold rounded-full text-base shadow-sm focus:ring-1 focus:ring-gold transition-all"
+                    className="pl-11 pr-11 h-12 bg-white/80 dark:bg-zinc-900/30 border-zinc-200 dark:border-zinc-800 focus:border-red-500 rounded-xl text-base shadow-sm focus:ring-1 focus:ring-red-500 transition-all"
                   />
                   {searchQuery && (
                     <Button
@@ -194,111 +167,83 @@ const Index: React.FC = () => {
                     </Button>
                   )}
                 </div>
-
-                {/* Styled Toggle Tabs (Categories) */}
-                <div className="flex items-center justify-center flex-wrap gap-1.5 sm:gap-2 p-1 rounded-full bg-white/60 dark:bg-black/20 border border-white/60 backdrop-blur-md max-w-md mx-auto">
-                  <button
-                    onClick={() => setSelectedCategory('all')}
-                    className={cn(
-                      "px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5",
-                      selectedCategory === 'all' 
-                        ? "bg-gradient-to-r from-gold to-gold-dark text-background shadow-md scale-[1.03]" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-white/40"
-                    )}
-                  >
-                    <Gamepad2 className="w-3.5 h-3.5" />
-                    ទាំងអស់
-                  </button>
-                  <button
-                    onClick={() => setSelectedCategory('popular')}
-                    className={cn(
-                      "px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5",
-                      selectedCategory === 'popular' 
-                        ? "bg-gradient-to-r from-gold to-gold-dark text-background shadow-md scale-[1.03]" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-white/40"
-                    )}
-                  >
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    ពេញនិយម
-                  </button>
-                  <button
-                    onClick={() => setSelectedCategory('mobile')}
-                    className={cn(
-                      "px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5",
-                      selectedCategory === 'mobile' 
-                        ? "bg-gradient-to-r from-gold to-gold-dark text-background shadow-md scale-[1.03]" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-white/40"
-                    )}
-                  >
-                    <Smartphone className="w-3.5 h-3.5" />
-                    ទូរស័ព្ទ
-                  </button>
-                  <button
-                    onClick={() => setSelectedCategory('pc')}
-                    className={cn(
-                      "px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5",
-                      selectedCategory === 'pc' 
-                        ? "bg-gradient-to-r from-gold to-gold-dark text-background shadow-md scale-[1.03]" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-white/40"
-                    )}
-                  >
-                    <Laptop className="w-3.5 h-3.5" />
-                    កុំព្យូទ័រ
-                  </button>
-                </div>
               </div>
             </div>
-            
-            {/* Games Grid & State Handling */}
-            {isLoading ? (
-              <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <div key={i} className="aspect-[3/4] rounded-[24px] bg-white/40 dark:bg-black/10 animate-pulse border border-white/20" />
-                ))}
-              </div>
-            ) : filteredGames.length === 0 ? (
-              <div className="text-center py-16 sm:py-24 animate-fade-in bg-white/50 dark:bg-black/10 border border-white/40 rounded-[28px] p-6 max-w-md mx-auto shadow-sm backdrop-blur-sm">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gold/10 text-gold mb-4 border border-gold/20">
-                  <AlertCircle className="w-7 h-7" />
+
+            {/* Featured Games Section */}
+            {!isLoading && featuredGames.length > 0 && (
+              <div className="mb-10 sm:mb-14">
+                <h3 className="text-lg sm:text-xl font-black text-zinc-900 dark:text-zinc-50 mb-5 flex items-center gap-2">
+                  <Sparkles className="w-4.5 h-4.5 text-gold animate-pulse fill-gold" />
+                  {settings.featuredGamesTitle || "Featured Games"}
+                </h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+                  {featuredGames.map((game, index) => (
+                    <GameCard
+                      key={`featured-${game.id}`}
+                      game={game}
+                      cardBgColor={settings.gameCardBgColor}
+                      cardBorderColor={settings.gameCardBorderColor}
+                      cardFrameImage={settings.gameCardFrameImage}
+                      cardBorderImage={settings.gameCardBorderImage}
+                      priority={index < 4}
+                      index={index}
+                    />
+                  ))}
                 </div>
-                <h3 className="font-khmer text-base sm:text-lg font-bold mb-2">រកមិនឃើញហ្គេមទេ</h3>
-                <p className="text-muted-foreground text-xs sm:text-sm">
-                  {searchQuery 
-                    ? `មិនមានលទ្ធផលស្វែងរកសម្រាប់ "${searchQuery}" ឡើយ។` 
-                    : 'មិនមានហ្គេមនៅក្នុងប្រភេទនេះឡើយនៅឡើយទេ។'}
-                </p>
-                {searchQuery && (
-                  <Button
-                    variant="outline"
-                    className="mt-4 rounded-full border-gold text-gold hover:bg-gold hover:text-background"
-                    onClick={() => setSearchQuery('')}
-                  >
-                    Clear search
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
-                {filteredGames.map((game, index) => (
-                  <GameCard 
-                    key={game.id} 
-                    game={game}
-                    cardBgColor={settings.gameCardBgColor}
-                    cardBorderColor={settings.gameCardBorderColor}
-                    cardFrameImage={settings.gameCardFrameImage}
-                    cardBorderImage={settings.gameCardBorderImage}
-                    priority={index < 4}
-                    index={index}
-                  />
-                ))}
+                <div className="mt-8 border-b border-zinc-200/50 dark:border-zinc-800/20 w-full" />
               </div>
             )}
+
+            {/* Full Games Section */}
+            <div className="mt-8">
+              {!isLoading && featuredGames.length > 0 && (
+                <h3 className="text-lg sm:text-xl font-black text-zinc-900 dark:text-zinc-50 mb-5 flex items-center gap-2">
+                  <Gamepad2 className="w-4.5 h-4.5 text-zinc-400" />
+                  Full Games
+                </h3>
+              )}
+              
+              {isLoading ? (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="aspect-[3/4] rounded-2xl bg-zinc-200 dark:bg-zinc-800 animate-pulse border border-zinc-100 dark:border-zinc-900" />
+                  ))}
+                </div>
+              ) : filteredGames.length === 0 ? (
+                <div className="text-center py-16 sm:py-24 animate-fade-in bg-white/70 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl p-6 max-w-md mx-auto shadow-sm backdrop-blur-sm">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 mb-4">
+                    <AlertCircle className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold mb-2 text-zinc-950 dark:text-zinc-50">រកមិនឃើញហ្គេមទេ</h3>
+                  <p className="text-muted-foreground text-xs sm:text-sm">
+                    {searchQuery
+                      ? `មិនមានលទ្ធផលស្វែងរកសម្រាប់ "${searchQuery}" ឡើយ。`
+                      : 'មិនមានហ្គេមឡើយនៅឡើយទេ។'}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+                  {filteredGames.map((game, index) => (
+                    <GameCard
+                      key={game.id}
+                      game={game}
+                      cardBgColor={settings.gameCardBgColor}
+                      cardBorderColor={settings.gameCardBorderColor}
+                      cardFrameImage={settings.gameCardFrameImage}
+                      cardBorderImage={settings.gameCardBorderImage}
+                      priority={index < 4}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </section>
-        
-        {/* Footer */}
-        <Footer 
-          backgroundColor={settings.footerBgColor}
+
+        <Footer
+          backgroundColor={settings.footerBgColor || undefined}
           textColor={settings.footerTextColor}
           copyrightText={settings.footerText}
           socialIcons={{
@@ -312,7 +257,6 @@ const Index: React.FC = () => {
             facebook: settings.footerFacebookUrl
           }}
           paymentIcons={settings.footerPaymentIcons}
-          paymentIconSize={settings.footerPaymentIconSize}
         />
       </div>
     </>

@@ -226,7 +226,7 @@ const FontSettingsTab: React.FC = () => {
                   className="text-lg"
                   style={{ fontFamily: 'CustomKhmer, Battambang, sans-serif' }}
                 >
-                  ភាសាខ្មែរ - សូមស្វាគមន៍មកកាន់ KESOR TOPUP
+                  ភាសាខ្មែរ - សូមស្វាគមន៍មកកាន់ AHNAJAK TOPUP
                 </p>
               )}
               {englishFont && (
@@ -234,7 +234,7 @@ const FontSettingsTab: React.FC = () => {
                   className="text-lg"
                   style={{ fontFamily: 'CustomEnglish, "Noto Sans", sans-serif' }}
                 >
-                  Welcome to KESOR TOPUP - Game Topup Service
+                  Welcome to AHNAJAK TOPUP - Game Topup Service
                 </p>
               )}
             </div>

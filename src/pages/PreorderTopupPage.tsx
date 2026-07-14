@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveIconUrl } from "@/lib/icon-url";
 
 interface PreorderPkg {
   id: string;
@@ -329,13 +330,21 @@ const PreorderTopupPage: React.FC = () => {
       </Helmet>
 
       <div
-        className="min-h-screen pb-8"
+        className="min-h-screen pb-8 relative"
         style={{
           backgroundColor: settings.topupBackgroundColor || undefined,
-          backgroundImage: settings.topupBackgroundImage ? `url(${settings.topupBackgroundImage})` : undefined,
-          backgroundSize: "cover", backgroundPosition: "center", backgroundAttachment: "fixed",
         }}
       >
+        {settings.topupBackgroundImage && (
+          <div 
+            className="fixed inset-0 -z-20 pointer-events-none"
+            style={{
+              backgroundImage: `url(${settings.topupBackgroundImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+        )}
         <Header />
         <HeaderSpacer />
 
@@ -354,7 +363,7 @@ const PreorderTopupPage: React.FC = () => {
                 backgroundSize: "cover", backgroundPosition: "center",
               }}
             >
-              <img src={game.image} alt={game.name}
+              <img src={resolveIconUrl(game.image)} alt={game.name}
                 className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover border-2"
                 style={{ borderColor: settings.topupBannerColor || "hsl(43 74% 49%)" }}
               />

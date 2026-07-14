@@ -211,15 +211,21 @@ const InvoicePage = () => {
       </Helmet>
 
       <div 
-        className="min-h-screen pb-8 print:bg-white"
+        className="min-h-screen pb-8 print:bg-white relative"
         style={{
           backgroundColor: settings.topupBackgroundColor || undefined,
-          backgroundImage: settings.topupBackgroundImage ? `url(${settings.topupBackgroundImage})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
         }}
       >
+        {settings.topupBackgroundImage && (
+          <div 
+            className="fixed inset-0 -z-20 pointer-events-none print:hidden"
+            style={{
+              backgroundImage: `url(${settings.topupBackgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+        )}
         <div className="print:hidden">
           <Header />
           <HeaderSpacer />

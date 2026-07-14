@@ -1,7 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import api from '@/lib/api';
 import { handleApiError } from '@/lib/errorHandler';
+
+// Local types replacing @supabase/supabase-js User/Session
+interface User {
+  id: string;
+  email: string;
+  display_name?: string;
+  [key: string]: any;
+}
+interface Session {
+  access_token: string;
+  user: User | null;
+}
 
 interface SignUpOptions {
   displayName?: string;
@@ -25,89 +36,83 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkAdminRole = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
-
-      if (error) {
-        handleApiError(error, 'AuthContext.checkAdminRole');
-        return false;
-      }
-      return !!data;
-    } catch (error) {
-      handleApiError(error, 'AuthContext.checkAdminRole');
-      return false;
-    }
-  };
-
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Defer admin check with setTimeout to avoid deadlock
-        if (session?.user) {
-          setTimeout(() => {
-            checkAdminRole(session.user.id).then(setIsAdmin);
-          }, 0);
-        } else {
+    // Check for existing session on mount
+    api.auth.getSession().then(({ data }) => {
+      if (data?.session && data.session.access_token) {
+        setSession(data.session);
+        const u = data.session.user as User;
+        setUser(u);
+        // Check admin role via session endpoint
+        if (u) {
+          fetch('/api/auth/session', {
+            headers: { Authorization: `Bearer ${data.session.access_token}` },
+          })
+            .then(res => res.json())
+            .then(result => {
+              setIsAdmin(!!result.isAdmin);
+            })
+            .catch(() => setIsAdmin(false));
+        }
+      }
+      setIsLoading(false);
+    });
+
+    // Listen for auth state changes (sign in/out)
+    const { data: { subscription } } = api.auth.onAuthStateChange(
+      (event, authUser) => {
+        if (event === 'SIGNED_IN' && authUser) {
+          const token = localStorage.getItem('auth_token');
+          const newSession: Session = { access_token: token || '', user: authUser as User };
+          setSession(newSession);
+          setUser(authUser as User);
+          // Check admin
+          fetch('/api/auth/session', {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+            .then(res => res.json())
+            .then(result => setIsAdmin(!!result.isAdmin))
+            .catch(() => setIsAdmin(false));
+        } else if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
           setIsAdmin(false);
         }
-        
         setIsLoading(false);
       }
     );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        checkAdminRole(session.user.id).then(setIsAdmin);
-      }
-      
-      setIsLoading(false);
-    });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, options?: SignUpOptions) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          display_name: options?.displayName || email.split('@')[0]
-        }
-      }
-    });
-    
-    return { error: error as Error | null };
+    try {
+      const { error } = await api.auth.signUp(email, password, {
+        displayName: options?.displayName || email.split('@')[0],
+      });
+      if (error) return { error: new Error(error.message) };
+      return { error: null };
+    } catch (error) {
+      handleApiError(error, 'AuthContext.signUp');
+      return { error: error as Error };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    return { error: error as Error | null };
+    try {
+      const { error } = await api.auth.signIn(email, password);
+      if (error) return { error: new Error(error.message) };
+      return { error: null };
+    } catch (error) {
+      handleApiError(error, 'AuthContext.signIn');
+      return { error: error as Error };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await api.auth.signOut();
+    setSession(null);
+    setUser(null);
     setIsAdmin(false);
   };
 

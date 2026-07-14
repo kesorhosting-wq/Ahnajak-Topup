@@ -30,6 +30,8 @@ const AuthPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'signin');
 
+  const primaryColor = settings.primaryColor || '#E53E3E';
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
@@ -100,9 +102,10 @@ const AuthPage: React.FC = () => {
         variant: 'destructive',
       });
     } else {
-      toast({ title: 'Account created successfully!' });
-      const redirect = searchParams.get('redirect') || '/';
-      navigate(redirect);
+      toast({
+        title: 'Registration Successful',
+        description: 'Please check your email to confirm your registration.',
+      });
     }
   };
 
@@ -116,31 +119,36 @@ const AuthPage: React.FC = () => {
       <Header />
       <HeaderSpacer />
 
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background to-secondary/20">
+      <div 
+        className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background to-secondary/20"
+        style={{ '--primary-color': primaryColor } as React.CSSProperties}
+      >
         <div className="w-full max-w-md">
           <KhmerFrame className="p-0">
             <Card className="border-0 shadow-none bg-transparent">
               <CardHeader className="text-center pb-2">
-                <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center">
-                  <User className="w-8 h-8 text-primary-foreground" />
+                <div className="mx-auto mb-4 w-16 h-16 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: primaryColor }}>
+                  <User className="w-8 h-8" />
                 </div>
-                <CardTitle className="font-display text-2xl gold-text">{settings.siteName}</CardTitle>
+                <CardTitle className="font-display text-2xl font-black" style={{ color: primaryColor }}>{settings.siteName}</CardTitle>
                 <CardDescription>Sign in to access your order history</CardDescription>
               </CardHeader>
               
               <CardContent>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                  <TabsList className="grid w-full grid-cols-2 bg-secondary/50">
+                  <TabsList className="grid w-full grid-cols-2 bg-zinc-100 dark:bg-zinc-900 rounded-xl p-1">
                     <TabsTrigger 
                       value="signin" 
-                      className="data-[state=active]:bg-gold data-[state=active]:text-primary-foreground"
+                      className="data-[state=active]:text-white rounded-lg transition-all"
+                      style={activeTab === 'signin' ? { backgroundColor: primaryColor } : {}}
                     >
                       <LogIn className="w-4 h-4 mr-2" />
                       Sign In
                     </TabsTrigger>
                     <TabsTrigger 
                       value="signup"
-                      className="data-[state=active]:bg-gold data-[state=active]:text-primary-foreground"
+                      className="data-[state=active]:text-white rounded-lg transition-all"
+                      style={activeTab === 'signup' ? { backgroundColor: primaryColor } : {}}
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
                       Register
@@ -156,7 +164,7 @@ const AuthPage: React.FC = () => {
                           placeholder="admin@example.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="border-gold/50 focus:border-gold"
+                          className="border-zinc-200 dark:border-zinc-800 focus:border-[var(--primary-color)] rounded-xl"
                           required
                         />
                       </div>
@@ -168,7 +176,7 @@ const AuthPage: React.FC = () => {
                             placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="border-gold/50 focus:border-gold pr-10"
+                            className="border-zinc-200 dark:border-zinc-800 focus:border-[var(--primary-color)] pr-10 rounded-xl"
                             required
                           />
                           <button
@@ -182,7 +190,8 @@ const AuthPage: React.FC = () => {
                       </div>
                       <Button 
                         type="submit" 
-                        className="w-full bg-gold hover:bg-gold-dark text-primary-foreground"
+                        className="w-full text-white font-bold rounded-xl transition-all hover:brightness-95"
+                        style={{ backgroundColor: primaryColor }}
                         disabled={isLoading}
                       >
                         {isLoading ? 'Signing in...' : 'Sign In'}
@@ -199,7 +208,7 @@ const AuthPage: React.FC = () => {
                           placeholder="Your name"
                           value={displayName}
                           onChange={(e) => setDisplayName(e.target.value)}
-                          className="border-gold/50 focus:border-gold"
+                          className="border-zinc-200 dark:border-zinc-800 focus:border-[var(--primary-color)] rounded-xl"
                         />
                       </div>
                       <div>
@@ -209,7 +218,7 @@ const AuthPage: React.FC = () => {
                           placeholder="your@email.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="border-gold/50 focus:border-gold"
+                          className="border-zinc-200 dark:border-zinc-800 focus:border-[var(--primary-color)] rounded-xl"
                           required
                         />
                       </div>
@@ -221,7 +230,7 @@ const AuthPage: React.FC = () => {
                             placeholder="Min. 6 characters"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="border-gold/50 focus:border-gold pr-10"
+                            className="border-zinc-200 dark:border-zinc-800 focus:border-[var(--primary-color)] pr-10 rounded-xl"
                             required
                           />
                           <button
@@ -235,7 +244,8 @@ const AuthPage: React.FC = () => {
                       </div>
                       <Button 
                         type="submit" 
-                        className="w-full bg-gold hover:bg-gold-dark text-primary-foreground"
+                        className="w-full text-white font-bold rounded-xl transition-all hover:brightness-95"
+                        style={{ backgroundColor: primaryColor }}
                         disabled={isLoading}
                       >
                         {isLoading ? 'Creating account...' : 'Create Account'}
@@ -248,8 +258,8 @@ const AuthPage: React.FC = () => {
                   <p className="text-sm text-muted-foreground">
                     Create an account to access:
                   </p>
-                  <div className="flex justify-center gap-4 text-xs">
-                    <span className="flex items-center gap-1 text-gold">
+                  <div className="flex justify-center gap-4 text-xs font-semibold">
+                    <span className="flex items-center gap-1" style={{ color: primaryColor }}>
                       <User className="w-3 h-3" /> Order History
                     </span>
                   </div>

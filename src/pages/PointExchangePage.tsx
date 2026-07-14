@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSite } from '@/contexts/SiteContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -28,6 +29,7 @@ interface UserCoupon {
 
 const PointExchangePage: React.FC = () => {
   const { user } = useAuth();
+  const { settings } = useSite();
   const [configs, setConfigs] = useState<ExchangeConfig[]>([]);
   const [userPoints, setUserPoints] = useState(0);
   const [userCoupons, setUserCoupons] = useState<UserCoupon[]>([]);
@@ -64,8 +66,8 @@ const PointExchangePage: React.FC = () => {
           .order('created_at', { ascending: false });
         setUserCoupons((couponData || []) as UserCoupon[]);
       }
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch (error: any) {
+      toast({ title: 'Error fetching data', description: error.message, variant: 'destructive' });
     }
   };
 
@@ -95,8 +97,10 @@ const PointExchangePage: React.FC = () => {
     }
   };
 
+  const primaryColor = settings.primaryColor || '#E53E3E';
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background theme-accented-page" style={{ '--primary-color': primaryColor } as React.CSSProperties}>
       <Header />
       <HeaderSpacer />
       <main className="flex-grow container mx-auto px-4 py-8">

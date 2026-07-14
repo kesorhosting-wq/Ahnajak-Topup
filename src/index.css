@@ -37,84 +37,84 @@
     --radius: 0.75rem;
 
     /* Custom Khmer-inspired tokens */
-    --gold: 43 74% 49%;
-    --gold-light: 43 60% 65%;
-    --gold-dark: 35 70% 35%;
-    --gold-glow: 43 80% 55%;
+    --gold: 199 89% 48%;
+    --gold-light: 199 89% 65%;
+    --gold-dark: 199 89% 30%;
+    --gold-glow: 199 89% 55%;
     --cream: 39 45% 96%;
     --cream-dark: 39 35% 88%;
     --burgundy: 350 50% 30%;
     --burgundy-light: 350 45% 45%;
 
     /* Gradients */
-    --gradient-gold: linear-gradient(135deg, hsl(43 74% 55%), hsl(35 70% 40%));
+    --gradient-gold: linear-gradient(135deg, hsl(199 89% 55%), hsl(199 89% 35%));
     --gradient-cream: linear-gradient(180deg, hsl(39 45% 98%), hsl(39 35% 88%));
-    --gradient-hero: linear-gradient(180deg, hsl(43 60% 65%) 0%, hsl(39 45% 96%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(43 50% 80%), hsl(39 40% 90%));
+    --gradient-hero: linear-gradient(180deg, hsl(199 89% 65%) 0%, hsl(39 45% 96%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(199 50% 80%), hsl(39 40% 90%));
 
     /* Shadows */
-    --shadow-gold: 0 4px 20px -4px hsl(43 74% 49% / 0.4);
+    --shadow-gold: 0 4px 20px -4px hsl(199 89% 48% / 0.4);
     --shadow-elegant: 0 10px 40px -10px hsl(30 20% 15% / 0.2);
 
     --sidebar-background: 39 35% 92%;
     --sidebar-foreground: 30 20% 15%;
-    --sidebar-primary: 43 74% 49%;
+    --sidebar-primary: 199 89% 48%;
     --sidebar-primary-foreground: 30 20% 10%;
     --sidebar-accent: 39 30% 85%;
     --sidebar-accent-foreground: 30 20% 20%;
-    --sidebar-border: 43 50% 75%;
-    --sidebar-ring: 43 74% 49%;
+    --sidebar-border: 199 50% 75%;
+    --sidebar-ring: 199 89% 48%;
   }
 
   .dark {
-    --background: 30 20% 8%;
-    --foreground: 39 45% 96%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
 
-    --card: 30 20% 12%;
-    --card-foreground: 39 45% 96%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 30 20% 10%;
-    --popover-foreground: 39 45% 96%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 43 74% 49%;
-    --primary-foreground: 30 20% 10%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 199 89% 10%;
 
-    --secondary: 30 20% 18%;
-    --secondary-foreground: 39 45% 90%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 30 15% 20%;
-    --muted-foreground: 39 20% 60%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 63.9%;
 
-    --accent: 25 80% 50%;
-    --accent-foreground: 39 45% 96%;
+    --accent: 199 89% 50%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 30 20% 25%;
-    --input: 30 20% 20%;
-    --ring: 43 74% 49%;
+    --border: 0 0% 15%;
+    --input: 0 0% 12%;
+    --ring: 199 89% 48%;
 
-    --gold: 43 74% 55%;
-    --gold-light: 43 60% 70%;
-    --gold-dark: 35 70% 40%;
-    --cream: 30 20% 8%;
-    --cream-dark: 30 20% 15%;
+    --gold: 199 89% 48%;
+    --gold-light: 199 89% 65%;
+    --gold-dark: 199 89% 30%;
+    --cream: 0 0% 2%;
+    --cream-dark: 0 0% 6%;
     --burgundy: 350 50% 35%;
 
-    --gradient-gold: linear-gradient(135deg, hsl(43 74% 60%), hsl(35 70% 45%));
-    --gradient-cream: linear-gradient(180deg, hsl(30 20% 12%), hsl(30 20% 8%));
-    --gradient-hero: linear-gradient(180deg, hsl(35 40% 20%) 0%, hsl(30 20% 8%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(30 25% 18%), hsl(30 20% 12%));
+    --gradient-gold: linear-gradient(135deg, hsl(199 89% 55%), hsl(199 89% 35%));
+    --gradient-cream: linear-gradient(180deg, hsl(0 0% 6%), hsl(0 0% 2%));
+    --gradient-hero: linear-gradient(180deg, hsl(199 89% 15%) 0%, hsl(0 0% 0%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 6%), hsl(0 0% 3%));
 
-    --sidebar-background: 30 20% 10%;
-    --sidebar-foreground: 39 45% 96%;
-    --sidebar-primary: 43 74% 55%;
-    --sidebar-primary-foreground: 30 20% 10%;
-    --sidebar-accent: 30 20% 18%;
-    --sidebar-accent-foreground: 39 45% 90%;
-    --sidebar-border: 30 20% 25%;
-    --sidebar-ring: 43 74% 49%;
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 199 89% 48%;
   }
 }
 
@@ -125,7 +125,6 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    background: transparent;
     min-height: 100vh;
   }
 
@@ -387,4 +386,137 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-contact-jump { animation: none; }
+}
+
+/* Admin Panel & Page Theme Accents Override */
+.theme-accented-admin,
+.theme-accented-page {
+  --primary-color: #D4A84B;
+}
+.theme-accented-admin .gold-text,
+.theme-accented-page .gold-text {
+  color: var(--primary-color) !important;
+}
+.theme-accented-admin .text-gold,
+.theme-accented-page .text-gold {
+  color: var(--primary-color) !important;
+}
+.theme-accented-admin .bg-gold,
+.theme-accented-page .bg-gold {
+  background-color: var(--primary-color) !important;
+}
+.theme-accented-admin .bg-gold-dark,
+.theme-accented-page .bg-gold-dark {
+  background-color: var(--primary-color) !important;
+  filter: brightness(0.9);
+}
+.theme-accented-admin .hover\:bg-gold-dark:hover,
+.theme-accented-page .hover\:bg-gold-dark:hover {
+  background-color: var(--primary-color) !important;
+  filter: brightness(0.9);
+}
+.theme-accented-admin .border-gold,
+.theme-accented-page .border-gold {
+  border-color: var(--primary-color) !important;
+}
+.theme-accented-admin .border-gold\/20,
+.theme-accented-page .border-gold\/20 {
+  border-color: color-mix(in srgb, var(--primary-color) 20%, transparent) !important;
+}
+.theme-accented-admin .border-gold\/30,
+.theme-accented-page .border-gold\/30 {
+  border-color: color-mix(in srgb, var(--primary-color) 30%, transparent) !important;
+}
+.theme-accented-admin .border-gold\/50,
+.theme-accented-page .border-gold\/50 {
+  border-color: color-mix(in srgb, var(--primary-color) 50%, transparent) !important;
+}
+.theme-accented-admin .bg-gold\/20,
+.theme-accented-page .bg-gold\/20 {
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent) !important;
+}
+.theme-accented-admin .bg-gold\/5,
+.theme-accented-page .bg-gold\/5 {
+  background-color: color-mix(in srgb, var(--primary-color) 5%, transparent) !important;
+}
+.theme-accented-admin .bg-gold\/10,
+.theme-accented-page .bg-gold\/10 {
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent) !important;
+}
+.theme-accented-admin .border-gold\/10,
+.theme-accented-page .border-gold\/10 {
+  border-color: color-mix(in srgb, var(--primary-color) 10%, transparent) !important;
+}
+.theme-accented-admin .border-gold\/40,
+.theme-accented-page .border-gold\/40 {
+  border-color: color-mix(in srgb, var(--primary-color) 40%, transparent) !important;
+}
+.theme-accented-admin .accent-gold,
+.theme-accented-page .accent-gold {
+  accent-color: var(--primary-color) !important;
+}
+.theme-accented-admin button[data-state=active],
+.theme-accented-admin [data-state=active],
+.theme-accented-page button[data-state=active],
+.theme-accented-page [data-state=active] {
+  &.data-\[state\=active\]\:bg-gold[data-state=active] {
+    background-color: var(--primary-color) !important;
+  }
+}
+
+/* Extra Gradient, Scrollbar, and Shadow overrides for Topup page */
+.theme-accented-page .from-gold {
+  --tw-gradient-from: var(--primary-color) !important;
+  --tw-gradient-to: color-mix(in srgb, var(--primary-color) 80%, black) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+.theme-accented-page .via-amber-400 {
+  --tw-gradient-stops: var(--tw-gradient-from), color-mix(in srgb, var(--primary-color) 70%, white) 50%, var(--tw-gradient-to) !important;
+}
+.theme-accented-page .to-gold-dark {
+  --tw-gradient-to: color-mix(in srgb, var(--primary-color) 80%, black) !important;
+}
+.theme-accented-page .to-amber-600 {
+  --tw-gradient-to: color-mix(in srgb, var(--primary-color) 80%, black) !important;
+}
+.theme-accented-page .to-amber-500 {
+  --tw-gradient-to: color-mix(in srgb, var(--primary-color) 80%, white) !important;
+}
+.theme-accented-page .from-gold\/30 {
+  --tw-gradient-from: color-mix(in srgb, var(--primary-color) 30%, transparent) !important;
+}
+.theme-accented-page .via-amber-200\/20 {
+  --tw-gradient-stops: var(--tw-gradient-from), color-mix(in srgb, var(--primary-color) 20%, transparent) 50%, var(--tw-gradient-to) !important;
+}
+.theme-accented-page .to-amber-300\/10 {
+  --tw-gradient-to: color-mix(in srgb, var(--primary-color) 10%, transparent) !important;
+}
+.theme-accented-page .shadow-gold {
+  box-shadow: 0 10px 25px -5px color-mix(in srgb, var(--primary-color) 30%, transparent) !important;
+}
+.theme-accented-page .bg-gold\/15 {
+  background-color: color-mix(in srgb, var(--primary-color) 15%, transparent) !important;
+}
+.theme-accented-page .bg-gold\/25 {
+  background-color: color-mix(in srgb, var(--primary-color) 25%, transparent) !important;
+}
+.theme-accented-page .bg-gold\/40 {
+  background-color: color-mix(in srgb, var(--primary-color) 40%, transparent) !important;
+}
+.theme-accented-page .\[\&::-webkit-scrollbar-thumb\]\:bg-gold\/40::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--primary-color) 40%, transparent) !important;
+}
+.theme-accented-page .animate-pulse-gold {
+  animation: pulse-glow-primary 2s infinite !important;
+}
+
+@keyframes pulse-glow-primary {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 0 0 0 0px color-mix(in srgb, var(--primary-color) 40%, transparent);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 15px 4px color-mix(in srgb, var(--primary-color) 60%, transparent);
+  }
 }

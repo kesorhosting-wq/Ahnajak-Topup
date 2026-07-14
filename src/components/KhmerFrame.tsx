@@ -10,7 +10,7 @@ interface KhmerFrameProps {
 
 const KhmerFrame: React.FC<KhmerFrameProps> = ({ children, className, variant = 'default' }) => {
   const { settings } = useSite();
-  const frameColor = settings.frameColor || '#D4A84B';
+  const frameColor = settings.frameColor || (settings.siteName === 'KESOR TOPUP' ? '#D4A84B' : '#E53E3E');
   const borderWidth = settings.frameBorderWidth || 4;
 
   return (

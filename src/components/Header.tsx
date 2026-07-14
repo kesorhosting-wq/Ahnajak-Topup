@@ -4,7 +4,9 @@ import { Settings, Receipt, User, Menu, LogOut, Home, CalendarDays, ShoppingBag,
 import { useSite } from '@/contexts/SiteContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { resolveIconUrl } from '@/lib/icon-url';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,11 +27,21 @@ const Header: React.FC = () => {
 
   const headerHeight = isMobile 
     ? (settings.headerHeightMobile || 56) 
-    : (settings.headerHeightDesktop || 96);
+    : (settings.headerHeightDesktop || 80);
+
+  const primaryColor = settings.primaryColor || (settings.siteName === 'KESOR TOPUP' ? '#D4A84B' : '#E53E3E');
+
+  // Navigation items structure
+  const navItems = [
+    { to: '/', title: 'ទំព័រដើម', icon: Home },
+    { to: '/events', title: 'ព្រឹត្តិការណ៍', icon: CalendarDays },
+    { to: '/preorder', title: 'បញ្ជាទិញមុន', icon: ShoppingBag },
+    { to: '/exchange', title: 'Point Exchange', icon: Coins },
+  ];
 
   return (
     <header 
-      className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-4 flex items-center bg-background"
+      className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 flex items-center bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md border-b border-zinc-200/40 dark:border-zinc-800/40 shadow-sm transition-all duration-300"
       style={{
         height: `${headerHeight}px`,
         backgroundImage: settings.headerImage ? `url(${settings.headerImage})` : undefined,
@@ -39,253 +51,178 @@ const Header: React.FC = () => {
     >
       {/* Background overlay for readability when image is present */}
       {settings.headerImage && (
-        <div className="absolute inset-0 bg-background/70" />
+        <div className="absolute inset-0 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md" />
       )}
-      {/* Decorative top border */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold to-transparent z-10" />
       
-      <div className="container mx-auto flex items-center justify-between relative z-10">
-        {/* Left section - ornament on desktop */}
-        <div className="hidden md:block w-20 h-12">
-          <svg viewBox="0 0 80 48" className="w-full h-full text-gold fill-current">
-            <path d="M0 24c0-8 5-16 15-20s25-2 35 4c-10-2-25 2-30 8s-8 12-5 18c-10-2-15-6-15-10z" opacity="0.8"/>
-            <path d="M20 20c5-8 20-12 35-8s25 12 25 20c-5-8-20-12-35-12s-25 4-25 0z" opacity="0.6"/>
-          </svg>
-        </div>
-
-        {/* Logo - absolutely centered on both mobile and desktop */}
+      {/* Dynamic top accent line */}
+      <div 
+        className="absolute top-0 left-0 right-0 h-[3px] opacity-90 transition-all duration-300" 
+        style={{
+          background: `linear-gradient(90deg, transparent 15%, ${primaryColor} 50%, transparent 85%)`
+        }}
+      />
+      
+      <div className="container mx-auto flex items-center justify-between relative z-10 w-full">
+        {/* Brand/Logo - Left-aligned for a modern, standard structure */}
         <Link 
           to="/" 
-          className="flex flex-col items-center group absolute left-1/2 -translate-x-1/2 z-20"
-          style={{
-            left: isMobile ? `${settings.logoMobilePosition}%` : '50%',
-          }}
+          className="flex items-center gap-3 group transition-transform duration-200 active:scale-[0.98]"
         >
-          {/* Mobile logo */}
-          <div className="md:hidden">
-            {settings.logoUrl ? (
-              <img 
-                src={settings.logoUrl} 
-                alt={settings.siteName}
-                style={{ height: `${settings.logoSize || 64}px` }}
-                className="object-contain transition-transform duration-300 group-hover:scale-105"
-              />
-            ) : (
-              <h1 className="font-display text-xl sm:text-3xl font-bold tracking-wider gold-text drop-shadow-lg transition-transform duration-300 group-hover:scale-105">
-                {settings.siteName}
-              </h1>
-            )}
-            <div className="mt-1 w-24 sm:w-32 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
-          </div>
-          {/* Desktop logo */}
-          <div className="hidden md:flex flex-col items-center">
-            {settings.logoUrl ? (
-              <img 
-                src={settings.logoUrl} 
-                alt={settings.siteName}
-                style={{ height: `${settings.logoSize || 64}px` }}
-                className="object-contain transition-transform duration-300 group-hover:scale-105"
-              />
-            ) : (
-              <h1 className="font-display text-3xl md:text-4xl font-bold tracking-wider gold-text drop-shadow-lg transition-transform duration-300 group-hover:scale-105">
-                {settings.siteName}
-              </h1>
-            )}
-            <div className="mt-1 w-32 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
-          </div>
+          {settings.logoUrl ? (
+            <img 
+              src={resolveIconUrl(settings.logoUrl)} 
+              alt={settings.siteName}
+              style={{ height: `${isMobile ? 80 : 110}px` }}
+              className="object-contain transition-transform duration-300 group-hover:rotate-3"
+            />
+          ) : (
+            <span 
+              className="font-display text-xl sm:text-2xl font-black tracking-tight transition-colors duration-300"
+              style={{ color: primaryColor }}
+            >
+              {settings.siteName}
+            </span>
+          )}
         </Link>
 
-        {/* Right section - Navigation */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Desktop ornament */}
-          <div className="hidden md:block w-20 h-12 transform scale-x-[-1]">
-            <svg viewBox="0 0 80 48" className="w-full h-full text-gold fill-current">
-              <path d="M0 24c0-8 5-16 15-20s25-2 35 4c-10-2-25 2-30 8s-8 12-5 18c-10-2-15-6-15-10z" opacity="0.8"/>
-              <path d="M20 20c5-8 20-12 35-8s25 12 25 20c-5-8-20-12-35-12s-25 4-25 0z" opacity="0.6"/>
-            </svg>
-          </div>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden sm:flex items-center gap-2 sm:gap-3">
+        {/* Desktop & Tablet Navigation */}
+        <nav className="hidden md:flex items-center gap-1.5">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="px-4 py-2 text-sm font-semibold rounded-full text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-200 flex items-center gap-2"
+              >
+                <Icon className="w-4 h-4 opacity-70" />
+                <span>{item.title}</span>
+              </Link>
+            );
+          })}
+        </nav>
 
-            {/* Home */}
-            <Link 
-              to="/" 
-              className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
-              title="ទំព័រដើម"
-            >
-              <Home className="w-5 h-5 text-gold" />
-            </Link>
-
-            {/* Events */}
-            <Link 
-              to="/events" 
-              className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
-              title="ព្រឹត្តិការណ៍"
-            >
-              <CalendarDays className="w-5 h-5 text-gold" />
-            </Link>
-
-            {/* Preorder */}
-            <Link 
-              to="/preorder" 
-              className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
-              title="បញ្ជាទិញមុន"
-            >
-              <ShoppingBag className="w-5 h-5 text-gold" />
-            </Link>
-
-            {/* Order History - only for logged in users */}
+        {/* Right Section - User Options */}
+        <div className="flex items-center gap-2">
+          {/* Desktop User Panel */}
+          <div className="hidden sm:flex items-center gap-2">
             {user && (
               <Link 
                 to="/orders" 
-                className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
+                className="p-2.5 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
                 title="ប្រវត្តិការបញ្ជាទិញ"
               >
-                <Receipt className="w-5 h-5 text-gold" />
+                <Receipt className="w-5 h-5" />
               </Link>
             )}
 
-            {/* Admin Panel */}
             {user && isAdmin && (
               <Link 
                 to="/admin" 
-                className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
+                className="p-2.5 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
                 title="Admin Panel"
               >
-                <Settings className="w-5 h-5 text-gold" />
+                <Settings className="w-5 h-5" />
               </Link>
             )}
 
-            {/* Exchange */}
-            <Link 
-              to="/exchange" 
-              className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
-              title="Point Exchange"
-            >
-              <Coins className="w-5 h-5 text-gold" />
-            </Link>
-
-            {/* Profile - only for logged in users */}
-            {user && (
-              <Link 
-                to="/profile" 
-                className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
-                title="គណនីរបស់ខ្ញុំ"
-              >
-                <User className="w-5 h-5 text-gold" />
-              </Link>
-            )}
-
-            {/* Login link for non-logged in users */}
-            {!user && (
+            {user ? (
+              <>
+                <Link 
+                  to="/profile" 
+                  className="p-2.5 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                  title="គណនីរបស់ខ្ញុំ"
+                >
+                  <User className="w-5 h-5" />
+                </Link>
+                <button 
+                  onClick={handleSignOut}
+                  className="p-2.5 rounded-full text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                  title="ចាកចេញ"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </>
+            ) : (
               <Link 
                 to="/auth" 
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-full text-white font-bold transition-all duration-300 hover:shadow-lg active:scale-95"
+                style={{ backgroundColor: primaryColor }}
                 title="ចូលគណនី"
               >
-                <User className="w-5 h-5 text-gold" />
-                <span className="text-sm font-medium text-gold">ចូល</span>
+                <User className="w-4 h-4" />
+                <span className="text-sm">ចូលគណនី</span>
               </Link>
-            )}
-
-            {/* Sign out button for logged in users */}
-            {user && (
-              <button 
-                onClick={handleSignOut}
-                className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
-                title="ចេញ"
-              >
-                <LogOut className="w-5 h-5 text-gold" />
-              </button>
             )}
           </div>
 
-          {/* Mobile: Menu */}
-          <div className="flex sm:hidden items-center gap-2">
-
-            {/* Mobile Menu Dropdown */}
+          {/* Mobile Menu Dropdown */}
+          <div className="flex sm:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button 
-                  className="p-2 rounded-lg border-2 border-gold/50 bg-card hover:bg-gold/20 transition-colors"
+                  className="p-2 rounded-full text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all active:scale-95 border border-zinc-200/50 dark:border-zinc-800/50 bg-white/50 dark:bg-zinc-950/50"
                   title="មឺនុយ"
                 >
-                  <Menu className="w-5 h-5 text-gold" />
+                  <Menu className="w-5 h-5" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-card border-gold/30">
-                <DropdownMenuItem asChild>
-                  <Link to="/" className="flex items-center gap-2 cursor-pointer">
-                    <Home className="w-4 h-4" />
-                    <span>ទំព័រដើម</span>
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link to="/events" className="flex items-center gap-2 cursor-pointer">
-                    <CalendarDays className="w-4 h-4" />
-                    <span>ព្រឹត្តិការណ៍</span>
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link to="/preorder" className="flex items-center gap-2 cursor-pointer">
-                    <ShoppingBag className="w-4 h-4" />
-                    <span>បញ្ជាទិញមុន</span>
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link to="/exchange" className="flex items-center gap-2 cursor-pointer">
-                    <Coins className="w-4 h-4" />
-                    <span>Point Exchange</span>
-                  </Link>
-                </DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-52 bg-white/95 dark:bg-zinc-950/95 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl shadow-xl backdrop-blur-md">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <DropdownMenuItem key={item.to} asChild>
+                      <Link to={item.to} className="flex items-center gap-2.5 cursor-pointer py-2.5 px-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900">
+                        <Icon className="w-4.5 h-4.5 opacity-70" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  );
+                })}
                 
                 {user && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
-                      <User className="w-4 h-4" />
-                      <span>គណនីរបស់ខ្ញុំ</span>
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-                
-                {user && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/orders" className="flex items-center gap-2 cursor-pointer">
-                      <Receipt className="w-4 h-4" />
-                      <span>ប្រវត្តិការបញ្ជាទិញ</span>
-                    </Link>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuSeparator className="bg-zinc-200/60 dark:bg-zinc-800/60" />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center gap-2.5 cursor-pointer py-2.5 px-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900">
+                        <User className="w-4.5 h-4.5 opacity-70" />
+                        <span>គណនីរបស់ខ្ញុំ</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="flex items-center gap-2.5 cursor-pointer py-2.5 px-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900">
+                        <Receipt className="w-4.5 h-4.5 opacity-70" />
+                        <span>ប្រវត្តិការបញ្ជាទិញ</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
                 )}
                 
                 {user && isAdmin && (
                   <DropdownMenuItem asChild>
-                    <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
-                      <Settings className="w-4 h-4" />
+                    <Link to="/admin" className="flex items-center gap-2.5 cursor-pointer py-2.5 px-3 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900">
+                      <Settings className="w-4.5 h-4.5 opacity-70" />
                       <span>Admin Panel</span>
                     </Link>
                   </DropdownMenuItem>
                 )}
                 
-                <DropdownMenuSeparator className="bg-gold/20" />
+                <DropdownMenuSeparator className="bg-zinc-200/60 dark:bg-zinc-800/60" />
                 
                 {!user ? (
                   <DropdownMenuItem asChild>
-                    <Link to="/auth" className="flex items-center gap-2 cursor-pointer">
-                      <User className="w-4 h-4" />
+                    <Link to="/auth" className="flex items-center gap-2.5 cursor-pointer py-2.5 px-3 rounded-xl text-white font-bold" style={{ backgroundColor: primaryColor }}>
+                      <User className="w-4.5 h-4.5" />
                       <span>ចូលគណនី</span>
                     </Link>
                   </DropdownMenuItem>
                 ) : (
                   <DropdownMenuItem 
                     onClick={handleSignOut}
-                    className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                    className="flex items-center gap-2.5 cursor-pointer py-2.5 px-3 rounded-xl text-rose-600 dark:text-rose-400 focus:bg-rose-50 dark:focus:bg-rose-950/20"
                   >
-                    <LogOut className="w-4 h-4" />
-                    <span>ចេញពីគណនី</span>
+                    <LogOut className="w-4.5 h-4.5" />
+                    <span>ចាកចេញពីគណនី</span>
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
@@ -293,9 +230,6 @@ const Header: React.FC = () => {
           </div>
         </div>
       </div>
-      
-      {/* Bottom decorative line */}
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gold/50 to-transparent z-10" />
     </header>
   );
 };

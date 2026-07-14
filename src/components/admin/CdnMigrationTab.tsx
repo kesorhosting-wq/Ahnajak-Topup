@@ -1,113 +1,121 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { CloudUpload, Search, CheckCircle2, XCircle, Loader2, Image as ImageIcon } from 'lucide-react';
+import { CloudUpload, Search, CheckCircle2, Loader2, Image as ImageIcon, RotateCcw, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ScanItem {
   table: string;
   column: string;
-  id: string;
   url: string;
 }
 
 interface ScanSummary {
   total_refs: number;
-  site_assets_refs: number;
-  current_other_storage_refs: number;
-  external_storage_refs: number;
-  external_http_refs: number;
+  local_refs: number;
+  remote_refs: number;
+  failed_refs: number;
   migratable_refs: number;
-}
-
-interface MigrationResult {
-  table: string;
-  column: string;
-  id: string;
-  old_url: string;
-  new_url: string;
-  status: 'migrated' | 'failed' | 'skipped';
-  error?: string;
 }
 
 const CdnMigrationTab: React.FC = () => {
   const [scanning, setScanning] = useState(false);
   const [migrating, setMigrating] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [scanResults, setScanResults] = useState<ScanItem[] | null>(null);
+  const [failedResults, setFailedResults] = useState<ScanItem[] | null>(null);
   const [scanSummary, setScanSummary] = useState<ScanSummary | null>(null);
-  const [migrationResults, setMigrationResults] = useState<MigrationResult[] | null>(null);
+  const [syncLog, setSyncLog] = useState<string | null>(null);
 
-  const handleScan = async () => {
-    setScanning(true);
-    setScanResults(null);
-    setScanSummary(null);
-    setMigrationResults(null);
+  // Load initial status on mount
+  useEffect(() => {
+    handleScan(true);
+  }, []);
+
+  const handleScan = async (silent = false) => {
+    if (!silent) setScanning(true);
     try {
-      const { data, error } = await supabase.functions.invoke('migrate-images-cdn', {
-        body: { action: 'scan' },
-      });
-      if (error) throw error;
+      const res = await fetch('/api/vps-sync/status');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
       setScanResults(data.items || []);
+      setFailedResults(data.failedItems || []);
       setScanSummary(data.summary || null);
-      toast({
-        title: data.total > 0 ? `Found ${data.total} image(s) to migrate` : 'No images need migration',
-        description: data.total > 0 ? 'Click "Migrate All to CDN" to proceed' : `${data.summary?.site_assets_refs ?? 0} image references already use CDN`,
-      });
+      if (!silent) {
+        toast({
+          title: data.summary?.migratable_refs > 0 ? `Found ${data.summary.migratable_refs} image(s) to sync` : 'No new images need syncing',
+          description: data.summary?.failed_refs > 0 ? `Note: ${data.summary.failed_refs} downloads previously failed.` : 'Local VPS cache status is up to date!',
+        });
+      }
     } catch (err) {
-      toast({ title: 'Scan failed', description: String(err), variant: 'destructive' });
+      if (!silent) {
+        toast({ title: 'Scan failed', description: String(err), variant: 'destructive' });
+      }
     } finally {
-      setScanning(false);
+      if (!silent) setScanning(false);
     }
   };
 
   const handleMigrate = async () => {
     setMigrating(true);
-    setMigrationResults(null);
-    const allResults: MigrationResult[] = [];
-    let totalMigrated = 0;
-    let totalFailed = 0;
-    let completed = false;
+    setSyncLog(null);
     try {
-      for (let i = 0; i < 200; i++) {
-        const { data, error } = await supabase.functions.invoke('migrate-images-cdn', {
-          body: { action: 'migrate' },
-        });
-        if (error) throw error;
-        allResults.push(...(data.results || []));
-        totalMigrated += data.migrated || 0;
-        totalFailed += data.failed || 0;
-        setMigrationResults([...allResults]);
-        toast({
-          title: data.done ? 'Migration complete' : `Batch ${i + 1} done — continuing…`,
-          description: `✅ ${totalMigrated} migrated, ❌ ${totalFailed} failed, ${data.remaining ?? 0} remaining`,
-        });
-        if (data.done) {
-          completed = true;
-          break;
-        }
+      const res = await fetch('/api/vps-sync/run', { method: 'POST' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.log) {
+        setSyncLog(data.log);
+      }
+      
+      // Rescan status
+      const statusRes = await fetch('/api/vps-sync/status');
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        setScanResults(statusData.items || []);
+        setFailedResults(statusData.failedItems || []);
+        setScanSummary(statusData.summary || null);
       }
 
-      if (!completed) {
-        toast({
-          title: 'Migration paused before completion',
-          description: 'Some images still remain. The stop limit was reached before the migration finished.',
-          variant: 'destructive',
-        });
-      }
-
-      const { data: rescanData, error: rescanError } = await supabase.functions.invoke('migrate-images-cdn', {
-        body: { action: 'scan' },
+      toast({
+        title: 'Sync completed successfully',
+        description: 'Sync cycle finished executing on the VPS!',
       });
-
-      if (rescanError) throw rescanError;
-      setScanResults(rescanData.items || []);
-      setScanSummary(rescanData.summary || null);
     } catch (err) {
-      toast({ title: 'Migration failed', description: String(err), variant: 'destructive' });
+      toast({ title: 'Sync failed', description: String(err), variant: 'destructive' });
     } finally {
       setMigrating(false);
+    }
+  };
+
+  const handleClearFailures = async () => {
+    setClearing(true);
+    setSyncLog(null);
+    try {
+      const res = await fetch('/api/vps-sync/clear-failures', { method: 'POST' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.log) {
+        setSyncLog(data.log);
+      }
+      
+      // Rescan status
+      const statusRes = await fetch('/api/vps-sync/status');
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        setScanResults(statusData.items || []);
+        setFailedResults(statusData.failedItems || []);
+        setScanSummary(statusData.summary || null);
+      }
+
+      toast({
+        title: 'Cache cleared & retried successfully',
+        description: 'Failed downloads cache cleared and sync rerun!',
+      });
+    } catch (err) {
+      toast({ title: 'Failed to clear cache', description: String(err), variant: 'destructive' });
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -117,135 +125,147 @@ const CdnMigrationTab: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CloudUpload className="w-5 h-5 text-gold" />
-            Migrate Images to CDN
+            Local VPS Image Sync (MySQL Cache)
           </CardTitle>
           <CardDescription>
-            Scan and migrate all external images to Cloud Storage (CDN) for faster loading.
-            Images already in storage will be skipped.
+            Scan, optimize (WebP), and download all game/package icons locally to this VPS storage and MySQL cache for instant loading.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-3">
-            <Button onClick={handleScan} disabled={scanning || migrating} variant="outline">
+            <Button onClick={() => handleScan(false)} disabled={scanning || migrating || clearing} variant="outline">
               {scanning ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
-              Scan for External Images
+              Scan Database Images
             </Button>
             <Button
               onClick={handleMigrate}
-              disabled={migrating || scanning}
-              className="bg-gold hover:bg-gold/90 text-primary-foreground"
+              disabled={migrating || scanning || clearing || (scanSummary?.migratable_refs === 0)}
+              className="bg-gold hover:bg-gold/90 text-primary-foreground font-bold"
             >
               {migrating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CloudUpload className="w-4 h-4 mr-2" />}
-              Migrate All to CDN
+              Sync All to VPS
+            </Button>
+            <Button
+              onClick={handleClearFailures}
+              disabled={migrating || scanning || clearing || (scanSummary?.failed_refs === 0)}
+              variant="destructive"
+              className="font-bold"
+            >
+              {clearing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RotateCcw className="w-4 h-4 mr-2" />}
+              Clear Failures & Retry
             </Button>
           </div>
 
           <div className="text-xs text-muted-foreground space-y-1">
-            <p>📊 Tables scanned: games, packages, special_packages, preorder_packages, events, payment_qr_settings, site_settings</p>
-            <p>🔍 Columns: image, cover_image, icon, label_icon, default_package_icon, qr_code_image, site setting image URLs</p>
-            <p>⚡ Images are cached with 1-year cache headers for maximum performance</p>
+            <p>📊 Tables synced: games, packages, special_packages, preorder_packages, events, payment_qr_settings, site_settings</p>
+            <p>⚡ WebP format conversion is automatically applied to reduce sizes by 50% for fast Cambodia loading</p>
           </div>
 
           {scanSummary && (
             <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-5 text-xs">
               <div className="rounded-lg bg-secondary/40 p-3">
-                <p className="text-muted-foreground">All image refs</p>
+                <p className="text-muted-foreground">Total Images</p>
                 <p className="text-sm font-semibold">{scanSummary.total_refs}</p>
               </div>
-              <div className="rounded-lg bg-secondary/40 p-3">
-                <p className="text-muted-foreground">Already on CDN</p>
-                <p className="text-sm font-semibold">{scanSummary.site_assets_refs}</p>
+              <div className="rounded-lg bg-secondary/40 p-3 border-l-2 border-green-500">
+                <p className="text-muted-foreground">Cached on VPS</p>
+                <p className="text-sm font-semibold text-green-600 dark:text-green-400">{scanSummary.local_refs}</p>
               </div>
-              <div className="rounded-lg bg-secondary/40 p-3">
-                <p className="text-muted-foreground">Same project, other bucket</p>
-                <p className="text-sm font-semibold">{scanSummary.current_other_storage_refs}</p>
+              <div className="rounded-lg bg-secondary/40 p-3 border-l-2 border-amber-500">
+                <p className="text-muted-foreground">Pending Sync</p>
+                <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">{scanSummary.remote_refs}</p>
               </div>
-              <div className="rounded-lg bg-secondary/40 p-3">
-                <p className="text-muted-foreground">Other storage</p>
-                <p className="text-sm font-semibold">{scanSummary.external_storage_refs}</p>
-              </div>
-              <div className="rounded-lg bg-secondary/40 p-3">
-                <p className="text-muted-foreground">Need migration</p>
-                <p className="text-sm font-semibold">{scanSummary.migratable_refs}</p>
+              <div className="rounded-lg bg-secondary/40 p-3 border-l-2 border-red-500">
+                <p className="text-muted-foreground">Failed Downloads</p>
+                <p className="text-sm font-semibold text-red-600 dark:text-red-400">{scanSummary.failed_refs}</p>
               </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Scan Results */}
-      {scanResults !== null && (
+      {/* Sync Log Output */}
+      {syncLog && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
-              <ImageIcon className="w-4 h-4" />
-              Scan Results ({scanResults.length} external image{scanResults.length !== 1 ? 's' : ''})
-            </CardTitle>
+            <CardTitle className="text-sm">Latest Sync Execution Logs</CardTitle>
           </CardHeader>
           <CardContent>
-            {scanResults.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground">
-                <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-500" />
-                <p className="font-medium">No image URLs need migration.</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                {scanResults.map((item, i) => (
-                  <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 text-sm">
-                    <img src={item.url} alt="" className="w-10 h-10 rounded object-cover shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">{item.table}</Badge>
-                        <span className="text-xs text-muted-foreground">{item.column}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">{item.url}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <pre className="p-3 bg-zinc-950 text-zinc-200 rounded-lg text-xs overflow-x-auto whitespace-pre-wrap max-h-[250px] font-mono">
+              {syncLog}
+            </pre>
           </CardContent>
         </Card>
       )}
 
-      {/* Migration Results */}
-      {migrationResults !== null && (
+      {/* Scan Results */}
+      {scanResults !== null && scanResults.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-sm flex items-center gap-2">
-              <CloudUpload className="w-4 h-4" />
-              Migration Results
+              <ImageIcon className="w-4 h-4" />
+              Unsynced Remote Images ({scanResults.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {migrationResults.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground">
-                <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-500" />
-                <p>No images needed migration.</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                {migrationResults.map((r, i) => (
-                  <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 text-sm">
-                    {r.status === 'migrated' ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-destructive shrink-0" />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={r.status === 'migrated' ? 'default' : 'destructive'} className="text-xs">
-                          {r.status}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">{r.table}</Badge>
-                        <span className="text-xs text-muted-foreground">{r.column}</span>
-                      </div>
-                      {r.error && <p className="text-xs text-destructive mt-0.5">{r.error}</p>}
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {scanResults.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50 text-sm">
+                  <img src={item.url} alt="" className="w-10 h-10 rounded object-cover shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">{item.table}</Badge>
+                      <span className="text-xs text-muted-foreground">{item.column}</span>
                     </div>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{item.url}</p>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Failed Results */}
+      {failedResults !== null && failedResults.length > 0 && (
+        <Card className="border-red-500/20">
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center gap-2 text-red-500">
+              <AlertTriangle className="w-4 h-4" />
+              Failed / Broken Image URLs ({failedResults.length})
+            </CardTitle>
+            <CardDescription className="text-xs">
+              These images returned 404 (Not Found) on Supabase. Upload a new image for them in your settings to fix them.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {failedResults.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-red-50/5 dark:bg-red-950/10 border border-red-500/10 text-sm">
+                  <div className="w-10 h-10 rounded bg-red-100 dark:bg-red-950/40 flex items-center justify-center text-red-500 shrink-0">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="destructive" className="text-xs">{item.table}</Badge>
+                      <span className="text-xs text-muted-foreground">{item.column}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{item.url}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* No Unsynced & No Failed */}
+      {scanResults !== null && scanResults.length === 0 && failedResults !== null && failedResults.length === 0 && (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-green-500" />
+            <p className="font-semibold text-base">All database images are fully cached on local VPS!</p>
+            <p className="text-xs mt-1">There are no remote image URLs or failed downloads remaining.</p>
           </CardContent>
         </Card>
       )}

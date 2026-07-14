@@ -10,7 +10,6 @@ import { toast } from '@/hooks/use-toast';
 
 interface Profile {
   reward_points: number;
-  wallet_balance: number;
   display_name: string;
   email: string;
 }
@@ -40,7 +39,7 @@ const ProfilePage: React.FC = () => {
     try {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('reward_points, wallet_balance, display_name, email')
+        .select('reward_points, display_name, email')
         .eq('user_id', user?.id)
         .single();
 

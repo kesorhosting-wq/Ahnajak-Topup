@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Game } from '@/contexts/SiteContext';
+import { Game, useSite } from '@/contexts/SiteContext';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Gamepad2 } from 'lucide-react';
+import { resolveIconUrl } from '@/lib/icon-url';
 
 interface GameCardProps {
   game: Game;
@@ -18,8 +19,11 @@ interface GameCardProps {
 
 const GameCard: React.FC<GameCardProps> = ({ game, cardBgColor, cardBorderColor, cardFrameImage, cardBorderImage, priority = false, index = 0 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const frameColor = cardBorderColor || 'hsl(43 74% 49%)';
-  const bgColor = cardBgColor || 'hsl(43 74% 70% / 0.15)';
+  const { settings } = useSite();
+  const primaryColor = settings.primaryColor || (settings.siteName === 'KESOR TOPUP' ? '#D4A84B' : '#E53E3E');
+  
+  const frameColor = cardBorderColor || primaryColor;
+  const bgColor = cardBgColor || `${primaryColor}15`;
   
   return (
     <div 
@@ -29,11 +33,11 @@ const GameCard: React.FC<GameCardProps> = ({ game, cardBgColor, cardBorderColor,
       <div className="relative">
         {/* Modern card with glass effect */}
         <div 
-          className="relative rounded-2xl overflow-hidden backdrop-blur-sm transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-2xl"
+          className="relative rounded-2xl overflow-hidden transition-[transform,box-shadow] duration-300 ease-out group-hover:scale-[1.02] group-hover:shadow-2xl"
           style={{
-            background: `linear-gradient(145deg, ${bgColor}, hsl(var(--card) / 0.8))`,
+            background: `linear-gradient(145deg, ${bgColor}, hsl(var(--card) / 0.95))`,
             border: `1px solid ${frameColor}40`,
-            boxShadow: `0 8px 32px hsl(43 74% 49% / 0.15), inset 0 1px 0 hsl(43 74% 80% / 0.1)`,
+            boxShadow: `0 8px 32px ${frameColor}15, inset 0 1px 0 ${frameColor}10`,
           }}
         >
           {/* Glow effect on hover */}
@@ -50,7 +54,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, cardBgColor, cardBorderColor,
             )}
             
             <img 
-              src={game.image} 
+              src={resolveIconUrl(game.image)} 
               alt={game.name}
               loading={priority ? "eager" : "lazy"}
               decoding="async"
@@ -63,7 +67,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, cardBgColor, cardBorderColor,
             />
             
             {/* Shimmer effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-gold/0 via-gold/10 to-gold/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
           </div>
           
           {/* Game name and Topup Button */}
@@ -73,10 +77,11 @@ const GameCard: React.FC<GameCardProps> = ({ game, cardBgColor, cardBorderColor,
             </h3>
             <Link to={`/topup/${game.slug}`} className="block">
               <Button 
-                className="w-full gap-1 sm:gap-2 bg-gradient-to-r from-gold to-gold-dark hover:from-gold-dark hover:to-gold text-background font-semibold transition-all duration-300 shadow-lg hover:shadow-gold/30 text-[9px] sm:text-sm h-7 sm:h-9"
+                className="w-full gap-1 sm:gap-2 text-white font-semibold transition-all duration-300 shadow-md text-[9px] sm:text-sm h-7 sm:h-9"
+                style={{ background: `linear-gradient(90deg, ${frameColor} 0%, ${frameColor}dd 100%)` }}
                 size="sm"
               >
-                <Gamepad2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                <Gamepad2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span className="font-khmer">Topup</span>
               </Button>
             </Link>
