@@ -106,7 +106,7 @@ const AiTab: React.FC = () => {
             <Sparkles className="w-5 h-5 animate-pulse" />
             AI Customization & Training Center
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-cyan-100/70">
             Configure your brand name, page background types, color codes, and automatically write instructions that train future AI developer agents to match your styling requirements.
           </CardDescription>
         </CardHeader>
@@ -114,7 +114,7 @@ const AiTab: React.FC = () => {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Brand Renaming */}
-        <Card className="border-zinc-800 bg-zinc-950">
+        <Card className="border-border bg-card text-card-foreground">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-cyan-400" />
@@ -124,27 +124,27 @@ const AiTab: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-zinc-400">Brand Name</label>
+              <label className="text-sm font-semibold text-muted-foreground">Brand Name</label>
               <Input
                 value={siteName}
                 onChange={(e) => setSiteName(e.target.value)}
                 placeholder="Enter new brand name (e.g. Ahnajak Topup)"
-                className="bg-zinc-900 border-zinc-800 focus:border-cyan-500"
+                className="bg-background border-input focus:border-cyan-500"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-zinc-400">Browser Page Title (Preview)</label>
+              <label className="text-sm font-semibold text-muted-foreground">Browser Page Title (Preview)</label>
               <Input
                 value={`${siteName} - Game Topup Cambodia`}
                 disabled
-                className="bg-zinc-900/50 border-zinc-800 text-zinc-500"
+                className="bg-muted/50 border-border text-muted-foreground"
               />
             </div>
           </CardContent>
         </Card>
 
         {/* Theme Settings */}
-        <Card className="border-zinc-800 bg-zinc-950">
+        <Card className="border-border bg-card text-card-foreground">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Paintbrush className="w-5 h-5 text-cyan-400" />
@@ -155,34 +155,34 @@ const AiTab: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-zinc-400">Primary Accent</label>
+                <label className="text-sm font-semibold text-muted-foreground">Primary Accent</label>
                 <div className="flex gap-2">
                   <input
                     type="color"
                     value={primaryColor}
                     onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="w-10 h-10 border border-zinc-800 rounded bg-transparent cursor-pointer"
+                    className="w-10 h-10 border border-input rounded bg-transparent cursor-pointer"
                   />
                   <Input
                     value={primaryColor}
                     onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="bg-zinc-900 border-zinc-800 text-sm"
+                    className="bg-background border-input text-sm"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-zinc-400">Secondary Accent</label>
+                <label className="text-sm font-semibold text-muted-foreground">Secondary Accent</label>
                 <div className="flex gap-2">
                   <input
                     type="color"
                     value={accentColor}
                     onChange={(e) => setAccentColor(e.target.value)}
-                    className="w-10 h-10 border border-zinc-800 rounded bg-transparent cursor-pointer"
+                    className="w-10 h-10 border border-input rounded bg-transparent cursor-pointer"
                   />
                   <Input
                     value={accentColor}
                     onChange={(e) => setAccentColor(e.target.value)}
-                    className="bg-zinc-900 border-zinc-800 text-sm"
+                    className="bg-background border-input text-sm"
                   />
                 </div>
               </div>
@@ -190,7 +190,7 @@ const AiTab: React.FC = () => {
 
             {/* Presets */}
             <div className="space-y-2 pt-2">
-              <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Color Presets</label>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Color Presets</label>
               <div className="flex flex-wrap gap-2">
                 {presets.map((preset) => (
                   <Button
@@ -198,7 +198,7 @@ const AiTab: React.FC = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleApplyPreset(preset.primary, preset.accent)}
-                    className="border-zinc-800 hover:border-cyan-500 hover:bg-zinc-900 text-xs text-zinc-300"
+                    className="border-border hover:border-primary hover:bg-accent text-xs text-foreground"
                   >
                     <span 
                       className="w-2.5 h-2.5 rounded-full mr-1.5" 
@@ -214,7 +214,7 @@ const AiTab: React.FC = () => {
       </div>
 
       {/* Global Background Settings Card */}
-      <Card className="border-zinc-800 bg-zinc-950">
+      <Card className="border-border bg-card text-card-foreground">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MonitorPlay className="w-5 h-5 text-cyan-400" />
@@ -225,7 +225,7 @@ const AiTab: React.FC = () => {
         <CardContent className="space-y-6">
           {/* Background Type Selection */}
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-zinc-400">Background Mode</label>
+            <label className="text-sm font-semibold text-muted-foreground">Background Mode</label>
             <div className="flex gap-2">
               {(['color', 'gradient', 'image', 'video'] as const).map((type) => (
                 <Button
@@ -235,7 +235,7 @@ const AiTab: React.FC = () => {
                   className={`flex-1 capitalize ${
                     bgType === type 
                       ? 'bg-cyan-500 text-black hover:bg-cyan-600 font-bold' 
-                      : 'border-zinc-800 hover:bg-zinc-900 text-zinc-300'
+                      : 'border-border hover:bg-accent text-foreground'
                   }`}
                 >
                   {type}
@@ -248,7 +248,7 @@ const AiTab: React.FC = () => {
             {/* Color & Gradient Settings */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-zinc-400">
+                <label className="text-sm font-semibold text-muted-foreground">
                   {bgType === 'gradient' ? 'Base Gradient Color' : 'Background Solid Color'}
                 </label>
                 <div className="flex gap-2">
@@ -256,15 +256,15 @@ const AiTab: React.FC = () => {
                     type="color"
                     value={backgroundColor}
                     onChange={(e) => setBackgroundColor(e.target.value)}
-                    className="w-10 h-10 border border-zinc-800 rounded bg-transparent cursor-pointer"
+                    className="w-10 h-10 border border-input rounded bg-transparent cursor-pointer"
                   />
                   <Input
                     value={backgroundColor}
                     onChange={(e) => setBackgroundColor(e.target.value)}
-                    className="bg-zinc-900 border-zinc-800 text-sm"
+                    className="bg-background border-input text-sm"
                   />
                 </div>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-muted-foreground">
                   {bgType === 'gradient' 
                     ? 'Determines the starting color of the linear background gradient.' 
                     : 'The base color of the page. Acts as the backing layer behind image and video modes too.'}
@@ -277,7 +277,7 @@ const AiTab: React.FC = () => {
               {/* Background Image URL */}
               {bgType === 'image' && (
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-zinc-400 flex items-center gap-1.5">
+                  <label className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
                     <Image className="w-4 h-4 text-cyan-400" />
                     Background Image URL
                   </label>
@@ -285,9 +285,9 @@ const AiTab: React.FC = () => {
                     value={bgImageUrl}
                     onChange={(e) => setBgImageUrl(e.target.value)}
                     placeholder="Enter image URL (e.g. https://example.com/bg.jpg)"
-                    className="bg-zinc-900 border-zinc-800 focus:border-cyan-500"
+                    className="bg-background border-input focus:border-cyan-500"
                   />
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-muted-foreground">
                     Provide a public image web address. The image will be centered, stretched, and layered at 40% opacity.
                   </p>
                 </div>
@@ -296,7 +296,7 @@ const AiTab: React.FC = () => {
               {/* Background Video URL */}
               {bgType === 'video' && (
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-zinc-400 flex items-center gap-1.5">
+                  <label className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
                     <Video className="w-4 h-4 text-cyan-400" />
                     Background Video URL
                   </label>
@@ -304,9 +304,9 @@ const AiTab: React.FC = () => {
                     value={bgVideoUrl}
                     onChange={(e) => setBgVideoUrl(e.target.value)}
                     placeholder="Enter video URL (e.g. https://example.com/bg.mp4)"
-                    className="bg-zinc-900 border-zinc-800 focus:border-cyan-500"
+                    className="bg-background border-input focus:border-cyan-500"
                   />
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-muted-foreground">
                     Provide a direct link to an MP4 video. The video will autoplay, loop, and run muted in the background.
                   </p>
                 </div>
@@ -314,7 +314,7 @@ const AiTab: React.FC = () => {
 
               {/* Inactive Mode Message */}
               {(bgType === 'color' || bgType === 'gradient') && (
-                <div className="h-full flex items-center justify-center border border-dashed border-zinc-800 rounded-xl p-6 text-center text-sm text-zinc-500">
+                <div className="h-full flex items-center justify-center border border-dashed border-border rounded-xl p-6 text-center text-sm text-muted-foreground">
                   No background media required. Using CSS {bgType} mode.
                 </div>
               )}
