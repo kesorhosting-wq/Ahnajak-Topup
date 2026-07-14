@@ -32,7 +32,7 @@ const KhqrSettingsTab = () => {
   const [testing, setTesting] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ahnajak-khqr-webhook`;
+  const webhookUrl = `${window.location.origin}/api/ahnajak-khqr-webhook`;
 
   useEffect(() => {
     (async () => {

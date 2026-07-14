@@ -131,7 +131,7 @@ const KesorSettingsTab: React.FC = () => {
     }
   };
 
-  const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ikhode-webhook`;
+  const webhookUrl = `${window.location.origin}/api/ikhode-webhook`;
 
   if (loading) {
     return (

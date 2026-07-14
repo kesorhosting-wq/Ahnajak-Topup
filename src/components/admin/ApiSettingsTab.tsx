@@ -311,7 +311,7 @@ const ApiSettingsTab: React.FC = () => {
             G2Bulk will automatically send order status updates to this URL:
           </p>
           <code className="block p-3 bg-secondary rounded-lg text-sm break-all">
-            {import.meta.env.VITE_SUPABASE_URL}/functions/v1/g2bulk-webhook
+            {window.location.origin}/api/g2bulk-webhook
           </code>
         </CardContent>
       </Card>

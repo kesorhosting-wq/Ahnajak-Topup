@@ -210,7 +210,7 @@ const KHQRccSettingsTab: React.FC = () => {
             Configure this URL in your KHQRcc dashboard as the Global Webhook URL:
           </p>
           <code className="text-xs bg-secondary p-2 rounded block break-all">
-            {`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/khqrcc-webhook`}
+            {`${window.location.origin}/api/khqrcc-webhook`}
           </code>
           <p className="text-xs text-muted-foreground mt-2">
             Note: We will handle verification using your Secret Key.

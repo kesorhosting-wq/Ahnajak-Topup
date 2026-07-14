@@ -265,7 +265,7 @@ const IKhodeSettingsTab: React.FC = () => {
         <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
           <h4 className="font-semibold text-green-600 dark:text-green-400 mb-2">🔗 Your Webhook URL</h4>
           <code className="text-xs bg-secondary p-2 rounded block break-all">
-            {`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ikhode-webhook/{order_id}`}
+            {`${window.location.origin}/api/ikhode-webhook/{order_id}`}
           </code>
           <p className="text-xs text-muted-foreground mt-2">
             Configure this URL in your Kesor Node.js server as the callback
