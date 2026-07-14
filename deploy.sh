@@ -130,7 +130,7 @@ DB_PORT=3306
 DB_USER=${DB_USER}
 DB_PASSWORD=${DB_PASSWORD}
 DB_NAME=${DB_NAME}
-PORT=3010
+PORT=9911
 JWT_SECRET=${JWT_SECRET}
 EOT
 
@@ -168,7 +168,7 @@ server {
     }
 
     location /api/ {
-        proxy_pass http://localhost:3010;
+        proxy_pass http://localhost:9911;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection 'upgrade';

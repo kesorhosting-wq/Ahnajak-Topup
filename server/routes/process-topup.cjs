@@ -196,7 +196,7 @@ async function fulfillRechargeOrder(orderId, order, apiKey, quantity, tableName)
     return { success: false, error: 'Could not determine catalogue_name' };
   }
 
-  const callbackUrl = `${process.env.PUBLIC_BASE_URL || 'http://localhost:3010'}/api/g2bulk-webhook`;
+  const callbackUrl = `${process.env.PUBLIC_BASE_URL || 'http://localhost:9911'}/api/g2bulk-webhook`;
   const allOrderIds = [];
   let failedCount = 0;
   let lastError = '';
