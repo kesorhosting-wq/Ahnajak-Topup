@@ -67,7 +67,7 @@ DROP TABLE IF EXISTS site_settings;
 CREATE TABLE site_settings (
   id         CHAR(36)     NOT NULL DEFAULT (UUID()) PRIMARY KEY,
   `key`      VARCHAR(255) NOT NULL,
-  value      JSON         NOT NULL,
+  value      LONGTEXT     NOT NULL,
   created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE (`key`)
@@ -87,7 +87,7 @@ CREATE TABLE games (
   g2bulk_category_id   TEXT,
   default_package_icon TEXT,
   cover_image          TEXT,
-  tags                 JSON,
+  tags                 LONGTEXT,
   created_at           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE (slug)
@@ -207,7 +207,7 @@ CREATE TABLE topup_orders (
   payment_method   VARCHAR(50),
   g2bulk_order_id  TEXT,
   g2bulk_product_id TEXT,
-  card_codes       JSON,
+  card_codes       LONGTEXT,
   status           VARCHAR(50)  DEFAULT 'pending',
   status_message   TEXT,
   created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -235,7 +235,7 @@ CREATE TABLE preorder_orders (
   payment_method    VARCHAR(50),
   g2bulk_order_id   TEXT,
   g2bulk_product_id TEXT,
-  card_codes        JSON,
+  card_codes        LONGTEXT,
   status            VARCHAR(50)  NOT NULL DEFAULT 'notpaid',
   status_message    TEXT,
   scheduled_fulfill_at DATETIME,
@@ -255,7 +255,7 @@ CREATE TABLE payment_gateways (
   slug       VARCHAR(100) NOT NULL,
   name       VARCHAR(255) NOT NULL,
   enabled    TINYINT(1)   DEFAULT 1,
-  config     JSON,
+  config     LONGTEXT,
   created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE (slug)
