@@ -82,7 +82,11 @@ router.post('/', optionalAuth, async (req, res) => {
       dbPrice = parseFloat(pkg.price);
     }
     
-    const finalAmount = dbPrice !== null ? dbPrice : b.amount;
+    if (dbPrice === null) {
+      return res.status(400).json({ error: 'Invalid package — could not verify price' });
+    }
+    
+    const finalAmount = dbPrice;
 
     await query(
       `INSERT INTO topup_orders (id, user_id, game_name, package_name, player_id, server_id, player_name, amount, currency, payment_method, g2bulk_product_id, status)

@@ -157,7 +157,7 @@ router.post('/khqrcc-webhook', async (req, res) => {
       return res.status(400).json({ error: 'Payment amount mismatch' });
     }
 
-    await query('UPDATE topup_orders SET status = ? WHERE id = ?', ['processing', transaction_id]);
+    await query('UPDATE topup_orders SET status = ? WHERE id = ?', ['paid', transaction_id]);
 
     // Trigger fulfillment (call process-topup internally)
     try {

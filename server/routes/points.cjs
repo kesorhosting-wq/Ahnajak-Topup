@@ -66,31 +66,50 @@ router.post('/exchange', requireAuth, async (req, res) => {
     const config = await queryOne('SELECT * FROM point_exchange_configs WHERE id = ? AND is_active = 1', [config_id]);
     if (!config) return res.json({ success: false, message: 'Exchange config not found or inactive' });
 
-    const profile = await queryOne('SELECT reward_points FROM profiles WHERE user_id = ?', [req.user.id]);
-    if (!profile) return res.json({ success: false, message: 'Profile not found' });
+    // Use raw pool for transaction with row lock to prevent race conditions
+    const conn = await require('../db.cjs').pool.getConnection();
+    try {
+      await conn.beginTransaction();
 
-    const userPoints = parseInt(profile.reward_points || 0, 10);
-    if (userPoints < config.points_required) {
-      return res.json({ success: false, message: 'Insufficient points' });
+      const [profileRows] = await conn.query('SELECT reward_points FROM profiles WHERE user_id = ? FOR UPDATE', [req.user.id]);
+      const profile = profileRows[0];
+      if (!profile) {
+        await conn.rollback(); conn.release();
+        return res.json({ success: false, message: 'Profile not found' });
+      }
+
+      const userPoints = parseInt(profile.reward_points || 0, 10);
+      if (userPoints < config.points_required) {
+        await conn.rollback(); conn.release();
+        return res.json({ success: false, message: 'Insufficient points' });
+      }
+
+      // Generate coupon code
+      const couponCode = uuid().replace(/-/g, '').substring(0, 8).toUpperCase();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + (config.coupon_valid_days || 30));
+
+      // Deduct points
+      await conn.query('UPDATE profiles SET reward_points = reward_points - ? WHERE user_id = ?', [config.points_required, req.user.id]);
+      // Create coupon
+      await conn.query(
+        'INSERT INTO coupons (id, code, user_id, discount_type, discount_value, is_used, expires_at) VALUES (?, ?, ?, ?, ?, 0, ?)',
+        [uuid(), couponCode, req.user.id, config.exchange_type, config.exchange_value, expiresAt]
+      );
+      // Log transaction
+      await conn.query(
+        'INSERT INTO point_transactions (id, user_id, amount, transaction_type, description, reference_id) VALUES (?, ?, ?, ?, ?, ?)',
+        [uuid(), req.user.id, -config.points_required, 'exchange', `Exchanged for coupon ${couponCode}`, config.id]
+      );
+
+      await conn.commit();
+      conn.release();
+      res.json({ success: true, coupon_code: couponCode });
+    } catch (txErr) {
+      await conn.rollback();
+      conn.release();
+      throw txErr;
     }
-
-    // Generate coupon code (8-char uppercase from UUID)
-    const couponCode = uuid().replace(/-/g, '').substring(0, 8).toUpperCase();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + (config.coupon_valid_days || 30));
-
-    // Deduct points + create coupon + log transaction
-    await query('UPDATE profiles SET reward_points = reward_points - ? WHERE user_id = ?', [config.points_required, req.user.id]);
-    await query(
-      'INSERT INTO coupons (id, code, user_id, discount_type, discount_value, is_used, expires_at) VALUES (?, ?, ?, ?, ?, 0, ?)',
-      [uuid(), couponCode, req.user.id, config.exchange_type, config.exchange_value, expiresAt]
-    );
-    await query(
-      'INSERT INTO point_transactions (id, user_id, amount, transaction_type, description, reference_id) VALUES (?, ?, ?, ?, ?, ?)',
-      [uuid(), req.user.id, -config.points_required, 'exchange', `Exchanged for coupon ${couponCode}`, config.id]
-    );
-
-    res.json({ success: true, coupon_code: couponCode });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

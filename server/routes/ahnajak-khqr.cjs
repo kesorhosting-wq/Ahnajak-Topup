@@ -114,8 +114,8 @@ router.post('/', async (req, res) => {
         const order = await findOrder(orderId);
         if (order && !['paid', 'processing', 'completed', 'failed'].includes(String(order.status).toLowerCase())) {
           const gwAmount = Number(gatewayPayload?.amount ?? gatewayPayload?.data?.amount ?? NaN);
-          if (Number.isFinite(gwAmount) && Math.abs(gwAmount - Number(order.amount)) > 0.01) {
-            console.warn('[ahnajak-khqr] Amount mismatch on check', { orderId, dbAmount: order.amount, gwAmount });
+          if (!Number.isFinite(gwAmount) || Math.abs(gwAmount - Number(order.amount)) > 0.01) {
+            console.warn('[ahnajak-khqr] Amount mismatch or missing on check', { orderId, dbAmount: order.amount, gwAmount });
           } else {
             await markPaid(order.table, orderId, gatewayPayload?.transaction_id);
           }

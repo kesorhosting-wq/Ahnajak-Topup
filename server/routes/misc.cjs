@@ -48,6 +48,11 @@ router.post('/khqrcc-payment', async (req, res) => {
 
 // khqrcc-webhook (external callback)
 router.post('/khqrcc-webhook', async (req, res) => {
+  const expectedSecret = process.env.G2BULK_WEBHOOK_SECRET;
+  if (expectedSecret) {
+    const provided = req.headers['x-webhook-secret'] || '';
+    if (provided !== expectedSecret) return res.status(401).send('Invalid webhook secret');
+  }
   const crypto = require('crypto');
   const { transaction_id, amount, status, req_time, hash: received_hash } = req.body;
   try {
@@ -60,11 +65,13 @@ router.post('/khqrcc-webhook', async (req, res) => {
     if (status === 'SUCCESS') {
       const order = await queryOne('SELECT amount FROM topup_orders WHERE id = ?', [transaction_id]);
       if (!order) return res.status(404).json({ error: 'Order not found' });
-      if (Math.abs(parseFloat(amount) - parseFloat(order.amount)) > 0.01) {
+      const paidAmount = parseFloat(amount);
+      const expectedAmount = parseFloat(order.amount);
+      if (isNaN(paidAmount) || isNaN(expectedAmount) || Math.abs(paidAmount - expectedAmount) > 0.01) {
         return res.status(400).json({ error: 'Payment amount mismatch' });
       }
       const { query } = require('../db.cjs');
-      await query('UPDATE topup_orders SET status = ? WHERE id = ?', ['processing', transaction_id]);
+      await query('UPDATE topup_orders SET status = ? WHERE id = ?', ['paid', transaction_id]);
       try { const pt = require('./process-topup.cjs'); if (pt.fulfillOrder) await pt.fulfillOrder(transaction_id); } catch (e) { console.error('Fulfill error:', e.message); }
       return res.json({ received: true });
     }
@@ -76,6 +83,11 @@ router.post('/khqrcc-webhook', async (req, res) => {
 
 // g2bulk-webhook (G2Bulk callback)
 router.post('/g2bulk-webhook', async (req, res) => {
+  const expectedSecret = process.env.G2BULK_WEBHOOK_SECRET;
+  if (expectedSecret) {
+    const provided = req.headers['x-webhook-secret'] || '';
+    if (provided !== expectedSecret) return res.status(401).json({ error: 'Invalid webhook secret' });
+  }
   const body = req.body || {};
   const remark = body.remark || '';
   const orderMatch = remark.match(/order_id:([a-f0-9-]+)/);
@@ -94,11 +106,18 @@ router.post('/g2bulk-webhook', async (req, res) => {
   res.json({ received: true, orderId, newStatus });
 });
 
-// Proxy image
+// Proxy image — only allow public image URLs to prevent SSRF
+const ALLOWED_IMAGE_DOMAINS = ['i.imgur.com', 'imgur.com', 'i.ibb.co', 'ibb.co', 'icons.iconarchive.com', 'cdn-icons-png.flaticon.com', 'raw.githubusercontent.com'];
+
 router.get('/proxy-image', async (req, res) => {
   const { url } = req.query;
   if (!url) return res.status(400).send('URL required');
   try {
+    const parsed = new URL(url);
+    if (!ALLOWED_IMAGE_DOMAINS.includes(parsed.hostname) && !parsed.hostname.endsWith('.r2.dev')) {
+      return res.status(403).send('Domain not allowed');
+    }
+    if (parsed.protocol !== 'https:') return res.status(403).send('HTTPS only');
     const response = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' }
     });

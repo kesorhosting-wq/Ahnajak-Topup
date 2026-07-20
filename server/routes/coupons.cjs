@@ -15,12 +15,17 @@ router.post('/apply', requireAuth, async (req, res) => {
   if (!code) return res.status(400).json({ success: false, message: 'Coupon code required' });
 
   try {
-    const coupon = await queryOne(
-      `SELECT * FROM coupons WHERE code = ? AND user_id = ? AND is_used = 0
+    // Atomically mark coupon as used — prevents race condition (double-use)
+    const result = await query(
+      `UPDATE coupons SET is_used = 1, used_at = NOW() WHERE code = ? AND user_id = ? AND is_used = 0
        AND (expires_at IS NULL OR expires_at > NOW())`,
       [code.trim().toUpperCase(), req.user.id]
     );
+    if (result[0].affectedRows === 0) {
+      return res.json({ success: false, message: 'Invalid, expired, or already used coupon' });
+    }
 
+    const coupon = await queryOne('SELECT * FROM coupons WHERE code = ? AND user_id = ?', [code.trim().toUpperCase(), req.user.id]);
     if (!coupon) {
       return res.json({ success: false, message: 'Invalid, expired, or already used coupon' });
     }
@@ -35,9 +40,6 @@ router.post('/apply', requireAuth, async (req, res) => {
     if (discount > parseFloat(order_amount)) {
       discount = parseFloat(order_amount);
     }
-
-    // Mark coupon as used
-    await query('UPDATE coupons SET is_used = 1, used_at = NOW() WHERE id = ?', [coupon.id]);
 
     res.json({ success: true, discount_amount: discount });
   } catch (err) {

@@ -30,10 +30,16 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
   fileFilter: (req, file, cb) => {
-    // Allow images and fonts
-    const allowed = /\.(png|jpe?g|gif|webp|svg|ico|woff2?|ttf|otf)$/i;
-    if (allowed.test(path.extname(file.originalname))) cb(null, true);
-    else cb(new Error('File type not allowed'));
+    const allowedExt = /\.(png|jpe?g|gif|webp|svg|ico|woff2?|ttf|otf)$/i;
+    const allowedMime = [
+      'image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml', 'image/x-icon', 'image/vnd.microsoft.icon',
+      'font/woff', 'font/woff2', 'font/ttf', 'font/otf',
+    ];
+    if (allowedExt.test(path.extname(file.originalname)) && allowedMime.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('File type not allowed'));
+    }
   },
 });
 

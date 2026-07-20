@@ -17,12 +17,35 @@ require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
 
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = parseInt(process.env.PORT || '9911', 10);
 
 // ── Middleware ──────────────────────────────────────────────────────────────
-app.use(cors());
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(express.json({ limit: '2mb' }));
+
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://telegram.org");
+  next();
+});
+
+// Rate limiting on auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { error: 'Too many requests — please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
@@ -35,7 +58,7 @@ app.post('/api/test-post', (req, res) => res.json({ ok: true, method: 'POST work
 // Each router replaces a specific Supabase feature (see route file headers for details)
 
 // Auth (replaces Supabase Auth)
-app.use('/api/auth', require('./routes/auth.cjs'));
+app.use('/api/auth', authLimiter, require('./routes/auth.cjs'));
 
 // Settings (site_settings CRUD)
 app.use('/api/settings', require('./routes/settings.cjs'));

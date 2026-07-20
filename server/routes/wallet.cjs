@@ -51,13 +51,18 @@ async function processWalletTransaction(userId, type, amount, description = null
   }
 }
 
-// Top up wallet (admin only)
+// Top up wallet (admin only — with amount cap and mandatory description for audit trail)
 router.post('/topup', requireAuth, requireAdmin, async (req, res) => {
   const { amount, description, reference_id } = req.body;
   if (!amount) return res.status(400).json({ error: 'amount required' });
+  const parsedAmount = parseFloat(amount);
+  if (parsedAmount <= 0) return res.status(400).json({ error: 'Amount must be positive' });
+  if (parsedAmount > 10000) return res.status(400).json({ error: 'Amount exceeds maximum ($10,000). Contact owner for larger amounts.' });
+  if (!description || description.length < 3) return res.status(400).json({ error: 'A description is required for audit purposes' });
   try {
-    const result = await processWalletTransaction(req.user.id, 'topup', parseFloat(amount), description || 'Wallet topup', reference_id || null);
+    const result = await processWalletTransaction(req.user.id, 'topup', parsedAmount, `Admin topup: ${description}`, reference_id || null);
     if (!result.success) return res.status(400).json(result);
+    console.warn(`[AUDIT] Admin wallet topup: user=${req.user.email}, amount=${parsedAmount}, description=${description}`);
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });

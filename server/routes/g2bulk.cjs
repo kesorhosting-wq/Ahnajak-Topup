@@ -267,6 +267,13 @@ async function syncGamesAndCatalogues(apiKey, gameCodes) {
 
 // ── G2Bulk webhook ──────────────────────────────────────────────────────────
 router.post('/g2bulk-webhook', async (req, res) => {
+  const expectedSecret = process.env.G2BULK_WEBHOOK_SECRET;
+  if (expectedSecret) {
+    const provided = req.headers['x-webhook-secret'] || '';
+    if (provided !== expectedSecret) {
+      return res.status(401).json({ error: 'Invalid webhook secret' });
+    }
+  }
   const body = req.body;
   const remark = body.remark || '';
   // Extract our order ID from the remark (format: "order_id:..._1ofN")

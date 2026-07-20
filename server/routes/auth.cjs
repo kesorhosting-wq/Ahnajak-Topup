@@ -62,6 +62,14 @@ router.post('/telegram', async (req, res) => {
     return res.status(401).json({ error: 'Telegram auth verification failed' });
   }
 
+  // Prevent replay attacks — auth_date must be within 5 minutes
+  if (auth_date) {
+    const authAge = Math.floor(Date.now() / 1000) - parseInt(auth_date, 10);
+    if (authAge > 300) {
+      return res.status(401).json({ error: 'Telegram auth expired — please log in again' });
+    }
+  }
+
   const telegramId = String(id);
   const displayName = first_name || username || 'Telegram User';
   const email = `tg_${telegramId}@telegram.local`;
