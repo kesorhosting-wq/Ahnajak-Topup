@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import Header from "@/components/Header";
 import HeaderSpacer from "@/components/HeaderSpacer";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,7 @@ const InvoicePage = () => {
       fetchOrder();
       
       // Set up realtime subscription for order updates
-      const channel = supabase
+      const channel = db
         .channel(`order-${orderId}`)
         .on(
           'postgres_changes',
@@ -75,14 +75,14 @@ const InvoicePage = () => {
         .subscribe();
 
       return () => {
-        supabase.removeChannel(channel);
+        db.removeChannel(channel);
       };
     }
   }, [orderId]);
 
   const fetchOrder = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("topup_orders")
         .select("*")
         .eq("id", orderId)

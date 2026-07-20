@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
@@ -235,7 +235,7 @@ const CdnMigrationTab: React.FC = () => {
               Failed / Broken Image URLs ({failedResults.length})
             </CardTitle>
             <CardDescription className="text-xs">
-              These images returned 404 (Not Found) on Supabase. Upload a new image for them in your settings to fix them.
+              These images returned 404 (Not Found) on db. Upload a new image for them in your settings to fix them.
             </CardDescription>
           </CardHeader>
           <CardContent>

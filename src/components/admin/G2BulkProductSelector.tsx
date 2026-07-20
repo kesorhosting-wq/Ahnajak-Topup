@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { Check, ChevronsUpDown, Link2, Link2Off, RefreshCw, Package, DollarSign, X, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -47,13 +47,13 @@ const G2BulkProductSelector: React.FC<G2BulkProductSelectorProps> = ({
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('g2bulk_products')
         .select('*')
         .eq('is_active', true)
         .order('game_name', { ascending: true })
         .order('price', { ascending: true })
-        // Supabase defaults to 1000 rows; we need the full catalogue for linking
+        // db defaults to 1000 rows; we need the full catalogue for linking
         .range(0, 4999);
 
       if (error) throw error;

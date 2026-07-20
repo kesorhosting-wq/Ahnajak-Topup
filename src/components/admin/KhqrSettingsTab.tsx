@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Eye, EyeOff, Loader2, Save, Wifi, Copy, Check } from "lucide-react";
 
 interface KhqrConfig {
@@ -36,7 +36,7 @@ const KhqrSettingsTab = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("payment_gateways")
         .select("config, enabled")
         .eq("slug", "ahnajak-khqr")
@@ -57,7 +57,7 @@ const KhqrSettingsTab = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    const { error } = await supabase
+    const { error } = await db
       .from("payment_gateways")
       .upsert(
         [{
@@ -78,7 +78,7 @@ const KhqrSettingsTab = () => {
 
   const handleTest = async () => {
     setTesting(true);
-    const { data, error } = await supabase.functions.invoke("ahnajak-khqr", {
+    const { data, error } = await db.functions.invoke("ahnajak-khqr", {
       body: { action: "test-connection" },
     });
     setTesting(false);

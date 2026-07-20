@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { 
   RefreshCw, 
   TrendingUp, 
@@ -44,7 +44,7 @@ const G2BulkStatsDashboard: React.FC = () => {
       const sevenDaysAgo = subDays(now, 7);
 
       // Fetch orders from last 7 days
-      const { data: orders, error } = await supabase
+      const { data: orders, error } = await db
         .from('topup_orders')
         .select('id, status, created_at, updated_at, g2bulk_order_id')
         .gte('created_at', sevenDaysAgo.toISOString())

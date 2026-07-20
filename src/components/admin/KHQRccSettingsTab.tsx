@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Save, Server, Key, Loader2, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { toast } from '@/hooks/use-toast';
 
 interface KHQRccConfig {
@@ -41,7 +41,7 @@ const KHQRccSettingsTab: React.FC = () => {
 
   const fetchSettings = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('payment_gateways')
         .select('*')
         .eq('slug', 'khqrcc')
@@ -75,7 +75,7 @@ const KHQRccSettingsTab: React.FC = () => {
     setSaving(true);
     try {
       const configJson = JSON.parse(JSON.stringify(config));
-      const { error } = await supabase
+      const { error } = await db
         .from('payment_gateways')
         .update({
           enabled,

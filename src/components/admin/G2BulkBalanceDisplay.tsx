@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Wallet, RefreshCw, AlertCircle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -17,7 +17,7 @@ const G2BulkBalanceDisplay: React.FC = () => {
 
   const checkConfig = useCallback(async () => {
     try {
-      const { data } = await supabase
+      const { data } = await db
         .from('api_configurations')
         .select('is_enabled')
         .eq('api_name', 'g2bulk')
@@ -37,7 +37,7 @@ const G2BulkBalanceDisplay: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('g2bulk-api', {
+      const { data, error: fnError } = await db.functions.invoke('g2bulk-api', {
         body: { action: 'get_account_balance' },
       });
 

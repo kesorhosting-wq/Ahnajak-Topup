@@ -1,6 +1,6 @@
-// Site context for global state management
+﻿// Site context for global state management
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { handleApiError } from '@/lib/errorHandler';
 
 export interface Game {
@@ -305,13 +305,13 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       // Load all data in parallel for faster loading
       const [settingsResult, gamesResult, packagesResult, specialPackagesResult, ikhodeGatewayResult, khqrccGatewayResult] = await Promise.all([
-        supabase.from('site_settings').select('*'),
-        supabase.from('games').select('*').order('sort_order', { ascending: true }),
-        supabase.from('packages').select('*').order('sort_order', { ascending: true }),
-        supabase.from('special_packages').select('*').order('sort_order', { ascending: true }),
+        db.from('site_settings').select('*'),
+        db.from('games').select('*').order('sort_order', { ascending: true }),
+        db.from('packages').select('*').order('sort_order', { ascending: true }),
+        db.from('special_packages').select('*').order('sort_order', { ascending: true }),
         // Public-safe gateway config via backend function (bypasses RLS on payment_gateways)
-        supabase.functions.invoke('get-ikhode-public-config'),
-        supabase.from('payment_gateways_public').select('*').eq('slug', 'khqrcc').maybeSingle(),
+        db.functions.invoke('get-ikhode-public-config'),
+        db.from('payment_gateways_public').select('*').eq('slug', 'khqrcc').maybeSingle(),
       ]);
 
       const settingsData = settingsResult.data;
@@ -485,9 +485,9 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const refreshGames = async () => {
     try {
       const [gamesResult, packagesResult, specialPackagesResult] = await Promise.all([
-        supabase.from('games').select('*').order('sort_order', { ascending: true }),
-        supabase.from('packages').select('*').order('sort_order', { ascending: true }),
-        supabase.from('special_packages').select('*').order('sort_order', { ascending: true }),
+        db.from('games').select('*').order('sort_order', { ascending: true }),
+        db.from('packages').select('*').order('sort_order', { ascending: true }),
+        db.from('special_packages').select('*').order('sort_order', { ascending: true }),
       ]);
 
       const gamesData = gamesResult.data;
@@ -550,7 +550,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const saveSetting = async (key: string, value: any) => {
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('site_settings')
         .upsert({ key, value }, { onConflict: 'key' });
       if (error) handleApiError(error, 'SiteContext.saveSetting');
@@ -572,7 +572,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const addGame = async (game: Omit<Game, 'id' | 'packages' | 'specialPackages'>) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('games')
         .insert({
           name: game.name,
@@ -611,7 +611,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (updatedGame.tags !== undefined) updateData.tags = updatedGame.tags || [];
 
       let updatePayload = { ...updateData };
-      let { error } = await supabase
+      let { error } = await db
         .from('games')
         .update(updatePayload)
         .eq('id', id);
@@ -620,7 +620,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (error && error.message && (error.message.includes("column 'tags'") || error.code === 'PGRST204')) {
         console.warn("Table 'games' is missing the 'tags' column. Retrying update without it.");
         delete updatePayload.tags;
-        const retryResult = await supabase
+        const retryResult = await db
           .from('games')
           .update(updatePayload)
           .eq('id', id);
@@ -637,7 +637,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const deleteGame = async (id: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('games')
         .delete()
         .eq('id', id);
@@ -662,8 +662,8 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       // Update sort_order for both games
       await Promise.all([
-        supabase.from('games').update({ sort_order: targetIndex }).eq('id', games[currentIndex].id),
-        supabase.from('games').update({ sort_order: currentIndex }).eq('id', games[targetIndex].id),
+        db.from('games').update({ sort_order: targetIndex }).eq('id', games[currentIndex].id),
+        db.from('games').update({ sort_order: currentIndex }).eq('id', games[targetIndex].id),
       ]);
       setGames(newGames);
     } catch (error) {
@@ -686,7 +686,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const addPackage = async (gameId: string, pkg: Omit<Package, 'id'>) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('packages')
         .insert({
           game_id: gameId,
@@ -752,7 +752,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (updatedPkg.quantity !== undefined) updateData.quantity = updatedPkg.quantity ?? null;
       if (updatedPkg.points !== undefined) updateData.points = updatedPkg.points;
 
-      const { error } = await supabase
+      const { error } = await db
         .from('packages')
         .update(updateData)
         .eq('id', packageId);
@@ -771,7 +771,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const deletePackage = async (gameId: string, packageId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('packages')
         .delete()
         .eq('id', packageId);
@@ -803,8 +803,8 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       // Update sort_order for both packages
       await Promise.all([
-        supabase.from('packages').update({ sort_order: targetIndex }).eq('id', game.packages[currentIndex].id),
-        supabase.from('packages').update({ sort_order: currentIndex }).eq('id', game.packages[targetIndex].id),
+        db.from('packages').update({ sort_order: targetIndex }).eq('id', game.packages[currentIndex].id),
+        db.from('packages').update({ sort_order: currentIndex }).eq('id', game.packages[targetIndex].id),
       ]);
       setGames(prev => prev.map(g =>
         g.id === gameId ? { ...g, packages: newPackages } : g
@@ -817,7 +817,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Special Package functions
   const addSpecialPackage = async (gameId: string, pkg: Omit<Package, 'id'>) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('special_packages')
         .insert({
           game_id: gameId,
@@ -883,7 +883,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (updatedPkg.quantity !== undefined) updateData.quantity = updatedPkg.quantity ?? null;
       if (updatedPkg.points !== undefined) updateData.points = updatedPkg.points;
 
-      const { error } = await supabase
+      const { error } = await db
         .from('special_packages')
         .update(updateData)
         .eq('id', packageId);
@@ -902,7 +902,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const deleteSpecialPackage = async (gameId: string, packageId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('special_packages')
         .delete()
         .eq('id', packageId);
@@ -933,8 +933,8 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       await Promise.all([
-        supabase.from('special_packages').update({ sort_order: targetIndex }).eq('id', game.specialPackages[currentIndex].id),
-        supabase.from('special_packages').update({ sort_order: currentIndex }).eq('id', game.specialPackages[targetIndex].id),
+        db.from('special_packages').update({ sort_order: targetIndex }).eq('id', game.specialPackages[currentIndex].id),
+        db.from('special_packages').update({ sort_order: currentIndex }).eq('id', game.specialPackages[targetIndex].id),
       ]);
       setGames(prev => prev.map(g =>
         g.id === gameId ? { ...g, specialPackages: newPackages } : g

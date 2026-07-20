@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import {
   RefreshCw, Package, CheckCircle, XCircle, Clock, CreditCard, Play, ChevronDown, AlertTriangle,
 } from 'lucide-react';
@@ -49,19 +49,19 @@ const PreorderOrdersTab: React.FC = () => {
 
   // Realtime subscription
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel('admin-preorder-orders-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'preorder_orders' }, () => {
         loadOrders();
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db.removeChannel(channel); };
   }, []);
 
   const loadOrders = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('preorder_orders')
         .select('*')
         .order('created_at', { ascending: false })
@@ -78,7 +78,7 @@ const PreorderOrdersTab: React.FC = () => {
 
   const updateStatus = async (orderId: string, status: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('preorder_orders')
         .update({ status, status_message: `Manually set to ${status}` })
         .eq('id', orderId);
@@ -98,7 +98,7 @@ const PreorderOrdersTab: React.FC = () => {
     setProcessingOrders(prev => ({ ...prev, [order.id]: true }));
     try {
       // Use process-topup edge function but adapt for preorder
-      const { data, error } = await supabase.functions.invoke('process-topup', {
+      const { data, error } = await db.functions.invoke('process-topup', {
         body: { action: 'fulfill', orderId: order.id, isPreorder: true },
       });
       if (error) throw error;

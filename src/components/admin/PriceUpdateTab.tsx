@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+﻿import React, { useState, useEffect, useCallback } from 'react';
+import { db } from '@/integrations/db/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,14 +39,14 @@ const PriceUpdateTab: React.FC = () => {
     setLoading(true);
     try {
       // Fetch g2bulk products for cost lookup
-      const { data: g2products } = await supabase
+      const { data: g2products } = await db
         .from('g2bulk_products')
         .select('g2bulk_product_id, price');
       const costMap = new Map<string, number>();
       g2products?.forEach(p => costMap.set(p.g2bulk_product_id, Number(p.price)));
 
       // Fetch games for name lookup
-      const { data: games } = await supabase.from('games').select('id, name');
+      const { data: games } = await db.from('games').select('id, name');
       const gameMap = new Map<string, string>();
       games?.forEach(g => gameMap.set(g.id, g.name));
 
@@ -60,7 +60,7 @@ const PriceUpdateTab: React.FC = () => {
       ] as const;
 
       for (const t of tables) {
-        const { data } = await supabase
+        const { data } = await db
           .from(t.name)
           .select('id, name, price, g2bulk_product_id, price_markup_percent, game_id')
           .not('g2bulk_product_id', 'is', null)
@@ -112,7 +112,7 @@ const PriceUpdateTab: React.FC = () => {
 
         const markupVal = val === '' ? null : parseFloat(val);
 
-        await supabase
+        await db
           .from(pkg.table as 'packages' | 'special_packages' | 'preorder_packages')
           .update({ price_markup_percent: markupVal })
           .eq('id', pkgId);
@@ -135,7 +135,7 @@ const PriceUpdateTab: React.FC = () => {
     try {
       toast({ title: 'Updating prices...', description: 'Fetching latest G2Bulk prices and applying markups.' });
 
-      const { data, error } = await supabase.functions.invoke('update-prices');
+      const { data, error } = await db.functions.invoke('update-prices');
 
       if (error) throw error;
 

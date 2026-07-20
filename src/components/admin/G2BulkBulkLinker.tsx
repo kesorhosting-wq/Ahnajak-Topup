@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { 
   Link2, Wand2, CheckCircle2, XCircle, RefreshCw, 
   ChevronDown, ChevronUp, Sparkles, AlertTriangle 
@@ -56,7 +56,7 @@ const G2BulkBulkLinker: React.FC<G2BulkBulkLinkerProps> = ({ games, onLinkComple
   const loadProductsAndGenerateSuggestions = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('g2bulk_products')
         .select('*')
         .eq('is_active', true)
@@ -218,7 +218,7 @@ const G2BulkBulkLinker: React.FC<G2BulkBulkLinkerProps> = ({ games, onLinkComple
 
       for (const match of toApply) {
         const tableName = match.isSpecialPackage ? 'special_packages' : 'packages';
-        const { error } = await supabase
+        const { error } = await db
           .from(tableName)
           .update({
             g2bulk_product_id: match.suggestedProduct!.g2bulk_product_id,
@@ -256,7 +256,7 @@ const G2BulkBulkLinker: React.FC<G2BulkBulkLinkerProps> = ({ games, onLinkComple
       // Load products if not already loaded
       let productData = products;
       if (productData.length === 0) {
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from('g2bulk_products')
           .select('*')
           .eq('is_active', true)
@@ -330,7 +330,7 @@ const G2BulkBulkLinker: React.FC<G2BulkBulkLinkerProps> = ({ games, onLinkComple
       let errorCount = 0;
 
       for (const match of allMatches) {
-        const { error } = await supabase
+        const { error } = await db
           .from(match.tableName as 'packages' | 'special_packages')
           .update({
             g2bulk_product_id: match.productId,

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Save, Server, Key, Link, Loader2, TestTube, Globe, Wifi } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { toast } from '@/hooks/use-toast';
 
 interface IkhodeConfig {
@@ -49,7 +49,7 @@ const KesorSettingsTab: React.FC = () => {
 
   const fetchSettings = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('payment_gateways')
         .select('*')
         .eq('slug', 'ikhode-bakong')
@@ -83,7 +83,7 @@ const KesorSettingsTab: React.FC = () => {
     setSaving(true);
     try {
       const configJson = JSON.parse(JSON.stringify(config));
-      const { error } = await supabase
+      const { error } = await db
         .from('payment_gateways')
         .update({
           enabled,
@@ -112,7 +112,7 @@ const KesorSettingsTab: React.FC = () => {
     setTesting(true);
     try {
       // Test via edge function to avoid CORS issues
-      const { data, error } = await supabase.functions.invoke('ikhode-payment', {
+      const { data, error } = await db.functions.invoke('ikhode-payment', {
         body: { action: 'test-connection' }
       });
 

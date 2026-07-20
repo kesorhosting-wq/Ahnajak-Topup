@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { RefreshCw, CheckCircle2, Package, Clock, Database, Zap } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -25,7 +25,7 @@ const G2BulkSyncWidget: React.FC<G2BulkSyncWidgetProps> = ({ onSyncComplete }) =
   const loadStats = async () => {
     try {
       // Get product count
-      const { count: totalProducts } = await supabase
+      const { count: totalProducts } = await db
         .from('g2bulk_products')
         .select('*', { count: 'exact', head: true })
         .eq('is_active', true);
@@ -33,7 +33,7 @@ const G2BulkSyncWidget: React.FC<G2BulkSyncWidgetProps> = ({ onSyncComplete }) =
       setProductCount(totalProducts || 0);
 
       // Get unique game count (categories)
-      const { data: games } = await supabase
+      const { data: games } = await db
         .from('g2bulk_products')
         .select('game_name')
         .eq('is_active', true);
@@ -44,7 +44,7 @@ const G2BulkSyncWidget: React.FC<G2BulkSyncWidgetProps> = ({ onSyncComplete }) =
       }
 
       // Get last update time from most recent product
-      const { data: lastProduct } = await supabase
+      const { data: lastProduct } = await db
         .from('g2bulk_products')
         .select('updated_at')
         .order('updated_at', { ascending: false })
@@ -66,7 +66,7 @@ const G2BulkSyncWidget: React.FC<G2BulkSyncWidgetProps> = ({ onSyncComplete }) =
     
     try {
       // Get all games with g2bulk_category_id
-      const { data: localGames } = await supabase
+      const { data: localGames } = await db
         .from('games')
         .select('name, g2bulk_category_id')
         .not('g2bulk_category_id', 'is', null);
@@ -86,7 +86,7 @@ const G2BulkSyncWidget: React.FC<G2BulkSyncWidgetProps> = ({ onSyncComplete }) =
         const batch = gameCodes.slice(i, i + batchSize);
         setSyncProgress(`Syncing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(gameCodes.length / batchSize)}...`);
         
-        const { data, error } = await supabase.functions.invoke('g2bulk-api', {
+        const { data, error } = await db.functions.invoke('g2bulk-api', {
           body: { action: 'sync_games_batch', game_codes: batch },
         });
 
@@ -124,7 +124,7 @@ const G2BulkSyncWidget: React.FC<G2BulkSyncWidgetProps> = ({ onSyncComplete }) =
     try {
       toast({ title: 'Syncing all G2Bulk products...', description: 'This may take several minutes.' });
 
-      const { data, error } = await supabase.functions.invoke('g2bulk-api', {
+      const { data, error } = await db.functions.invoke('g2bulk-api', {
         body: { action: 'sync_products' },
       });
 

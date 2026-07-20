@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Save, QrCode, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import ImageUpload from '@/components/ImageUpload';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { toast } from '@/hooks/use-toast';
 
 interface IKhodeSettings {
@@ -41,7 +41,7 @@ const PaymentQRSettingsTab: React.FC = () => {
   const fetchSettings = async () => {
     try {
       // Get the single IKhode payment setting (we only use one)
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('payment_qr_settings')
         .select('*')
         .eq('payment_method', 'IKhode')
@@ -75,7 +75,7 @@ const PaymentQRSettingsTab: React.FC = () => {
     try {
       if (settings.id) {
         // Update existing
-        const { error } = await supabase
+        const { error } = await db
           .from('payment_qr_settings')
           .update({
             qr_code_image: settings.qr_code_image || null,
@@ -91,7 +91,7 @@ const PaymentQRSettingsTab: React.FC = () => {
         if (error) throw error;
       } else {
         // Create new IKhode setting
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from('payment_qr_settings')
           .insert({
             payment_method: 'IKhode',

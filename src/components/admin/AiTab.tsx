@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSite } from '@/contexts/SiteContext';
 import { toast } from '@/hooks/use-toast';
 import { Sparkles, Save, RefreshCw, Paintbrush, ShieldCheck, Image, Video, MonitorPlay } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 
 const AiTab: React.FC = () => {
   const { settings, updateSettings } = useSite();
@@ -52,7 +52,7 @@ const AiTab: React.FC = () => {
       };
 
       for (const [key, value] of Object.entries(updates)) {
-        await supabase.from('site_settings').upsert({
+        await db.from('site_settings').upsert({
           key,
           value: JSON.stringify(value),
         });

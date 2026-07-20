@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+﻿import React, { useState, useEffect } from 'react';
+import { db } from '@/integrations/db/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -38,7 +38,7 @@ const PointExchangeTab: React.FC = () => {
 
   const fetchConfigs = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('point_exchange_configs')
       .select('*')
       .order('created_at', { ascending: false });
@@ -57,7 +57,7 @@ const PointExchangeTab: React.FC = () => {
       return;
     }
 
-    const { error } = await supabase
+    const { error } = await db
       .from('point_exchange_configs')
       .insert([newData as any]);
 
@@ -78,7 +78,7 @@ const PointExchangeTab: React.FC = () => {
   };
 
   const handleUpdate = async (id: string) => {
-    const { error } = await supabase
+    const { error } = await db
       .from('point_exchange_configs')
       .update(editData)
       .eq('id', id);
@@ -93,7 +93,7 @@ const PointExchangeTab: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
+    const { error } = await db
       .from('point_exchange_configs')
       .delete()
       .eq('id', id);

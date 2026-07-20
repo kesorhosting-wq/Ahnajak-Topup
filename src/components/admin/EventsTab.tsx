@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+﻿import React, { useState, useEffect } from 'react';
+import { db } from '@/integrations/db/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,7 +31,7 @@ const EventsTab: React.FC = () => {
   useEffect(() => { loadEvents(); }, []);
 
   const loadEvents = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from('events')
       .select('*')
       .order('sort_order', { ascending: true })
@@ -45,7 +45,7 @@ const EventsTab: React.FC = () => {
       toast({ title: 'សូមបញ្ចូលចំណងជើង', variant: 'destructive' });
       return;
     }
-    const { error } = await supabase.from('events').insert({
+    const { error } = await db.from('events').insert({
       title: newEvent.title,
       description: newEvent.description || null,
       image: newEvent.image || null,
@@ -73,7 +73,7 @@ const EventsTab: React.FC = () => {
   };
 
   const handleSave = async (id: string) => {
-    const { error } = await supabase.from('events').update({
+    const { error } = await db.from('events').update({
       title: editData.title,
       description: editData.description || null,
       image: editData.image || null,
@@ -91,13 +91,13 @@ const EventsTab: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm('លុបព្រឹត្តិការណ៍នេះ?')) return;
-    await supabase.from('events').delete().eq('id', id);
+    await db.from('events').delete().eq('id', id);
     loadEvents();
     toast({ title: 'បានលុប!' });
   };
 
   const handleToggleActive = async (id: string, active: boolean) => {
-    await supabase.from('events').update({ is_active: active }).eq('id', id);
+    await db.from('events').update({ is_active: active }).eq('id', id);
     loadEvents();
   };
 

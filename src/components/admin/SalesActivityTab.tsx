@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+﻿import React, { useState, useEffect, useCallback } from 'react';
+import { db } from '@/integrations/db/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,7 @@ const SalesActivityTab: React.FC = () => {
     setLoading(true);
     try {
       // Fetch completed orders
-      const { data: orders, error: ordersErr } = await supabase
+      const { data: orders, error: ordersErr } = await db
         .from('topup_orders')
         .select('id, game_name, package_name, player_id, amount, created_at, g2bulk_product_id, g2bulk_order_id')
         .eq('status', 'completed')
@@ -44,7 +44,7 @@ const SalesActivityTab: React.FC = () => {
       if (ordersErr) throw ordersErr;
 
       // Fetch all g2bulk product prices
-      const { data: products } = await supabase
+      const { data: products } = await db
         .from('g2bulk_products')
         .select('g2bulk_product_id, price');
 
@@ -54,11 +54,11 @@ const SalesActivityTab: React.FC = () => {
       });
 
       // Fetch package quantities for accurate cost calculation
-      const { data: packages } = await supabase
+      const { data: packages } = await db
         .from('packages')
         .select('g2bulk_product_id, price, quantity');
       
-      const { data: specialPkgs } = await supabase
+      const { data: specialPkgs } = await db
         .from('special_packages')
         .select('g2bulk_product_id, price, quantity');
 

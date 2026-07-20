@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Wallet, Copy, Check, Timer, Smartphone, Shield, RefreshCw, Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useNotificationSound } from "@/hooks/useNotificationSound";
 
 interface KHQRPaymentCardProps {
@@ -91,7 +91,7 @@ const KHQRPaymentCard = ({
       if (!silent) setChecking(true);
 
       try {
-        const { data: statusData, error: statusError } = await supabase.functions.invoke("ahnajak-khqr", {
+        const { data: statusData, error: statusError } = await db.functions.invoke("ahnajak-khqr", {
           body: { action: "check-status", orderId, md5, is_preorder: isPreorder },
         });
 
@@ -108,7 +108,7 @@ const KHQRPaymentCard = ({
 
         // Fallback: direct DB check
         const tableName = isPreorder ? "preorder_orders" : "topup_orders";
-        const { data: order, error: dbError } = await supabase
+        const { data: order, error: dbError } = await db
           .from(tableName)
           .select("status")
           .eq("id", orderId)
@@ -137,13 +137,13 @@ const KHQRPaymentCard = ({
     [orderId, md5, toast, handlePaymentSuccess, isSuccessStatus, normalizeStatus, isPreorder],
   );
 
-  // Supabase Realtime subscription for instant payment detection
+  // db Realtime subscription for instant payment detection
   useEffect(() => {
     if (paymentStatus !== "pending") return;
 
     console.log(`[Payment] Setting up Realtime subscription for order: ${orderId}`);
 
-    const channel = supabase
+    const channel = db
       .channel(`order-status-${orderId}`)
       .on(
         "postgres_changes",
@@ -170,7 +170,7 @@ const KHQRPaymentCard = ({
 
     return () => {
       console.log(`[Payment] Cleaning up Realtime subscription for order: ${orderId}`);
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [paymentStatus, orderId, isSuccessStatus, normalizeStatus, handlePaymentSuccess, isPreorder]);
 

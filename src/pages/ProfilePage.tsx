@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import HeaderSpacer from '@/components/HeaderSpacer';
@@ -37,7 +37,7 @@ const ProfilePage: React.FC = () => {
   const fetchProfileData = async () => {
     setIsLoading(true);
     try {
-      const { data: profileData, error: profileError } = await supabase
+      const { data: profileData, error: profileError } = await db
         .from('profiles')
         .select('reward_points, display_name, email')
         .eq('user_id', user?.id)
@@ -46,7 +46,7 @@ const ProfilePage: React.FC = () => {
       if (profileError) throw profileError;
       setProfile(profileData);
 
-      const { data: transData, error: transError } = await supabase
+      const { data: transData, error: transError } = await db
         .from('point_transactions')
         .select('*')
         .eq('user_id', user?.id)

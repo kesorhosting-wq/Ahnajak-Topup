@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { Download, RefreshCw, Check, AlertTriangle, Percent, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -43,7 +43,7 @@ const G2BulkFullImport: React.FC<G2BulkFullImportProps> = ({ onImportComplete })
   const loadAvailableGames = async () => {
     setIsLoadingGames(true);
     try {
-      const { data, error } = await supabase.functions.invoke('g2bulk-api', {
+      const { data, error } = await db.functions.invoke('g2bulk-api', {
         body: { action: 'get_g2bulk_games_list' },
       });
 
@@ -75,7 +75,7 @@ const G2BulkFullImport: React.FC<G2BulkFullImportProps> = ({ onImportComplete })
     setResult(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('g2bulk-api', {
+      const { data, error } = await db.functions.invoke('g2bulk-api', {
         body: { 
           action: 'bulk_import_all',
           price_markup_percent: markup,

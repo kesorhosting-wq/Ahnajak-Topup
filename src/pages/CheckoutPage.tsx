@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import Header from "@/components/Header";
 import HeaderSpacer from "@/components/HeaderSpacer";
 import { Button } from "@/components/ui/button";
@@ -70,7 +70,7 @@ const CheckoutPage = () => {
     if (!couponCode) return;
     setIsApplyingCoupon(true);
     try {
-      const { data, error } = await supabase.rpc('apply_coupon', { 
+      const { data, error } = await db.rpc('apply_coupon', { 
         p_code: couponCode.trim().toUpperCase(), 
         p_order_amount: getTotal() 
       });
@@ -110,7 +110,7 @@ const CheckoutPage = () => {
     try {
       // First create the order with G2Bulk product ID
       const firstItem = items[0];
-      const { data: orderData, error: orderError } = await supabase.functions.invoke("process-topup", {
+      const { data: orderData, error: orderError } = await db.functions.invoke("process-topup", {
         body: {
           game_name: firstItem.gameName,
           package_name: firstItem.packageName,
@@ -134,7 +134,7 @@ const CheckoutPage = () => {
       setOrderId(newOrderId);
 
       // Generate KHQR via Ahnajak gateway (DB price is authoritative)
-      const { data, error } = await supabase.functions.invoke("ahnajak-khqr", {
+      const { data, error } = await db.functions.invoke("ahnajak-khqr", {
         body: {
           action: "generate-qr",
           orderId: newOrderId,

@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { RefreshCw, Package, CheckCircle, XCircle, Clock, AlertTriangle, Search, BarChart3, Bell, BellOff, CreditCard, Copy, ChevronDown, Play } from 'lucide-react';
 import {
   DropdownMenu,
@@ -74,7 +74,7 @@ const OrdersTab: React.FC = () => {
   useEffect(() => {
     console.log('[Realtime] Setting up subscription for topup_orders');
     
-    const channel = supabase
+    const channel = db
       .channel('admin-orders-realtime')
       .on(
         'postgres_changes',
@@ -144,14 +144,14 @@ const OrdersTab: React.FC = () => {
 
     return () => {
       console.log('[Realtime] Cleaning up subscription');
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [soundEnabled, playNewOrderSound, playCompletedSound, playFailedSound, playStatusChangeSound]);
 
   const loadOrders = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('topup_orders')
         .select('*')
         .order('created_at', { ascending: false })
@@ -174,7 +174,7 @@ const OrdersTab: React.FC = () => {
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('topup_orders')
         .update({ status, status_message: `Manually updated to ${status}` })
         .eq('id', orderId);
@@ -197,7 +197,7 @@ const OrdersTab: React.FC = () => {
 
     setCheckingG2Bulk(prev => ({ ...prev, [order.id]: true }));
     try {
-      const { data, error } = await supabase.functions.invoke('process-topup', {
+      const { data, error } = await db.functions.invoke('process-topup', {
         body: { 
           action: 'check_status', 
           orderId: order.id
@@ -235,7 +235,7 @@ const OrdersTab: React.FC = () => {
 
     setCheckingG2Bulk(prev => ({ ...prev, [order.id]: true }));
     try {
-      const { data, error } = await supabase.functions.invoke('process-topup', {
+      const { data, error } = await db.functions.invoke('process-topup', {
         body: { action: 'fulfill', orderId: order.id },
       });
 

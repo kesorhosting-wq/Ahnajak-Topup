@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { useSite } from '@/contexts/SiteContext';
 import G2BulkProductSelector from './G2BulkProductSelector';
 import G2BulkAutoImport from './G2BulkAutoImport';
@@ -71,7 +71,7 @@ const PreorderGamesTab: React.FC = () => {
   const loadPreorderGames = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('preorder_games')
         .select('*')
         .order('sort_order', { ascending: true });
@@ -106,7 +106,7 @@ const PreorderGamesTab: React.FC = () => {
       return;
     }
     try {
-      const { error } = await supabase.from('preorder_games').insert({
+      const { error } = await db.from('preorder_games').insert({
         game_id: selectedGameId,
         sort_order: preorderGames.length,
       });
@@ -122,7 +122,7 @@ const PreorderGamesTab: React.FC = () => {
 
   const removePreorderGame = async (id: string) => {
     try {
-      const { error } = await supabase.from('preorder_games').delete().eq('id', id);
+      const { error } = await db.from('preorder_games').delete().eq('id', id);
       if (error) throw error;
       toast({ title: 'Pre-order game removed!' });
       loadPreorderGames();
@@ -133,7 +133,7 @@ const PreorderGamesTab: React.FC = () => {
 
   const loadPackages = async (gameId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('preorder_packages')
         .select('*')
         .eq('game_id', gameId)
@@ -160,7 +160,7 @@ const PreorderGamesTab: React.FC = () => {
       return;
     }
     try {
-      const { error } = await supabase.from('preorder_packages').insert({
+      const { error } = await db.from('preorder_packages').insert({
         game_id: gameId,
         name: newPkg.name,
         amount: newPkg.amount,
@@ -212,7 +212,7 @@ const PreorderGamesTab: React.FC = () => {
 
   const saveEditPkg = async (gameId: string, pkgId: string) => {
     try {
-      const { error } = await supabase.from('preorder_packages').update({
+      const { error } = await db.from('preorder_packages').update({
         name: editPkgData.name,
         amount: editPkgData.amount,
         price: editPkgData.price,
@@ -237,7 +237,7 @@ const PreorderGamesTab: React.FC = () => {
 
   const deletePkg = async (gameId: string, pkgId: string) => {
     try {
-      const { error } = await supabase.from('preorder_packages').delete().eq('id', pkgId);
+      const { error } = await db.from('preorder_packages').delete().eq('id', pkgId);
       if (error) throw error;
       toast({ title: 'Package deleted!' });
       loadPackages(gameId);
@@ -248,7 +248,7 @@ const PreorderGamesTab: React.FC = () => {
 
   const clonePkg = async (gameId: string, pkg: PreorderPackage) => {
     try {
-      const { error } = await supabase.from('preorder_packages').insert({
+      const { error } = await db.from('preorder_packages').insert({
         game_id: gameId,
         name: `${pkg.name} (Copy)`,
         amount: pkg.amount,
@@ -278,8 +278,8 @@ const PreorderGamesTab: React.FC = () => {
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
     if (swapIdx < 0 || swapIdx >= packages.length) return;
     try {
-      await supabase.from('preorder_packages').update({ sort_order: swapIdx }).eq('id', packages[idx].id);
-      await supabase.from('preorder_packages').update({ sort_order: idx }).eq('id', packages[swapIdx].id);
+      await db.from('preorder_packages').update({ sort_order: swapIdx }).eq('id', packages[idx].id);
+      await db.from('preorder_packages').update({ sort_order: idx }).eq('id', packages[swapIdx].id);
       loadPackages(gameId);
     } catch (error) {
       toast({ title: 'Failed to reorder', variant: 'destructive' });
@@ -514,7 +514,7 @@ const PreorderGamesTab: React.FC = () => {
                           existingProductIds={[]}
                           onImport={async (products) => {
                             for (const product of products) {
-                              await supabase.from('preorder_packages').insert({
+                              await db.from('preorder_packages').insert({
                                 game_id: pg.game_id,
                                 name: product.name,
                                 amount: product.amount,
@@ -688,7 +688,7 @@ const PreorderGamesTab: React.FC = () => {
                                       gameName={pg.game_name || ''}
                                       g2bulkCategoryId={pg.g2bulk_category_id}
                                       onChange={async (productId, typeId) => {
-                                        await supabase.from('preorder_packages').update({
+                                        await db.from('preorder_packages').update({
                                           g2bulk_product_id: productId || null,
                                           g2bulk_type_id: typeId || null,
                                         }).eq('id', pkg.id);

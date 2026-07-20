@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -6,7 +6,7 @@ import HeaderSpacer from '@/components/HeaderSpacer';
 import Footer from '@/components/Footer';
 import { useSite } from '@/contexts/SiteContext';
 import { useFavicon } from '@/hooks/useFavicon';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { Loader2, Search, X, Clock, Gamepad2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -120,7 +120,7 @@ const PreorderPage: React.FC = () => {
 
   const loadPreorderGames = async () => {
     try {
-      const { data: pgData, error: pgError } = await supabase
+      const { data: pgData, error: pgError } = await db
         .from('preorder_games')
         .select('*')
         .eq('is_active', true)
@@ -128,7 +128,7 @@ const PreorderPage: React.FC = () => {
 
       if (pgError) throw pgError;
 
-      const { data: pkgData } = await supabase
+      const { data: pkgData } = await db
         .from('preorder_packages')
         .select('game_id, scheduled_fulfill_at');
 

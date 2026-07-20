@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RefreshCw, Bug, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { toast } from '@/hooks/use-toast';
 
 interface LogEntry {
@@ -27,7 +27,7 @@ const G2BulkDebugLogs: React.FC = () => {
     setIsLoading(true);
     try {
       // Fetch recent orders with G2Bulk activity
-      const { data: orders, error } = await supabase
+      const { data: orders, error } = await db
         .from('topup_orders')
         .select('id, created_at, updated_at, game_name, package_name, player_id, g2bulk_product_id, g2bulk_order_id, status, status_message')
         .not('g2bulk_product_id', 'is', null)
@@ -68,7 +68,7 @@ const G2BulkDebugLogs: React.FC = () => {
     setIsLoading(true);
     try {
       const startTime = Date.now();
-      const { data, error } = await supabase.functions.invoke('g2bulk-api', {
+      const { data, error } = await db.functions.invoke('g2bulk-api', {
         body: { action: 'get_account_balance' }
       });
       const duration = Date.now() - startTime;
@@ -101,7 +101,7 @@ const G2BulkDebugLogs: React.FC = () => {
     setIsLoading(true);
     try {
       const startTime = Date.now();
-      const { data, error } = await supabase.functions.invoke('g2bulk-api', {
+      const { data, error } = await db.functions.invoke('g2bulk-api', {
         body: { action: 'get_games' }
       });
       const duration = Date.now() - startTime;

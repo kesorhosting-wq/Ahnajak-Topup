@@ -1,8 +1,8 @@
-import React, { useState, useRef } from "react";
+﻿import React, { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Upload, Database, CheckCircle, AlertCircle, Loader2, FileJson } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { toast } from "@/hooks/use-toast";
 
 interface ExportData {
@@ -34,12 +34,12 @@ const DatabaseExportImport: React.FC = () => {
         verificationConfigsResult,
         paymentQrResult,
       ] = await Promise.all([
-        supabase.from("games").select("*").order("sort_order"),
-        supabase.from("packages").select("*").order("sort_order"),
-        supabase.from("special_packages").select("*").order("sort_order"),
-        supabase.from("site_settings").select("*"),
-        supabase.from("game_verification_configs").select("*"),
-        supabase.from("payment_qr_settings").select("*"),
+        db.from("games").select("*").order("sort_order"),
+        db.from("packages").select("*").order("sort_order"),
+        db.from("special_packages").select("*").order("sort_order"),
+        db.from("site_settings").select("*"),
+        db.from("game_verification_configs").select("*"),
+        db.from("payment_qr_settings").select("*"),
       ]);
 
       // Check for errors
@@ -112,44 +112,44 @@ const DatabaseExportImport: React.FC = () => {
       // Order matters: delete children first, then parents
 
       // 1. Delete existing packages and special packages first (they reference games)
-      await supabase.from("packages").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-      await supabase.from("special_packages").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      await db.from("packages").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      await db.from("special_packages").delete().neq("id", "00000000-0000-0000-0000-000000000000");
 
       // 2. Delete games
-      await supabase.from("games").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      await db.from("games").delete().neq("id", "00000000-0000-0000-0000-000000000000");
 
       // 3. Delete other tables
-      await supabase.from("game_verification_configs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-      await supabase.from("payment_qr_settings").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-      await supabase.from("site_settings").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      await db.from("game_verification_configs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      await db.from("payment_qr_settings").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      await db.from("site_settings").delete().neq("id", "00000000-0000-0000-0000-000000000000");
 
       // 4. Insert games first (parent table)
       if (data.games.length > 0) {
-        const { error: gamesError } = await supabase.from("games").insert(data.games);
+        const { error: gamesError } = await db.from("games").insert(data.games);
         if (gamesError) throw new Error(`Games import failed: ${gamesError.message}`);
       }
 
       // 5. Insert packages (reference games)
       if (data.packages.length > 0) {
-        const { error: packagesError } = await supabase.from("packages").insert(data.packages);
+        const { error: packagesError } = await db.from("packages").insert(data.packages);
         if (packagesError) throw new Error(`Packages import failed: ${packagesError.message}`);
       }
 
       // 6. Insert special packages (reference games)
       if (data.specialPackages.length > 0) {
-        const { error: specialPackagesError } = await supabase.from("special_packages").insert(data.specialPackages);
+        const { error: specialPackagesError } = await db.from("special_packages").insert(data.specialPackages);
         if (specialPackagesError) throw new Error(`Special packages import failed: ${specialPackagesError.message}`);
       }
 
       // 7. Insert site settings
       if (data.siteSettings.length > 0) {
-        const { error: settingsError } = await supabase.from("site_settings").insert(data.siteSettings);
+        const { error: settingsError } = await db.from("site_settings").insert(data.siteSettings);
         if (settingsError) throw new Error(`Site settings import failed: ${settingsError.message}`);
       }
 
       // 8. Insert verification configs
       if (data.gameVerificationConfigs?.length > 0) {
-        const { error: configsError } = await supabase
+        const { error: configsError } = await db
           .from("game_verification_configs")
           .insert(data.gameVerificationConfigs);
         if (configsError) throw new Error(`Verification configs import failed: ${configsError.message}`);
@@ -157,7 +157,7 @@ const DatabaseExportImport: React.FC = () => {
 
       // 9. Insert payment QR settings
       if (data.paymentQrSettings?.length > 0) {
-        const { error: qrError } = await supabase.from("payment_qr_settings").insert(data.paymentQrSettings);
+        const { error: qrError } = await db.from("payment_qr_settings").insert(data.paymentQrSettings);
         if (qrError) throw new Error(`Payment QR settings import failed: ${qrError.message}`);
       }
 

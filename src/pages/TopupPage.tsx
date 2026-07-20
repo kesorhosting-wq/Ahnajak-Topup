@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, memo } from "react";
+﻿import React, { useState, useEffect, useMemo, memo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, CheckCircle, Loader2, UserCheck, XCircle } from "lucide-react";
@@ -18,7 +18,7 @@ import { useGameVerificationConfig, ZoneOption } from "@/hooks/useGameVerificati
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { resolveIconUrl } from "@/lib/icon-url";
 
 interface VerifiedUser {
@@ -758,7 +758,7 @@ const TopupPage: React.FC = () => {
     setAlternateRegions(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("verify-game-id", {
+      const { data, error } = await db.functions.invoke("verify-game-id", {
         body: {
           gameName: game?.name,
           userId: userId.trim(),
@@ -865,7 +865,7 @@ const TopupPage: React.FC = () => {
     setAlternateRegions(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("verify-game-id", {
+      const { data, error } = await db.functions.invoke("verify-game-id", {
         body: {
           gameName: region.gameName,
           userId: userId.trim(),
@@ -1032,7 +1032,7 @@ const TopupPage: React.FC = () => {
         const remark = `Order ${pkg.name} for ${verifiedUser.username}`;
 
         // 1. Create order in database
-        const { data: newOrder, error: orderError } = await supabase.from("topup_orders").insert({
+        const { data: newOrder, error: orderError } = await db.from("topup_orders").insert({
           user_id: authUser?.id || null,
           game_name: game.name,
           package_name: pkg.name,
@@ -1049,7 +1049,7 @@ const TopupPage: React.FC = () => {
         const dbOrderId = newOrder.id;
 
         // 2. Request payment URL from Edge Function
-        const { data, error } = await supabase.functions.invoke("khqrcc-payment", {
+        const { data, error } = await db.functions.invoke("khqrcc-payment", {
           body: {
             orderId: dbOrderId,
             amount,

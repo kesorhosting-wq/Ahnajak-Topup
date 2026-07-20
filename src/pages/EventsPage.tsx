@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import Header from '@/components/Header';
 import HeaderSpacer from '@/components/HeaderSpacer';
 import Footer from '@/components/Footer';
@@ -31,7 +31,7 @@ const EventsPage: React.FC = () => {
   }, []);
 
   const loadEvents = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from('events')
       .select('*')
       .eq('is_active', true)

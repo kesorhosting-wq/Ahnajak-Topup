@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Activity, CheckCircle2, XCircle, Clock, Loader2, RefreshCw, Zap } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { Button } from '@/components/ui/button';
 
 interface OrderStatus {
@@ -24,7 +24,7 @@ const RealtimeOrderStatusWidget: React.FC = () => {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const fetchRecentOrders = async () => {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('topup_orders')
       .select('id, game_name, package_name, player_id, amount, currency, status, created_at, updated_at')
       .order('created_at', { ascending: false })
@@ -41,7 +41,7 @@ const RealtimeOrderStatusWidget: React.FC = () => {
     fetchRecentOrders();
 
     // Subscribe to realtime changes
-    const channel = supabase
+    const channel = db
       .channel('admin-orders-realtime')
       .on(
         'postgres_changes',
@@ -75,7 +75,7 @@ const RealtimeOrderStatusWidget: React.FC = () => {
       });
 
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, []);
 

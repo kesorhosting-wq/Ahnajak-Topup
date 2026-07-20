@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Save, X, CheckCircle, XCircle, RefreshCw, Shield, Download, Link2, Gamepad2, Server } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 
 interface ZoneOption {
   value: string;
@@ -63,7 +63,7 @@ const GameVerificationConfigsTab: React.FC = () => {
   });
 
   const fetchGames = async () => {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('games')
       .select('id, name, g2bulk_category_id')
       .order('name', { ascending: true });
@@ -75,7 +75,7 @@ const GameVerificationConfigsTab: React.FC = () => {
 
   const fetchConfigs = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('game_verification_configs')
       .select('*')
       .order('game_name', { ascending: true });
@@ -101,7 +101,7 @@ const GameVerificationConfigsTab: React.FC = () => {
     setSyncing(true);
     try {
       // Fetch games from G2Bulk API
-      const { data, error } = await supabase.functions.invoke('g2bulk-api', {
+      const { data, error } = await db.functions.invoke('g2bulk-api', {
         body: { action: 'get_games' }
       });
 
@@ -120,7 +120,7 @@ const GameVerificationConfigsTab: React.FC = () => {
       }
 
       // Get existing configs
-      const { data: existingConfigs } = await supabase
+      const { data: existingConfigs } = await db
         .from('game_verification_configs')
         .select('api_code');
       
@@ -144,7 +144,7 @@ const GameVerificationConfigsTab: React.FC = () => {
       }
 
       // Insert new configs
-      const { error: insertError } = await supabase
+      const { error: insertError } = await db
         .from('game_verification_configs')
         .insert(newConfigs);
 
@@ -175,7 +175,7 @@ const GameVerificationConfigsTab: React.FC = () => {
     setSyncingGames(true);
     try {
       // Get existing configs
-      const { data: existingConfigs } = await supabase
+      const { data: existingConfigs } = await db
         .from('game_verification_configs')
         .select('game_name');
       
@@ -201,7 +201,7 @@ const GameVerificationConfigsTab: React.FC = () => {
         is_active: true
       }));
 
-      const { error: insertError } = await supabase
+      const { error: insertError } = await db
         .from('game_verification_configs')
         .insert(newConfigs);
 
@@ -233,7 +233,7 @@ const GameVerificationConfigsTab: React.FC = () => {
       return;
     }
 
-    const { error } = await supabase.from('game_verification_configs').insert({
+    const { error } = await db.from('game_verification_configs').insert({
       game_name: newConfig.game_name,
       api_code: newConfig.api_code,
       api_provider: newConfig.api_provider,
@@ -274,7 +274,7 @@ const GameVerificationConfigsTab: React.FC = () => {
   const handleSaveEdit = async () => {
     if (!editingId) return;
 
-    const { error } = await supabase
+    const { error } = await db
       .from('game_verification_configs')
       .update({
         game_name: editData.game_name,
@@ -297,7 +297,7 @@ const GameVerificationConfigsTab: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
+    const { error } = await db
       .from('game_verification_configs')
       .delete()
       .eq('id', id);
@@ -311,7 +311,7 @@ const GameVerificationConfigsTab: React.FC = () => {
   };
 
   const handleToggleActive = async (id: string, currentActive: boolean) => {
-    const { error } = await supabase
+    const { error } = await db
       .from('game_verification_configs')
       .update({ is_active: !currentActive })
       .eq('id', id);
@@ -328,7 +328,7 @@ const GameVerificationConfigsTab: React.FC = () => {
       return;
     }
 
-    const { error } = await supabase
+    const { error } = await db
       .from('game_verification_configs')
       .delete()
       .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
@@ -346,7 +346,7 @@ const GameVerificationConfigsTab: React.FC = () => {
   const handleFetchServers = async (config: VerificationConfig) => {
     setFetchingServersFor(config.id);
     try {
-      const { data, error } = await supabase.functions.invoke('g2bulk-api', {
+      const { data, error } = await db.functions.invoke('g2bulk-api', {
         body: { action: 'get_game_servers', game_code: config.api_code }
       });
 
@@ -365,7 +365,7 @@ const GameVerificationConfigsTab: React.FC = () => {
       }));
 
       // Save to database
-      const { error: updateError } = await supabase
+      const { error: updateError } = await db
         .from('game_verification_configs')
         .update({ zone_options: zoneOptions as unknown as any })
         .eq('id', config.id);

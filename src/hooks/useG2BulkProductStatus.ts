@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+﻿import { useState, useEffect } from 'react';
+import { db } from '@/integrations/db/client';
 
 interface G2BulkProductStatus {
   productId: string;
@@ -25,7 +25,7 @@ export const useG2BulkProductStatus = (): UseG2BulkProductStatusReturn => {
 
   const loadProductStatuses = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('g2bulk_products')
         .select('g2bulk_product_id, is_active, game_name, product_name')
         .range(0, 4999);

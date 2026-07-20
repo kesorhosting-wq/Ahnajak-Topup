@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+﻿import React, { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, CheckCircle, Loader2, UserCheck, XCircle, Clock } from "lucide-react";
@@ -18,7 +18,7 @@ import { useGameVerificationConfig, ZoneOption } from "@/hooks/useGameVerificati
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { resolveIconUrl } from "@/lib/icon-url";
 
 interface PreorderPkg {
@@ -88,7 +88,7 @@ const PreorderTopupPage: React.FC = () => {
     const loadPkgs = async () => {
       setPackagesLoading(true);
       try {
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from('preorder_packages')
           .select('*')
           .eq('game_id', game.id)
@@ -187,7 +187,7 @@ const PreorderTopupPage: React.FC = () => {
     if (requiresZone && !serverId.trim()) { toast({ title: "សូមបញ្ចូល Server ID", variant: "destructive" }); return; }
     setIsVerifying(true); setVerificationError(null); setVerifiedUser(null); setAlternateRegions(null);
     try {
-      const { data, error } = await supabase.functions.invoke("verify-game-id", {
+      const { data, error } = await db.functions.invoke("verify-game-id", {
         body: { gameName: game.name, userId: userId.trim(), serverId: serverId.trim() || undefined },
       });
       if (error) {
@@ -224,7 +224,7 @@ const PreorderTopupPage: React.FC = () => {
   const handleRetryWithRegion = async (region: { gameName: string; apiCode: string; requiresZone: boolean }) => {
     setIsVerifying(true); setVerificationError(null); setVerifiedUser(null); setAlternateRegions(null);
     try {
-      const { data, error } = await supabase.functions.invoke("verify-game-id", {
+      const { data, error } = await db.functions.invoke("verify-game-id", {
         body: { gameName: region.gameName, userId: userId.trim(), serverId: region.requiresZone ? serverId.trim() : undefined },
       });
       if (error) { let msg = error.message; const anyErr = error as any; if (anyErr?.context?.json) { try { const body = await anyErr.context.json(); msg = body?.error || msg; } catch {} } throw new Error(msg); }

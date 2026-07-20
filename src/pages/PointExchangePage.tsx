@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSite } from '@/contexts/SiteContext';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import HeaderSpacer from '@/components/HeaderSpacer';
@@ -42,7 +42,7 @@ const PointExchangePage: React.FC = () => {
   const fetchData = async () => {
     try {
       // Fetch active exchange configs
-      const { data: configData } = await supabase
+      const { data: configData } = await db
         .from('point_exchange_configs')
         .select('*')
         .eq('is_active', true);
@@ -50,7 +50,7 @@ const PointExchangePage: React.FC = () => {
 
       if (user) {
         // Fetch user points
-        const { data: profileData } = await supabase
+        const { data: profileData } = await db
           .from('profiles')
           .select('reward_points')
           .eq('user_id', user.id)
@@ -58,7 +58,7 @@ const PointExchangePage: React.FC = () => {
         setUserPoints(profileData?.reward_points || 0);
 
         // Fetch user coupons
-        const { data: couponData } = await supabase
+        const { data: couponData } = await db
           .from('coupons')
           .select('*')
           .eq('user_id', user.id)
@@ -79,7 +79,7 @@ const PointExchangePage: React.FC = () => {
 
     setIsExchanging(configId);
     try {
-      const { data, error } = await supabase.rpc('exchange_points_for_coupon', { config_id: configId });
+      const { data, error } = await db.rpc('exchange_points_for_coupon', { config_id: configId });
 
       if (error) throw error;
 

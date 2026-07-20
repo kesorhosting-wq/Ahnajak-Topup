@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+﻿import { useState, useEffect } from 'react';
+import { db } from '@/integrations/db/client';
 
 export interface ZoneOption {
   value: string;
@@ -40,7 +40,7 @@ export const useGameVerificationConfig = (gameName: string | undefined): UseGame
       setIsLoading(true);
       try {
         // Try exact match first
-        const { data: exactMatches } = await supabase
+        const { data: exactMatches } = await db
           .from('game_verification_configs')
           .select('*')
           .eq('is_active', true)
@@ -54,7 +54,7 @@ export const useGameVerificationConfig = (gameName: string | undefined): UseGame
 
         // If not found, try partial match
         if (!data) {
-          const { data: partialMatches } = await supabase
+          const { data: partialMatches } = await db
             .from('game_verification_configs')
             .select('*')
             .eq('is_active', true)

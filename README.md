@@ -120,9 +120,9 @@ ahnajak-topup/
 │       └── misc.cjs           # Image proxy + icon search
 ├── src/                      # React frontend
 │   ├── lib/
-│   │   └── api.ts            # Fetch-based API client (replaces Supabase JS)
-│   ├── integrations/supabase/
-│   │   └── client.ts         # Compatibility shim (routes to api.ts)
+│   │   └── api.ts            # Fetch-based API client for Express+MySQL
+│   ├── integrations/db/
+│   │   └── client.ts         # Database client wrapper (routes to api.ts)
 │   ├── contexts/             # AuthContext, SiteContext, CartContext
 │   ├── pages/                # All page components
 │   ├── components/           # UI + admin components

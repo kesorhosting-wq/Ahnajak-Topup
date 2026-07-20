@@ -34,18 +34,31 @@ router.post('/', async (req, res) => {
   // Actions requiring auth
   const authActions = new Set(['check_player_id']);
 
+  // Helper to run middleware as a promise
+  function runMiddleware(middleware, req, res) {
+    return new Promise((resolve, reject) => {
+      middleware(req, res, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
   // Check auth requirements
   if (adminActions.has(action)) {
-    const { requireAdmin: ra } = require('../auth.cjs');
-    const isAdm = await ra.handler(req, res); // can't call middleware inline easily
-    // Use a simple inline check
-    if (!req.user) return res.status(401).json({ success: false, error: 'Authentication required' });
-    const { hasRole } = require('../auth.cjs');
-    if (!(await hasRole(req.user.id, 'admin'))) {
-      return res.status(403).json({ success: false, error: 'Admin access required' });
+    try {
+      await runMiddleware(requireAdmin, req, res);
+    } catch {
+      return; // response already sent by middleware
     }
+    if (res.headersSent) return;
   } else if (authActions.has(action)) {
-    if (!req.user) return res.status(401).json({ success: false, error: 'Authentication required' });
+    try {
+      await runMiddleware(requireAuth, req, res);
+    } catch {
+      return;
+    }
+    if (res.headersSent) return;
   }
 
   const apiKey = await getApiKey();

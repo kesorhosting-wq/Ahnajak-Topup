@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import Header from "@/components/Header";
 import HeaderSpacer from "@/components/HeaderSpacer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,7 +52,7 @@ const OrderHistoryPage = () => {
 
   const fetchOrders = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("topup_orders")
         .select("id, game_name, package_name, player_id, amount, currency, status, created_at")
         .order("created_at", { ascending: false });

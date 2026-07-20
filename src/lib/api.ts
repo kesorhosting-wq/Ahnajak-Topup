@@ -1,15 +1,15 @@
-/**
- * api.ts — Frontend data layer replacing @supabase/supabase-js
+﻿/**
+ * api.ts — Frontend data layer for Express+MySQL API
  *
  * All database operations go through the Express API server (port 3010,
  * proxied by Vite via /api → localhost:3010). JWT tokens stored in
  * localStorage are auto-attached to every request.
  *
- * Returns { data, error } to match the Supabase JS client pattern,
+ * Returns { data, error } to match the db JS client pattern,
  * minimizing changes in call sites across ~44 frontend files.
  */
 
-const BASE = '/api';
+const BASE = import.meta.env.VITE_API_URL || '/api';
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
 
@@ -113,12 +113,12 @@ const api = {
   put: <T = any>(path: string, body?: any) => request<T>('PUT', path, body),
   del: <T = any>(path: string) => request<T>('DELETE', path),
 
-  // ── Uploads (replaces supabase.storage) ─────────────────────────────
+  // ── Uploads ────────────────────────────────────────────────────────
   upload: uploadFile,
   deleteUpload,
   getUploadUrl,
 
-  // ── Edge function invoke (replaces supabase.functions.invoke) ───────
+  // ── Edge function invoke ──────────────────────────────────────────
   invoke: async <T = any>(funcName: string, options?: { body?: any }): Promise<{ data: T | null; error: any }> => {
     return request<T>('POST', `/${funcName}`, options?.body);
   },

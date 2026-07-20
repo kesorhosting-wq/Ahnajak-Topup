@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+﻿import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '@/lib/api';
 import { handleApiError } from '@/lib/errorHandler';
 
-// Local types replacing @supabase/supabase-js User/Session
+// Local types replacing db User/Session
 interface User {
   id: string;
   email: string;

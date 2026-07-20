@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { Check, ChevronsUpDown, Link2, Link2Off, RefreshCw, Gamepad2, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -37,11 +37,11 @@ const G2BulkCategorySelector: React.FC<G2BulkCategorySelectorProps> = ({
   const loadCategoriesFromProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('g2bulk_products')
         .select('game_name')
         .eq('is_active', true)
-        // Supabase defaults to 1000 rows; categories need the full dataset
+        // db defaults to 1000 rows; categories need the full dataset
         .range(0, 4999);
       
       if (!error && data) {
@@ -70,7 +70,7 @@ const G2BulkCategorySelector: React.FC<G2BulkCategorySelectorProps> = ({
   const fetchFromG2Bulk = useCallback(async () => {
     setFetching(true);
     try {
-      const { data: syncData, error: syncError } = await supabase.functions.invoke('g2bulk-api', {
+      const { data: syncData, error: syncError } = await db.functions.invoke('g2bulk-api', {
         body: { action: 'sync_products' }
       });
 

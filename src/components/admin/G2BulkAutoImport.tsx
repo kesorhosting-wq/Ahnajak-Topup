@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/db/client';
 import { Download, RefreshCw, Check, Package, Link2, Percent } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -53,7 +53,7 @@ const G2BulkAutoImport: React.FC<G2BulkAutoImportProps> = ({
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      let query = supabase
+      let query = db
         .from('g2bulk_products')
         .select('*')
         .eq('is_active', true);
