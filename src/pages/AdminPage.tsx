@@ -771,6 +771,16 @@ const AdminPage: React.FC = () => {
                             placeholder="e.g. ហ្គេមពិសេស / Featured Games"
                           />
                         </div>
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">Telegram Bot Username</label>
+                          <Input
+                            value={settings.telegramBotUsername || ''}
+                            onChange={(e) => handleUpdateSettings("telegramBotUsername", e.target.value)}
+                            className="border-gold/50"
+                            placeholder="e.g. MyTopupBot (without @)"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">Required for Telegram Login. Create a bot via @BotFather and paste the username here.</p>
+                        </div>
                       </div>
                     </div>
 

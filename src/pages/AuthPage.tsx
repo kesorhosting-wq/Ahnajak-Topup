@@ -33,37 +33,41 @@ const AuthPage: React.FC = () => {
     }
   }, [user, navigate, searchParams]);
 
-  // Load Telegram Login Widget
   useEffect(() => {
-    if (telegramBtnRef.current && settings.telegramBotUsername) {
-      const script = document.createElement('script');
-      script.src = 'https://telegram.org/js/telegram-widget.js?22';
-      script.setAttribute('data-telegram-login', settings.telegramBotUsername);
-      script.setAttribute('data-size', 'large');
-      script.setAttribute('data-request-access', 'write');
-      script.setAttribute('data-onauth', 'onTelegramAuth');
-      script.async = true;
-      telegramBtnRef.current.appendChild(script);
+    if (!settings.telegramBotUsername) return;
+    const container = telegramBtnRef.current;
+    if (!container) return;
 
-      (window as any).onTelegramAuth = async (userData: any) => {
-        setIsLoading(true);
-        try {
-          const { error } = await signIn('telegram', userData);
-          if (error) {
-            toast({ title: 'Telegram Login Failed', description: error.message, variant: 'destructive' });
-          } else {
-            toast({ title: 'Welcome!' });
-            navigate('/');
-          }
-        } finally {
-          setIsLoading(false);
+    container.innerHTML = '';
+
+    const script = document.createElement('script');
+    script.src = 'https://telegram.org/js/telegram-widget.js?22';
+    script.setAttribute('data-telegram-login', settings.telegramBotUsername);
+    script.setAttribute('data-size', 'large');
+    script.setAttribute('data-request-access', 'write');
+    script.setAttribute('data-onauth', 'onTelegramAuth');
+    script.async = true;
+    container.appendChild(script);
+
+    (window as any).onTelegramAuth = async (userData: any) => {
+      setIsLoading(true);
+      try {
+        const { error } = await signIn('telegram', userData);
+        if (error) {
+          toast({ title: 'Telegram Login Failed', description: error.message, variant: 'destructive' });
+        } else {
+          toast({ title: 'Welcome!' });
+          navigate('/');
         }
-      };
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-      return () => {
-        delete (window as any).onTelegramAuth;
-      };
-    }
+    return () => {
+      delete (window as any).onTelegramAuth;
+      if (container.parentNode) container.innerHTML = '';
+    };
   }, [settings.telegramBotUsername]);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -157,20 +161,29 @@ const AuthPage: React.FC = () => {
                   </Button>
                 </form>
 
-                {settings.telegramBotUsername && (
-                  <>
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-border" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-                      </div>
-                    </div>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                  </div>
+                </div>
 
-                    <div className="flex justify-center" ref={telegramBtnRef} />
-                  </>
-                )}
+                <div className="flex justify-center">
+                  {settings.telegramBotUsername ? (
+                    <div ref={telegramBtnRef} />
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="w-full flex items-center justify-center gap-2 rounded-xl py-6 border-[#0088cc]/30 hover:bg-[#0088cc]/5"
+                      onClick={() => toast({ title: 'Telegram login not configured', description: 'Contact the administrator to enable Telegram login.' })}
+                    >
+                      <MessageCircle className="w-5 h-5 text-[#0088cc]" />
+                      <span>Login with Telegram</span>
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </KhmerFrame>
