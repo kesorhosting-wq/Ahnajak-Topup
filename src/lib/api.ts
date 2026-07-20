@@ -213,6 +213,7 @@ const api = {
         return channelObj;
       },
       subscribe: (statusCallback?: (status: string) => void) => {
+        let subscribed = false;
         // Poll every 5 seconds
         const interval = setInterval(async () => {
           try {
@@ -222,13 +223,17 @@ const api = {
             if (!error && data) {
               const rows = Array.isArray(data) ? data : [data];
               
+              if (!subscribed) {
+                statusCallback?.('SUBSCRIBED');
+                subscribed = true;
+              }
+
               if (isFirstPoll) {
                 // Initialize known orders on first poll
                 for (const row of rows) {
                   knownOrders.set(row.id, { status: row.status, updated_at: row.updated_at, data: row });
                 }
                 isFirstPoll = false;
-                statusCallback?.('SUBSCRIBED');
                 return;
               }
 

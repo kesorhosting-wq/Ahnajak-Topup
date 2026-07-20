@@ -104,6 +104,7 @@ export const db = {
       for (const f of _filters) {
         if (f.op === 'in') rows = rows.filter((r: any) => Array.isArray(f.val) && f.val.includes(r[f.col]));
         else if (f.op === 'neq') rows = rows.filter((r: any) => r[f.col] !== f.val);
+        else if (f.op === 'gte') rows = rows.filter((r: any) => r[f.col] >= f.val);
         else if (f.op === 'ilike') {
           const pattern = String(f.val).replace(/%/g, '').toLowerCase();
           rows = rows.filter((r: any) => String(r[f.col] || '').toLowerCase().includes(pattern));
@@ -133,6 +134,7 @@ export const db = {
       neq: (col: string, val: any) => { _filters.push({ col, val, op: 'neq' }); return self; },
       not: (col: string, op: string, val: any) => { _filters.push({ col, val, op: 'neq' }); return self; },
       in: (col: string, vals: any[]) => { _filters.push({ col, val: vals, op: 'in' }); return self; },
+      gte: (col: string, val: any) => { _filters.push({ col, val, op: 'gte' }); return self; },
       ilike: (col: string, val: string) => { _filters.push({ col, val, op: 'ilike' }); return self; },
       range: (from: number, to: number) => { _limit = to - from + 1; return self; },
       order: (col: string, opts?: { ascending?: boolean }) => { _order = { col, ascending: opts?.ascending ?? true }; return self; },
