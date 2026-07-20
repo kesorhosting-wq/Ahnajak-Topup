@@ -140,13 +140,17 @@ async function fulfillRechargeOrder(orderId, order, apiKey, quantity, tableName)
     if (g2bulkProduct.product_name) catalogueName = g2bulkProduct.product_name;
   }
 
-  // PRIORITY 2: Extract from g2bulk_product_id format: game_CODE_id
+  // PRIORITY 2: Extract from g2bulk_product_id format: game_CODE_id or CODE_id
   let catalogueId = '';
-  if (order.g2bulk_product_id?.startsWith('game_')) {
+  if (order.g2bulk_product_id) {
     const parts = order.g2bulk_product_id.split('_');
-    if (parts.length >= 3) {
+    if (order.g2bulk_product_id.startsWith('game_') && parts.length >= 3) {
       catalogueId = parts[parts.length - 1];
       if (!gameCode) gameCode = parts.slice(1, -1).join('_');
+    } else if (parts.length >= 2) {
+      // Fallback: CODE_id (no game_ prefix)
+      catalogueId = parts[parts.length - 1];
+      if (!gameCode) gameCode = parts.slice(0, -1).join('_');
     }
   }
 
