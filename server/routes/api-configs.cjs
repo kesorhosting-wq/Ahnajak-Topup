@@ -82,6 +82,11 @@ router.delete('/game-verification/:id', requireAuth, requireAdmin, async (req, r
   catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+router.delete('/game-verification', requireAuth, requireAdmin, async (req, res) => {
+  try { await query('DELETE FROM game_verification_configs'); res.json({ success: true }); }
+  catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── G2Bulk products ─────────────────────────────────────────────────────────
 router.get('/g2bulk-products', requireAuth, requireAdmin, async (req, res) => {
   try {

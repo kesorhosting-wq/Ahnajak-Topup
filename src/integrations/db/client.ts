@@ -58,7 +58,7 @@ export const db = {
       }
 
       if (_isDelete) {
-        const idFilter = _filters.find(f => f.col === 'id');
+        const idFilter = _filters.find(f => f.col === 'id' && f.op === 'eq');
         if (idFilter) return await api.del(ep.item(idFilter.val));
         return await api.del(ep.list);
       }
