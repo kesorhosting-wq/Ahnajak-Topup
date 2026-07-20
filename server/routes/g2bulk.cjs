@@ -73,6 +73,15 @@ router.post('/', async (req, res) => {
     case 'get_products': url = '/products'; break;
     case 'get_category_products': url = `/category/${params.category_id}`; break;
     case 'get_games': url = '/games'; break;
+    case 'get_g2bulk_games_list': {
+      try {
+        const r = await fetch(`${G2BULK_API_URL}/games`, { headers });
+        const d = await r.json();
+        return res.json({ success: true, data: d.games || [] });
+      } catch (e) {
+        return res.status(502).json({ success: false, error: e.message });
+      }
+    }
     case 'get_game_catalogue': url = `/games/${params.game_code}/catalogue`; break;
     case 'get_game_fields': url = '/games/fields'; method = 'POST'; body = { game: params.game_code }; break;
     case 'get_game_servers': url = '/games/servers'; method = 'POST'; body = { game: params.game_code }; break;

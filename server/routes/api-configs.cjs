@@ -46,15 +46,20 @@ router.get('/game-verification', async (req, res) => {
 });
 
 router.post('/game-verification', requireAuth, requireAdmin, async (req, res) => {
-  const b = req.body;
-  const id = uuid();
+  const items = Array.isArray(req.body) ? req.body : [req.body];
+  const inserted = [];
   try {
-    await query(
-      `INSERT INTO game_verification_configs (id, game_name, api_code, api_provider, requires_zone, default_zone, is_active, zone_options)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, b.game_name, b.api_code, b.api_provider || 'g2bulk', b.requires_zone ? 1 : 0, b.default_zone || null, b.is_active ?? 1, b.zone_options ? JSON.stringify(b.zone_options) : null]
-    );
-    res.json(await queryOne('SELECT * FROM game_verification_configs WHERE id = ?', [id]));
+    for (const b of items) {
+      if (!b.game_name) continue;
+      const id = uuid();
+      await query(
+        `INSERT INTO game_verification_configs (id, game_name, api_code, api_provider, requires_zone, default_zone, is_active, zone_options)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [id, b.game_name, b.api_code, b.api_provider || 'g2bulk', b.requires_zone ? 1 : 0, b.default_zone || null, b.is_active ?? 1, b.zone_options ? JSON.stringify(b.zone_options) : null]
+      );
+      inserted.push(await queryOne('SELECT * FROM game_verification_configs WHERE id = ?', [id]));
+    }
+    res.json(inserted);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
