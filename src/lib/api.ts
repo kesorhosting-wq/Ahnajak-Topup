@@ -125,11 +125,8 @@ const api = {
 
   // ── Auth ───────────────────────────────────────────────────────────
   auth: {
-    signUp: async (email: string, password: string, options?: { displayName?: string }) => {
-      const result = await request('POST', '/auth/signup', {
-        email, password,
-        displayName: options?.displayName || email.split('@')[0],
-      });
+    signInWithTelegram: async (userData: any) => {
+      const result = await request('POST', '/auth/telegram', userData);
       if (result.data?.session?.access_token) {
         setToken(result.data.session.access_token);
         localStorage.setItem(USER_KEY, JSON.stringify(result.data.user));

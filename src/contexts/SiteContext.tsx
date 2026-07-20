@@ -146,6 +146,7 @@ export interface SiteSettings {
   contactButtonIcon: string;
   // Featured games title customization
   featuredGamesTitle?: string;
+  telegramBotUsername?: string;
 }
 
 interface SiteContextType {
@@ -257,6 +258,7 @@ const defaultSettings: SiteSettings = {
   iconCdnBaseUrl: '',
   contactButtonIcon: '',
   featuredGamesTitle: 'Featured Games',
+  telegramBotUsername: '',
 };
 
 const defaultPaymentMethods: PaymentMethod[] = [
@@ -424,6 +426,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (row.key === 'fallingSpeed') loadedSettings.fallingSpeed = row.value as number;
           if (row.key === 'iconCdnBaseUrl') loadedSettings.iconCdnBaseUrl = row.value as string;
           if (row.key === 'contactButtonIcon') loadedSettings.contactButtonIcon = row.value as string;
+          if (row.key === 'telegramBotUsername') loadedSettings.telegramBotUsername = row.value as string;
         });
         setSettings(prev => ({ ...prev, ...loadedSettings }));
       }

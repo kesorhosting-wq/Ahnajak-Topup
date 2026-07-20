@@ -2,7 +2,6 @@
 import api from '@/lib/api';
 import { handleApiError } from '@/lib/errorHandler';
 
-// Local types replacing db User/Session
 interface User {
   id: string;
   email: string;
@@ -14,16 +13,11 @@ interface Session {
   user: User | null;
 }
 
-interface SignUpOptions {
-  displayName?: string;
-}
-
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
   isLoading: boolean;
-  signUp: (email: string, password: string, options?: SignUpOptions) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -37,13 +31,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session on mount
     api.auth.getSession().then(({ data }) => {
       if (data?.session && data.session.access_token) {
         setSession(data.session);
         const u = data.session.user as User;
         setUser(u);
-        // Check admin role via session endpoint
         if (u) {
           api.get('/auth/session').then(({ data }) => {
             setIsAdmin(!!(data as any)?.isAdmin);
@@ -53,7 +45,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false);
     });
 
-    // Listen for auth state changes (sign in/out)
     const { data: { subscription } } = api.auth.onAuthStateChange(
       (event, authUser) => {
         if (event === 'SIGNED_IN' && authUser) {
@@ -76,22 +67,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, options?: SignUpOptions) => {
+  const signIn = async (emailOrMethod: string, passwordOrData?: any) => {
     try {
-      const { error } = await api.auth.signUp(email, password, {
-        displayName: options?.displayName || email.split('@')[0],
-      });
-      if (error) return { error: new Error(error.message) };
-      return { error: null };
-    } catch (error) {
-      handleApiError(error, 'AuthContext.signUp');
-      return { error: error as Error };
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { error } = await api.auth.signIn(email, password);
+      if (emailOrMethod === 'telegram') {
+        const { error } = await api.auth.signInWithTelegram(passwordOrData);
+        if (error) return { error: new Error(error.message) };
+        return { error: null };
+      }
+      const { error } = await api.auth.signIn(emailOrMethod, passwordOrData);
       if (error) return { error: new Error(error.message) };
       return { error: null };
     } catch (error) {
@@ -113,7 +96,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       session,
       isAdmin,
       isLoading,
-      signUp,
       signIn,
       signOut,
     }}>
