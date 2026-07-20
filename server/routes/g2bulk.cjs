@@ -5,6 +5,7 @@
 const express = require('express');
 const { query, queryOne } = require('../db.cjs');
 const { requireAuth, requireAdmin } = require('../auth.cjs');
+const { v4: uuid } = require('uuid');
 
 const router = express.Router();
 const G2BULK_API_URL = 'https://api.g2bulk.com/v1';
@@ -94,6 +95,8 @@ router.post('/', async (req, res) => {
     case 'get_transactions': url = '/transactions'; break;
     case 'sync_products':
       return res.json(await syncProducts(apiKey));
+    case 'bulk_import_all':
+      return res.json(await bulkImportAll(apiKey, params));
     case 'sync_games_batch':
       return res.json(await syncGamesAndCatalogues(apiKey, params.gameCodes?.split(',') || []));
     default:
@@ -115,6 +118,7 @@ router.post('/', async (req, res) => {
 async function syncProducts(apiKey) {
   const headers = g2bulkHeaders(apiKey);
   const allProducts = [];
+  const gameNames = new Set();
   let count = 0;
 
   try {
@@ -123,6 +127,7 @@ async function syncProducts(apiKey) {
     const gamesData = await gamesRes.json();
     if (gamesData.success && gamesData.games) {
       for (const game of gamesData.games) {
+        gameNames.add(game.name);
         const catRes = await fetch(`${G2BULK_API_URL}/games/${game.code}/catalogue`, { headers });
         const catData = await catRes.json();
         if (catData.success && catData.catalogues) {
@@ -164,10 +169,92 @@ async function syncProducts(apiKey) {
       count++;
     }
 
-    return { success: true, synced: count };
+    return { success: true, synced: count, categories: gameNames.size };
   } catch (err) {
     console.error('Sync error:', err.message);
-    return { success: false, error: err.message, synced: count };
+    return { success: false, error: err.message, synced: count, categories: 0 };
+  }
+}
+
+async function bulkImportAll(apiKey, params) {
+  const headers = g2bulkHeaders(apiKey);
+  const markup = parseFloat(params.price_markup_percent) || 0;
+  const updateExisting = params.update_existing_prices === true;
+  const selectedCodes = params.selected_game_codes
+    ? new Set(Array.isArray(params.selected_game_codes) ? params.selected_game_codes : [params.selected_game_codes])
+    : null;
+
+  const result = { games_created: 0, games_skipped: 0, packages_created: 0, packages_skipped: 0, packages_updated: 0, price_markup_percent: markup };
+
+  try {
+    const gamesRes = await fetch(`${G2BULK_API_URL}/games`, { headers });
+    const gamesData = await gamesRes.json();
+    if (!gamesData.success || !gamesData.games) {
+      return { success: false, error: 'Failed to fetch games from G2Bulk', data: result };
+    }
+
+    for (const game of gamesData.games) {
+      if (selectedCodes && !selectedCodes.has(game.code)) continue;
+
+      // Upsert game
+      let dbGame = await queryOne('SELECT id FROM games WHERE name = ?', [game.name]);
+      if (!dbGame) {
+        const gameId = uuid();
+        await query(
+          `INSERT INTO games (id, name, image, description, g2bulk_category_id)
+           VALUES (?, ?, ?, ?, ?)`,
+          [gameId, game.name, game.image || null, game.description || null, game.code]
+        );
+        dbGame = { id: gameId };
+        result.games_created++;
+      } else {
+        result.games_skipped++;
+      }
+
+      // Fetch catalogue
+      const catRes = await fetch(`${G2BULK_API_URL}/games/${game.code}/catalogue`, { headers });
+      const catData = await catRes.json();
+      if (!catData.success || !catData.catalogues) continue;
+
+      for (const cat of catData.catalogues) {
+        let price = parseFloat(cat.amount) || 0;
+        const g2bulkProductId = `${game.code}_${cat.id}`;
+
+        // Check if package exists
+        const existingPkg = await queryOne(
+          'SELECT id, price FROM packages WHERE g2bulk_product_id = ? AND game_id = ?',
+          [g2bulkProductId, dbGame.id]
+        );
+
+        if (existingPkg) {
+          if (updateExisting) {
+            let newPrice = price;
+            if (markup > 0) newPrice = parseFloat((price * (1 + markup / 100)).toFixed(2));
+            await query(
+              `UPDATE packages SET price = ?, price_markup_percent = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+              [newPrice, markup > 0 ? markup : null, existingPkg.id]
+            );
+            result.packages_updated++;
+          } else {
+            result.packages_skipped++;
+          }
+        } else {
+          let finalPrice = price;
+          if (markup > 0) finalPrice = parseFloat((price * (1 + markup / 100)).toFixed(2));
+          await query(
+            `INSERT INTO packages (id, game_id, name, amount, price, g2bulk_product_id, price_markup_percent)
+             VALUES (UUID(), ?, ?, ?, ?, ?, ?)`,
+            [dbGame.id, cat.name, cat.name, finalPrice, g2bulkProductId, markup > 0 ? markup : null]
+          );
+          result.packages_created++;
+        }
+      }
+    }
+
+    return { success: true, data: result };
+  } catch (err) {
+    console.error('bulkImportAll error:', err.message);
+    return { success: false, error: err.message, data: result };
   }
 }
 
