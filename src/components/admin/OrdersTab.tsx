@@ -430,7 +430,7 @@ const OrdersTab: React.FC = () => {
                           </div>
                           <div>
                             <span className="text-muted-foreground">Amount:</span>{' '}
-                            <span className="font-bold text-gold">${order.amount}</span>
+                            <span className="font-bold text-gold">${Number(order.amount).toFixed(2)}</span>
                           </div>
                         </div>
                         {order.status_message && (
