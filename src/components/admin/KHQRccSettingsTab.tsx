@@ -50,7 +50,7 @@ const KHQRccSettingsTab: React.FC = () => {
       if (error) throw error;
 
       if (data) {
-        const raw = (data.config as unknown as KHQRccConfig) || {};
+        const raw = typeof data.config === 'string' ? JSON.parse(data.config) : data.config || {};
         const configData = { ...defaultConfig, ...raw };
         setGateway({
           id: data.id,

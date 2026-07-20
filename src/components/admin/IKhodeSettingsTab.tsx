@@ -54,7 +54,8 @@ const IKhodeSettingsTab: React.FC = () => {
       if (error) throw error;
 
       if (data) {
-        const configData = (data.config as unknown as IKhodeConfig) || defaultConfig;
+        const raw = typeof data.config === 'string' ? JSON.parse(data.config) : data.config || {};
+        const configData = { ...defaultConfig, ...raw };
         setGateway({
           id: data.id,
           slug: data.slug,
