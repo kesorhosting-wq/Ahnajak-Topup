@@ -45,15 +45,16 @@ const G2BulkBalanceDisplay: React.FC = () => {
 
       if (data?.success && data?.data) {
         const apiData = data.data;
-        // Handle different response structures
         const balanceValue = apiData.data?.balance ?? apiData.balance ?? null;
         const currency = apiData.data?.currency ?? apiData.currency ?? 'USD';
-        
         if (balanceValue !== null) {
           setBalance({ balance: balanceValue, currency });
         } else {
           setBalance({ balance: 'N/A' });
         }
+      } else if (data?.success && data?.balance !== undefined) {
+        // Direct response format (no data wrapper)
+        setBalance({ balance: data.balance, currency: data.currency || 'USD' });
       } else {
         setError('Failed to fetch');
       }
