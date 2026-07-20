@@ -58,7 +58,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, cardBgColor, cardBorderColor,
               alt={game.name}
               loading={priority ? "eager" : "lazy"}
               decoding="async"
-              fetchPriority={priority ? "high" : "auto"}
+              fetchpriority={priority ? "high" : "auto"}
               onLoad={() => setImageLoaded(true)}
               className={cn(
                 "w-full h-full object-cover transition-all duration-500 group-hover:scale-110",
