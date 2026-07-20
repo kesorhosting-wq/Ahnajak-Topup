@@ -65,6 +65,7 @@ import PackageStockBadge from "@/components/admin/PackageStockBadge";
 import DatabaseExportImport from "@/components/admin/DatabaseExportImport";
 import FontSettingsTab from "@/components/admin/FontSettingsTab";
 import { useG2BulkProductStatus } from "@/hooks/useG2BulkProductStatus";
+import api from "@/lib/api";
 import EventsTab from "@/components/admin/EventsTab";
 import PreorderGamesTab from "@/components/admin/PreorderGamesTab";
 import PreorderOrdersTab from "@/components/admin/PreorderOrdersTab";
@@ -206,9 +207,8 @@ const AdminPage: React.FC = () => {
     if (!q.trim()) return;
     setIsSearching(true);
     try {
-      const res = await fetch(`/api/search-icons?q=${encodeURIComponent(q)}`);
-      const data = await res.json();
-      setSearchResults(data.results || []);
+      const { data } = await api.get(`/search-icons?q=${encodeURIComponent(q)}`);
+      setSearchResults((data as any)?.results || []);
     } catch (e) {
       console.error(e);
       toast({ title: "Failed to search images", variant: "destructive" });

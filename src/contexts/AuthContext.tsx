@@ -45,14 +45,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(u);
         // Check admin role via session endpoint
         if (u) {
-          fetch('/api/auth/session', {
-            headers: { Authorization: `Bearer ${data.session.access_token}` },
-          })
-            .then(res => res.json())
-            .then(result => {
-              setIsAdmin(!!result.isAdmin);
-            })
-            .catch(() => setIsAdmin(false));
+          api.get('/auth/session').then(({ data }) => {
+            setIsAdmin(!!(data as any)?.isAdmin);
+          }).catch(() => setIsAdmin(false));
         }
       }
       setIsLoading(false);
@@ -66,13 +61,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           const newSession: Session = { access_token: token || '', user: authUser as User };
           setSession(newSession);
           setUser(authUser as User);
-          // Check admin
-          fetch('/api/auth/session', {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-            .then(res => res.json())
-            .then(result => setIsAdmin(!!result.isAdmin))
-            .catch(() => setIsAdmin(false));
+          api.get('/auth/session').then(({ data }) => {
+            setIsAdmin(!!(data as any)?.isAdmin);
+          }).catch(() => setIsAdmin(false));
         } else if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);

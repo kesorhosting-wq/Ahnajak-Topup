@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { toast } from '@/hooks/use-toast';
 import { CloudUpload, Search, CheckCircle2, Loader2, Image as ImageIcon, RotateCcw, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import api from '@/lib/api';
 
 interface ScanItem {
   table: string;
@@ -36,12 +37,11 @@ const CdnMigrationTab: React.FC = () => {
   const handleScan = async (silent = false) => {
     if (!silent) setScanning(true);
     try {
-      const res = await fetch('/api/vps-sync/status');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setScanResults(data.items || []);
-      setFailedResults(data.failedItems || []);
-      setScanSummary(data.summary || null);
+      const { data: scanData, error: scanErr } = await api.get('/vps-sync/status');
+      if (scanErr) throw new Error(scanErr.message || `HTTP error`);
+      setScanResults((scanData as any)?.items || []);
+      setFailedResults((scanData as any)?.failedItems || []);
+      setScanSummary((scanData as any)?.summary || null);
       if (!silent) {
         toast({
           title: data.summary?.migratable_refs > 0 ? `Found ${data.summary.migratable_refs} image(s) to sync` : 'No new images need syncing',
@@ -61,20 +61,18 @@ const CdnMigrationTab: React.FC = () => {
     setMigrating(true);
     setSyncLog(null);
     try {
-      const res = await fetch('/api/vps-sync/run', { method: 'POST' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (data.log) {
-        setSyncLog(data.log);
+      const { data: migrateData, error: migrateErr } = await api.post('/vps-sync/run');
+      if (migrateErr) throw new Error(migrateErr.message || `HTTP error`);
+      if ((migrateData as any)?.log) {
+        setSyncLog((migrateData as any).log);
       }
       
       // Rescan status
-      const statusRes = await fetch('/api/vps-sync/status');
-      if (statusRes.ok) {
-        const statusData = await statusRes.json();
-        setScanResults(statusData.items || []);
-        setFailedResults(statusData.failedItems || []);
-        setScanSummary(statusData.summary || null);
+      const { data: statusData, error: statusErr } = await api.get('/vps-sync/status');
+      if (!statusErr) {
+        setScanResults((statusData as any)?.items || []);
+        setFailedResults((statusData as any)?.failedItems || []);
+        setScanSummary((statusData as any)?.summary || null);
       }
 
       toast({
@@ -92,20 +90,18 @@ const CdnMigrationTab: React.FC = () => {
     setClearing(true);
     setSyncLog(null);
     try {
-      const res = await fetch('/api/vps-sync/clear-failures', { method: 'POST' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (data.log) {
-        setSyncLog(data.log);
+      const { data: clearData, error: clearErr } = await api.post('/vps-sync/clear-failures');
+      if (clearErr) throw new Error(clearErr.message || `HTTP error`);
+      if ((clearData as any)?.log) {
+        setSyncLog((clearData as any).log);
       }
       
       // Rescan status
-      const statusRes = await fetch('/api/vps-sync/status');
-      if (statusRes.ok) {
-        const statusData = await statusRes.json();
-        setScanResults(statusData.items || []);
-        setFailedResults(statusData.failedItems || []);
-        setScanSummary(statusData.summary || null);
+      const { data: statusData2, error: statusErr2 } = await api.get('/vps-sync/status');
+      if (!statusErr2) {
+        setScanResults((statusData2 as any)?.items || []);
+        setFailedResults((statusData2 as any)?.failedItems || []);
+        setScanSummary((statusData2 as any)?.summary || null);
       }
 
       toast({

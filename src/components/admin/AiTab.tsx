@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { useSite } from '@/contexts/SiteContext';
 import { toast } from '@/hooks/use-toast';
 import { Sparkles, Save, RefreshCw, Paintbrush, ShieldCheck, Image, Video, MonitorPlay } from 'lucide-react';
+import api from '@/lib/api';
 import { db } from '@/integrations/db/client';
 
 const AiTab: React.FC = () => {
@@ -59,25 +60,18 @@ const AiTab: React.FC = () => {
       }
 
       // 2. Trigger AI training endpoint to update .agents/AGENTS.md
-      const response = await fetch('/api/settings/ai-train', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({
-          siteName,
-          primaryColor,
-          accentColor,
-          bgType,
-          backgroundColor,
-          bgImageUrl,
-          bgVideoUrl,
-        }),
+      const { error: trainError } = await api.post('/settings/ai-train', {
+        siteName,
+        primaryColor,
+        accentColor,
+        bgType,
+        backgroundColor,
+        bgImageUrl,
+        bgVideoUrl,
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update AI guidelines file');
+      if (trainError) {
+        throw new Error(trainError.message || 'Failed to update AI guidelines file');
       }
 
       updateSettings(updates);
