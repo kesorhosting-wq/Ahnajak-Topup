@@ -61,6 +61,7 @@ import G2BulkBulkLinker from "@/components/admin/G2BulkBulkLinker";
 import G2BulkLinkStats from "@/components/admin/G2BulkLinkStats";
 import G2BulkFullImport from "@/components/admin/G2BulkFullImport";
 import G2BulkDebugLogs from "@/components/admin/G2BulkDebugLogs";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import PackageStockBadge from "@/components/admin/PackageStockBadge";
 import DatabaseExportImport from "@/components/admin/DatabaseExportImport";
 import FontSettingsTab from "@/components/admin/FontSettingsTab";
@@ -3042,8 +3043,10 @@ const AdminPage: React.FC = () => {
 
               {/* Orders */}
               <TabsContent value="orders" className="space-y-6">
-                <G2BulkDebugLogs />
-                <OrdersTab />
+                <ErrorBoundary>
+                  <G2BulkDebugLogs />
+                  <OrdersTab />
+                </ErrorBoundary>
               </TabsContent>
 
               {/* Game Verification Configs */}
