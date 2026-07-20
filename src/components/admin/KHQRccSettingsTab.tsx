@@ -50,7 +50,8 @@ const KHQRccSettingsTab: React.FC = () => {
       if (error) throw error;
 
       if (data) {
-        const configData = (data.config as unknown as KHQRccConfig) || defaultConfig;
+        const raw = (data.config as unknown as KHQRccConfig) || {};
+        const configData = { ...defaultConfig, ...raw };
         setGateway({
           id: data.id,
           slug: data.slug,
