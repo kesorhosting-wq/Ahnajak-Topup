@@ -1,6 +1,7 @@
 ﻿// Site context for global state management
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { db } from '@/integrations/db/client';
+import api from '@/lib/api';
 import { handleApiError } from '@/lib/errorHandler';
 
 export interface Game {
@@ -304,44 +305,46 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loadData = async (gamesOnly = false) => {
     try {
       // Load all data in parallel for faster loading
-      const [settingsResult, gamesResult, packagesResult, specialPackagesResult, ikhodeGatewayResult, khqrccGatewayResult] = await Promise.all([
+      const [settingsResult, gamesResult, packagesResult, specialPackagesResult, publicGatewaysResult] = await Promise.all([
         db.from('site_settings').select('*'),
         db.from('games').select('*').order('sort_order', { ascending: true }),
         db.from('packages').select('*').order('sort_order', { ascending: true }),
         db.from('special_packages').select('*').order('sort_order', { ascending: true }),
-        // Public-safe gateway config via backend function (bypasses RLS on payment_gateways)
-        db.functions.invoke('get-ikhode-public-config'),
-        db.from('payment_gateways_public').select('*').eq('slug', 'khqrcc').maybeSingle(),
+        api.get('/payments/public'),
       ]);
 
       const settingsData = settingsResult.data;
       const gamesData = gamesResult.data;
       const packagesData = packagesResult.data;
       const specialPackagesData = specialPackagesResult.data;
-      const ikhodeGateway = (ikhodeGatewayResult as any)?.data;
-      const khqrccGateway = khqrccGatewayResult.data;
+      const publicGateways = Array.isArray(publicGatewaysResult?.data) ? publicGatewaysResult.data : [];
 
-      // KHQR is the only payment method - always enabled (admin configures keys in Admin → KHQR tab)
+      const gatewayMap: Record<string, any> = {};
+      for (const gw of publicGateways) {
+        gatewayMap[gw.slug] = gw;
+      }
+
+      const ikhodeGw = gatewayMap['ikhode-bakong'];
+      const khqrccGw = gatewayMap['khqrcc'];
+
       setIkhodePayment({ isEnabled: true });
 
-      if (khqrccGateway) {
+      if (khqrccGw) {
         setKhqrccPayment({
-          isEnabled: !!khqrccGateway.enabled,
-          profileId: (khqrccGateway.config as any)?.profile_id || '',
-          checkoutUrl: (khqrccGateway.config as any)?.checkout_url || 'https://khqr.cc/api/payment/requestv2'
+          isEnabled: !!khqrccGw.enabled,
+          profileId: khqrccGw.config?.profile_id || '',
+          checkoutUrl: khqrccGw.config?.checkout_url || 'https://khqr.cc/api/payment/requestv2'
         });
       }
 
-      // Filter payment methods based on gateway enabled status
-      const filteredMethods = defaultPaymentMethods.filter(method => {
-        if (method.id === 'khqr') {
-          return false;
-        }
-        if (method.id === 'khqrcc') {
-          return khqrccGateway ? !!khqrccGateway.enabled : false;
-        }
-        return true;
-      });
+      // Build payment methods from enabled gateways
+      const filteredMethods: PaymentMethod[] = [];
+      if (ikhodeGw?.enabled) {
+        filteredMethods.push({ id: 'ikhode', name: 'KHQR', icon: '📱' });
+      }
+      if (khqrccGw?.enabled) {
+        filteredMethods.push({ id: 'khqrcc', name: 'ABA Pay', icon: 'https://play-lh.googleusercontent.com/O7xMXY5ehCEVwpR0MlKYQOK5QJ1oFIw4EoXQqyt_vgDKT3Uvn1g8FIz_fNDDhWH4Zbdclp54WhRMnI8vzyE9OeU=w240-h480-rw' });
+      }
       setPaymentMethods(filteredMethods);
 
       if (settingsData && settingsData.length > 0) {

@@ -48,6 +48,17 @@ async function handlePublicConfig(req, res) {
     }
   });
 }
+router.get('/public', async (req, res) => {
+  const [rows] = await query('SELECT slug, name, enabled, config FROM payment_gateways WHERE enabled = 1');
+  const list = (rows || []).map(r => ({
+    slug: r.slug,
+    name: r.name,
+    enabled: !!r.enabled,
+    config: typeof r.config === 'string' ? JSON.parse(r.config) : r.config,
+  }));
+  res.json(list);
+});
+
 router.get('/public/:slug', handlePublicConfig);
 router.post('/public/:slug', handlePublicConfig);
 
