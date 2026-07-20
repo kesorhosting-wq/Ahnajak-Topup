@@ -127,14 +127,15 @@ async function syncProducts(apiKey) {
     const gamesData = await gamesRes.json();
     if (gamesData.success && gamesData.games) {
       for (const game of gamesData.games) {
-        gameNames.add(game.name);
+        const gName = game.name || game.code || 'Unknown Game';
+        gameNames.add(gName);
         const catRes = await fetch(`${G2BULK_API_URL}/games/${game.code}/catalogue`, { headers });
         const catData = await catRes.json();
         if (catData.success && catData.catalogues) {
           for (const cat of catData.catalogues) {
             allProducts.push({
               g2bulk_type_id: String(cat.id), g2bulk_product_id: `game_${game.code}_${cat.id}`,
-              game_name: game.name, product_name: cat.name, denomination: cat.name,
+              game_name: gName, product_name: cat.name || gName, denomination: cat.name || gName,
               price: parseFloat(cat.amount) || 0, currency: 'USD',
               fields: JSON.stringify({ game_code: game.code }),
               product_type: 'recharge',
@@ -149,10 +150,11 @@ async function syncProducts(apiKey) {
     const prodData = await prodRes.json();
     if (prodData.success && prodData.products) {
       for (const prod of prodData.products) {
+        const pName = prod.name || `Card ${prod.id}`;
         allProducts.push({
           g2bulk_type_id: '', g2bulk_product_id: `card_${prod.id}`,
-          game_name: prod.name, product_name: prod.name,
-          denomination: prod.name, price: parseFloat(prod.amount) || 0,
+          game_name: pName, product_name: pName,
+          denomination: pName, price: parseFloat(prod.amount) || 0,
           currency: 'USD', fields: JSON.stringify({}), product_type: 'card',
         });
       }
@@ -195,15 +197,16 @@ async function bulkImportAll(apiKey, params) {
 
     for (const game of gamesData.games) {
       if (selectedCodes && !selectedCodes.has(game.code)) continue;
+      const gName = game.name || game.code || 'Unknown Game';
 
       // Upsert game
-      let dbGame = await queryOne('SELECT id FROM games WHERE name = ?', [game.name]);
+      let dbGame = await queryOne('SELECT id FROM games WHERE name = ?', [gName]);
       if (!dbGame) {
         const gameId = uuid();
         await query(
           `INSERT INTO games (id, name, image, description, g2bulk_category_id)
            VALUES (?, ?, ?, ?, ?)`,
-          [gameId, game.name, game.image || null, game.description || null, game.code]
+          [gameId, gName, game.image || null, game.description || null, game.code]
         );
         dbGame = { id: gameId };
         result.games_created++;
