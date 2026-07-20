@@ -221,7 +221,7 @@ async function bulkImportAll(apiKey, params) {
 
       for (const cat of catData.catalogues) {
         let price = parseFloat(cat.amount) || 0;
-        const g2bulkProductId = `${game.code}_${cat.id}`;
+        const g2bulkProductId = `game_${game.code}_${cat.id}`;
 
         // Check if package exists
         const existingPkg = await queryOne(
