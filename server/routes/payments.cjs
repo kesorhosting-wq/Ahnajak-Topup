@@ -87,8 +87,10 @@ router.put('/:slug', requireAuth, requireAdmin, async (req, res) => {
   if (config !== undefined) { sets.push('config = ?'); values.push(JSON.stringify(config)); }
   if (!sets.length) return res.json({ success: true });
   values.push(slug);
+  // Support both slug string and UUID id
+  const where = slug.includes('-') ? 'id = ?' : 'slug = ?';
   try {
-    await query(`UPDATE payment_gateways SET ${sets.join(', ')} WHERE slug = ?`, values);
+    await query(`UPDATE payment_gateways SET ${sets.join(', ')} WHERE ${where}`, values);
     await refreshGatewayCache();
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
