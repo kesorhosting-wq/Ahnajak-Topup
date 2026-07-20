@@ -84,9 +84,15 @@ router.post('/signout', (req, res) => {
 // Get current session
 router.get('/session', requireAuth, async (req, res) => {
   const isAdmin = await hasRole(req.user.id, 'admin');
+  const profile = await queryOne('SELECT reward_points, display_name, email, wallet_balance FROM profiles WHERE user_id = ?', [req.user.id]);
   return res.json({
-    user: req.user,
+    id: req.user.id,
+    user_id: req.user.id,
+    email: req.user.email,
+    display_name: req.user.display_name,
     isAdmin,
+    reward_points: profile?.reward_points || 0,
+    wallet_balance: profile?.wallet_balance || 0,
   });
 });
 
