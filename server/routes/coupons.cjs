@@ -6,6 +6,7 @@
 const express = require('express');
 const { query, queryOne, uuid } = require('../db.cjs');
 const { requireAuth } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
@@ -42,9 +43,7 @@ router.post('/apply', requireAuth, async (req, res) => {
     }
 
     res.json({ success: true, discount_amount: discount });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /coupons/apply'); }
 });
 
 // List user's coupons (auth)
@@ -52,7 +51,7 @@ router.get('/', requireAuth, async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM coupons WHERE user_id = ? ORDER BY created_at DESC', [req.user.id]);
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /coupons'); }
 });
 
 module.exports = router;

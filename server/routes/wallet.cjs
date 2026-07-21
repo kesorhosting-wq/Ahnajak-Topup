@@ -4,6 +4,7 @@
 const express = require('express');
 const { query, queryOne, uuid } = require('../db.cjs');
 const { requireAuth, requireAdmin } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.get('/', requireAuth, async (req, res) => {
     const profile = await queryOne('SELECT wallet_balance FROM profiles WHERE user_id = ?', [req.user.id]);
     const [transactions] = await query('SELECT * FROM wallet_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT 100', [req.user.id]);
     res.json({ balance: parseFloat(profile?.wallet_balance || 0), transactions });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /wallet'); }
 });
 
 // Process a wallet transaction atomically (replaces RPC process_wallet_transaction)
@@ -64,9 +65,7 @@ router.post('/topup', requireAuth, requireAdmin, async (req, res) => {
     if (!result.success) return res.status(400).json(result);
     console.warn(`[AUDIT] Admin wallet topup: user=${req.user.email}, amount=${parsedAmount}, description=${description}`);
     res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /wallet/topup'); }
 });
 
 module.exports = { router, processWalletTransaction };

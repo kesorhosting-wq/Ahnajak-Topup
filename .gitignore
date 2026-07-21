@@ -30,5 +30,8 @@ dist-ssr
 .env.production
 .env.test
 
+# Admin credentials
+admin_credentials.txt
+
 # Backup archives
 angkor-topup-hub.tar.gz

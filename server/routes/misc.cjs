@@ -8,6 +8,7 @@
  * POST /api/g2bulk-webhook
  */
 const express = require('express');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 const { queryOne } = require('../db.cjs');
@@ -20,9 +21,7 @@ router.post('/get-ikhode-public-config', async (req, res) => {
     if (!row) return res.json({ success: true, enabled: false });
     const config = typeof row.config === 'string' ? JSON.parse(row.config) : row.config || {};
     res.json({ success: true, enabled: !!row.enabled, websocket_url: config.websocket_url || null });
-  } catch (err) {
-    res.status(500).json({ success: false, error: 'Unexpected error' });
-  }
+  } catch (err) { sendError(res, err, 'POST /get-ikhode-public-config'); }
 });
 
 // khqrcc-payment (forward to payments create-payment handler)
@@ -41,9 +40,7 @@ router.post('/khqrcc-payment', async (req, res) => {
     const hash = crypto.createHash('sha1').update(plainHash).digest('hex');
     const params = new URLSearchParams({ transaction_id: String(orderId), amount: String(amount), success_url, remark: remark || '', hash });
     res.json({ url: `${cfg.checkout_url}/${cfg.profile_id}?${params.toString()}` });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /khqrcc-payment'); }
 });
 
 // khqrcc-webhook (external callback)
@@ -76,9 +73,7 @@ router.post('/khqrcc-webhook', async (req, res) => {
       return res.json({ received: true });
     }
     res.status(400).send('Not success');
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /khqrcc-webhook'); }
 });
 
 // g2bulk-webhook (G2Bulk callback)
@@ -127,10 +122,7 @@ router.get('/proxy-image', async (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=86400');
     const arrayBuffer = await response.arrayBuffer();
     res.send(Buffer.from(arrayBuffer));
-  } catch (err) {
-    console.error('Failed to proxy image:', url, err.message);
-    res.status(500).send('Failed to fetch image');
-  }
+  } catch (err) { sendError(res, err, 'GET /proxy-image'); }
 });
 
 // Search icons (Google CSE + Bing fallback)
@@ -206,7 +198,7 @@ router.get('/search-icons', async (req, res) => {
     }
 
     res.json({ results });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /search-icons'); }
 });
 
 module.exports = router;

@@ -3,14 +3,15 @@
  */
 const express = require('express');
 const { query, queryOne, uuid } = require('../db.cjs');
-const { requireAuth, requireAdmin, optionalAuth } = require('../auth.cjs');
+const { requireAuth, requireAdmin, optionalAuth, hasRole } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
 // List orders — admin gets all, user gets their own
 router.get('/', requireAuth, async (req, res) => {
   try {
-    const isAdmin = await requireAdminCheck(req.user.id);
+    const isAdmin = await hasRole(req.user.id, 'admin');
     let rows;
     if (isAdmin) {
       [rows] = await query('SELECT * FROM topup_orders ORDER BY created_at DESC LIMIT 500');
@@ -18,23 +19,19 @@ router.get('/', requireAuth, async (req, res) => {
       [rows] = await query('SELECT * FROM topup_orders WHERE user_id = ? ORDER BY created_at DESC', [req.user.id]);
     }
     res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'GET /orders'); }
 });
 
 // Polling endpoint for the realtime order widget (admin only)
 router.get('/recent', requireAuth, async (req, res) => {
   try {
-    const isAdmin = await requireAdminCheck(req.user.id);
+    const isAdmin = await hasRole(req.user.id, 'admin');
     if (!isAdmin) return res.status(403).json({ error: 'Admin access required' });
     const [rows] = await query(
       'SELECT id, game_name, package_name, player_id, amount, currency, status, created_at, updated_at FROM topup_orders ORDER BY created_at DESC LIMIT 10'
     );
     res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'GET /orders/recent'); }
 });
 
 // Get single order by id
@@ -42,14 +39,12 @@ router.get('/:id', requireAuth, async (req, res) => {
   try {
     const order = await queryOne('SELECT * FROM topup_orders WHERE id = ?', [req.params.id]);
     if (!order) return res.status(404).json({ error: 'Order not found' });
-    const isAdmin = await requireAdminCheck(req.user.id);
+    const isAdmin = await hasRole(req.user.id, 'admin');
     if (!isAdmin && order.user_id !== req.user.id) {
       return res.status(403).json({ error: 'Access denied' });
     }
     res.json(order);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'GET /orders/:id'); }
 });
 
 // Create order (anyone — guest checkout allowed, status forced to 'pending')
@@ -95,9 +90,7 @@ router.post('/', optionalAuth, async (req, res) => {
     );
     const order = await queryOne('SELECT * FROM topup_orders WHERE id = ?', [id]);
     res.json(order);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /orders'); }
 });
 
 // Update order status (admin only)
@@ -116,15 +109,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
   try {
     await query(`UPDATE topup_orders SET ${sets.join(', ')} WHERE id = ?`, values);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'PUT /orders/:id'); }
 });
-
-// Internal helper (not exported as route)
-async function requireAdminCheck(userId) {
-  const { hasRole } = require('../auth.cjs');
-  return hasRole(userId, 'admin');
-}
 
 module.exports = router;

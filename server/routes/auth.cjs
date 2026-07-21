@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { query, queryOne, uuid } = require('../db.cjs');
 const { signToken, hashPassword, comparePassword, hasRole, requireAuth } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
@@ -93,10 +94,7 @@ router.post('/telegram', async (req, res) => {
       user: { id: user.id, email: user.email, display_name: user.display_name },
       session: { access_token: token },
     });
-  } catch (err) {
-    console.error('Telegram auth error:', err.message);
-    return res.status(500).json({ error: 'Failed to authenticate with Telegram' });
-  }
+  } catch (err) { sendError(res, err, 'POST /auth/telegram'); }
 });
 
 // Signout (stateless JWT — client just removes the token)

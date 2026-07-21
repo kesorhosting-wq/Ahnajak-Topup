@@ -10,6 +10,7 @@
 const express = require('express');
 const { query, queryOne, uuid } = require('../db.cjs');
 const { optionalAuth } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 const G2BULK_API_URL = 'https://api.g2bulk.com/v1';
@@ -476,10 +477,7 @@ router.post('/', optionalAuth, async (req, res) => {
       has_g2bulk: !!g2bulk_product_id, is_preorder: !!is_preorder,
       message: is_preorder ? 'Pre-order created. Awaiting payment confirmation.' : 'Order created. Awaiting payment confirmation.',
     });
-  } catch (err) {
-    console.error('[Process-Topup] Error:', err.message);
-    return res.status(500).json({ success: false, error: 'An unexpected error occurred. Please try again.' });
-  }
+  } catch (err) { sendError(res, err, 'POST /process-topup'); }
 });
 
 // Export the fulfill function for use by webhook routes

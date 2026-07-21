@@ -6,6 +6,7 @@
 const express = require('express');
 const { query, queryOne, uuid } = require('../db.cjs');
 const { requireAdmin } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ router.get('/packages/all', async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM packages ORDER BY sort_order ASC');
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /packages/all'); }
 });
 
 // List all special packages (public — used by SiteContext bulk load)
@@ -24,7 +25,7 @@ router.get('/special-packages/all', async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM special_packages ORDER BY sort_order ASC');
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /special-packages/all'); }
 });
 
 // List all games (public)
@@ -32,9 +33,7 @@ router.get('/', async (req, res) => {
   try {
     const [games] = await query('SELECT * FROM games ORDER BY sort_order ASC');
     res.json(games);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'GET /games'); }
 });
 
 // Create game (admin)
@@ -49,9 +48,7 @@ router.post('/', requireAdmin, async (req, res) => {
     );
     const game = await queryOne('SELECT * FROM games WHERE id = ?', [id]);
     res.json(game);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /games'); }
 });
 
 // Update game (admin)
@@ -71,9 +68,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
   try {
     await query(`UPDATE games SET ${sets.join(', ')} WHERE id = ?`, values);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'PUT /games/:id'); }
 });
 
 // Delete game (admin)
@@ -82,9 +77,7 @@ router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     await query('DELETE FROM games WHERE id = ?', [id]);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'DELETE /games/:id'); }
 });
 
 // Move game (swap sort_order) (admin)
@@ -101,9 +94,7 @@ router.post('/:id/move', requireAdmin, async (req, res) => {
     await query('UPDATE games SET sort_order = ? WHERE id = ?', [target.sort_order, current.id]);
     await query('UPDATE games SET sort_order = ? WHERE id = ?', [current.sort_order, target.id]);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /games/:id/move'); }
 });
 
 // ── PACKAGES ───────────────────────────────────────────────────────────────
@@ -113,9 +104,7 @@ router.get('/:gameId/packages', async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM packages WHERE game_id = ? ORDER BY sort_order ASC', [req.params.gameId]);
     res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'GET /:gameId/packages'); }
 });
 
 // Create package (admin)
@@ -131,9 +120,7 @@ router.post('/:gameId/packages', requireAdmin, async (req, res) => {
     );
     const pkg = await queryOne('SELECT * FROM packages WHERE id = ?', [id]);
     res.json(pkg);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /:gameId/packages'); }
 });
 
 // Update package (admin)
@@ -158,9 +145,7 @@ router.put('/:gameId/packages/:pkgId', requireAdmin, async (req, res) => {
   try {
     await query(`UPDATE packages SET ${sets.join(', ')} WHERE id = ?`, values);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'PUT /:gameId/packages/:pkgId'); }
 });
 
 // Delete package (admin)
@@ -168,9 +153,7 @@ router.delete('/:gameId/packages/:pkgId', requireAdmin, async (req, res) => {
   try {
     await query('DELETE FROM packages WHERE id = ?', [req.params.pkgId]);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'DELETE /:gameId/packages/:pkgId'); }
 });
 
 // Move package (admin)
@@ -187,9 +170,7 @@ router.post('/:gameId/packages/:pkgId/move', requireAdmin, async (req, res) => {
     await query('UPDATE packages SET sort_order = ? WHERE id = ?', [target.sort_order, current.id]);
     await query('UPDATE packages SET sort_order = ? WHERE id = ?', [current.sort_order, target.id]);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /:gameId/packages/:pkgId/move'); }
 });
 
 // ── SPECIAL PACKAGES ───────────────────────────────────────────────────────
@@ -198,9 +179,7 @@ router.get('/:gameId/special-packages', async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM special_packages WHERE game_id = ? ORDER BY sort_order ASC', [req.params.gameId]);
     res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'GET /:gameId/special-packages'); }
 });
 
 router.post('/:gameId/special-packages', requireAdmin, async (req, res) => {
@@ -215,9 +194,7 @@ router.post('/:gameId/special-packages', requireAdmin, async (req, res) => {
     );
     const pkg = await queryOne('SELECT * FROM special_packages WHERE id = ?', [id]);
     res.json(pkg);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /:gameId/special-packages'); }
 });
 
 router.put('/:gameId/special-packages/:pkgId', requireAdmin, async (req, res) => {
@@ -241,18 +218,14 @@ router.put('/:gameId/special-packages/:pkgId', requireAdmin, async (req, res) =>
   try {
     await query(`UPDATE special_packages SET ${sets.join(', ')} WHERE id = ?`, values);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'PUT /:gameId/special-packages/:pkgId'); }
 });
 
 router.delete('/:gameId/special-packages/:pkgId', requireAdmin, async (req, res) => {
   try {
     await query('DELETE FROM special_packages WHERE id = ?', [req.params.pkgId]);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'DELETE /:gameId/special-packages/:pkgId'); }
 });
 
 router.post('/:gameId/special-packages/:pkgId/move', requireAdmin, async (req, res) => {
@@ -268,9 +241,7 @@ router.post('/:gameId/special-packages/:pkgId/move', requireAdmin, async (req, r
     await query('UPDATE special_packages SET sort_order = ? WHERE id = ?', [target.sort_order, current.id]);
     await query('UPDATE special_packages SET sort_order = ? WHERE id = ?', [current.sort_order, target.id]);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /:gameId/special-packages/:pkgId/move'); }
 });
 
 module.exports = router;

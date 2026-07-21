@@ -5,6 +5,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const mysql = require('mysql2/promise');
 
 require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
@@ -28,16 +29,30 @@ async function main() {
     multipleStatements: true,
   });
 
+  const adminPassword = crypto.randomBytes(4).toString('hex');
+  const bcrypt = require('bcryptjs');
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
+
   const seedPath = path.resolve(__dirname, '..', 'database', 'seed.sql');
-  const sql = fs.readFileSync(seedPath, 'utf8');
+  let sql = fs.readFileSync(seedPath, 'utf8');
+
+  sql = sql.replace(
+    /'(\$2[aby]\$[^']+)'/,
+    `'${passwordHash}'`
+  );
 
   try {
     await pool.query(sql);
     console.log('✓ Seed data inserted successfully');
-    console.log('  - Default admin user: admin@ahnajak.com / admin123');
+    console.log('  - Default admin user: admin@ahnajak.com / ' + adminPassword);
     console.log('  - Payment gateways (disabled)');
     console.log('  - Default site settings');
     console.log('  - Game verification configs');
+    console.log('');
+
+    const credsPath = path.resolve(__dirname, '..', 'admin_credentials.txt');
+    fs.writeFileSync(credsPath, `Email: admin@ahnajak.com\nPassword: ${adminPassword}\n`, 'utf8');
+    console.log(`  Admin credentials saved to admin_credentials.txt`);
     console.log('');
     console.log('⚠  CHANGE the admin password immediately after first login!');
   } catch (err) {

@@ -30,6 +30,14 @@ router.post('/', async (req, res) => {
       const customWebhookUrl = cfg.custom_webhook_url;
 
       if (!nodeApiUrl) return res.json({ success: false, error: 'IKhode node_api_url not configured' });
+      try {
+        const parsedUrl = new URL(nodeApiUrl);
+        if (parsedUrl.protocol !== 'https:') {
+          return res.status(400).json({ error: 'Invalid gateway URL' });
+        }
+      } catch {
+        return res.status(400).json({ error: 'Invalid gateway URL' });
+      }
 
       // Call IKhode API to generate QR
       const response = await fetch(`${nodeApiUrl}/api/generate`, {
@@ -56,6 +64,14 @@ router.post('/', async (req, res) => {
 
       const nodeApiUrl = cfg.node_api_url;
       if (!nodeApiUrl) return res.json({ success: false, error: 'IKhode not configured' });
+      try {
+        const parsedUrl = new URL(nodeApiUrl);
+        if (parsedUrl.protocol !== 'https:') {
+          return res.status(400).json({ error: 'Invalid gateway URL' });
+        }
+      } catch {
+        return res.status(400).json({ error: 'Invalid gateway URL' });
+      }
 
       const response = await fetch(`${nodeApiUrl}/api/check`, {
         method: 'POST',

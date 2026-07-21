@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const { query, queryOne } = require('../db.cjs');
 const { requireAuth, requireAdmin, optionalAuth } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
@@ -24,9 +25,7 @@ router.get('/', optionalAuth, async (req, res) => {
       catch { settings[row.key] = row.value; }
     }
     res.json(settings);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'GET /settings'); }
 });
 
 // Bulk upsert (admin)
@@ -43,9 +42,7 @@ router.put('/', requireAuth, requireAdmin, async (req, res) => {
       );
     }
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'PUT /settings'); }
 });
 
 // Upsert single setting (admin)
@@ -58,9 +55,7 @@ router.put('/:key', requireAuth, requireAdmin, async (req, res) => {
       [key, JSON.stringify(value)]
     );
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'PUT /settings/:key'); }
 });
 
 // Delete single setting (admin)
@@ -69,9 +64,7 @@ router.delete('/:key', requireAuth, requireAdmin, async (req, res) => {
   try {
     await query('DELETE FROM site_settings WHERE `key` = ?', [key]);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'DELETE /settings/:key'); }
 });
 
 // Train AI with active branding and colors (admin)
@@ -110,9 +103,7 @@ This file is automatically updated by the AI Admin Panel. It instructs future de
 
     fs.writeFileSync(path.join(agentsDir, 'AGENTS.md'), guidelines, 'utf8');
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /settings/ai-train'); }
 });
 
 module.exports = router;

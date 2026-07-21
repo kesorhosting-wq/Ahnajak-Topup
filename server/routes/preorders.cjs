@@ -4,6 +4,7 @@
 const express = require('express');
 const { query, queryOne, uuid } = require('../db.cjs');
 const { requireAuth, requireAdmin, optionalAuth } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.get('/games', async (req, res) => {
       ORDER BY pg.sort_order ASC
     `);
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /preorders/games'); }
 });
 
 router.post('/games', requireAdmin, async (req, res) => {
@@ -27,7 +28,7 @@ router.post('/games', requireAdmin, async (req, res) => {
     await query('INSERT INTO preorder_games (id, game_id, is_active, sort_order) VALUES (?, ?, ?, ?)',
       [id, game_id, is_active ?? 1, sort_order ?? 0]);
     res.json({ id, game_id, is_active: is_active ?? 1, sort_order: sort_order ?? 0 });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'POST /preorders/games'); }
 });
 
 router.put('/games/:id', requireAdmin, async (req, res) => {
@@ -39,12 +40,12 @@ router.put('/games/:id', requireAdmin, async (req, res) => {
   if (!sets.length) return res.json({ success: true });
   values.push(id);
   try { await query(`UPDATE preorder_games SET ${sets.join(', ')} WHERE id = ?`, values); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'PUT /preorders/games/:id'); }
 });
 
 router.delete('/games/:id', requireAdmin, async (req, res) => {
   try { await query('DELETE FROM preorder_games WHERE id = ?', [req.params.id]); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'DELETE /preorders/games/:id'); }
 });
 
 // ── PREORDER PACKAGES ───────────────────────────────────────────────────────
@@ -56,7 +57,7 @@ router.get('/packages', async (req, res) => {
       : 'SELECT * FROM preorder_packages ORDER BY sort_order ASC';
     const [rows] = await query(sql, gameId ? [gameId] : []);
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /preorders/packages'); }
 });
 
 router.post('/packages', requireAdmin, async (req, res) => {
@@ -69,7 +70,7 @@ router.post('/packages', requireAdmin, async (req, res) => {
       [id, b.game_id, b.name, String(b.amount), b.price, b.icon || null, b.sort_order || 0, b.label || null, b.labelBgColor || null, b.labelTextColor || null, b.labelIcon || null, b.g2bulkProductId || null, b.g2bulkTypeId || null, b.quantity ?? null, b.scheduledFulfillAt || null, b.points || 0]
     );
     res.json(await queryOne('SELECT * FROM preorder_packages WHERE id = ?', [id]));
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'POST /preorders/packages'); }
 });
 
 router.put('/packages/:id', requireAdmin, async (req, res) => {
@@ -91,12 +92,12 @@ router.put('/packages/:id', requireAdmin, async (req, res) => {
   if (!sets.length) return res.json({ success: true });
   values.push(id);
   try { await query(`UPDATE preorder_packages SET ${sets.join(', ')} WHERE id = ?`, values); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'PUT /preorders/packages/:id'); }
 });
 
 router.delete('/packages/:id', requireAdmin, async (req, res) => {
   try { await query('DELETE FROM preorder_packages WHERE id = ?', [req.params.id]); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'DELETE /preorders/packages/:id'); }
 });
 
 // ── PREORDER ORDERS ─────────────────────────────────────────────────────────
@@ -109,7 +110,7 @@ router.get('/orders', requireAuth, async (req, res) => {
       : 'SELECT * FROM preorder_orders WHERE user_id = ? ORDER BY created_at DESC';
     const [rows] = await query(sql, isAdmin ? [] : [req.user.id]);
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /preorders/orders'); }
 });
 
 router.post('/orders', optionalAuth, async (req, res) => {
@@ -147,7 +148,7 @@ router.post('/orders', optionalAuth, async (req, res) => {
       [id, req.user?.id || null, b.game_name, b.package_name, b.player_id, b.server_id || null, b.player_name || null, finalAmount, b.currency || 'USD', b.payment_method || null, b.g2bulk_product_id || null, b.status || 'notpaid', b.scheduledFulfillAt || null]
     );
     res.json(await queryOne('SELECT * FROM preorder_orders WHERE id = ?', [id]));
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'POST /preorders/orders'); }
 });
 
 router.put('/orders/:id', requireAdmin, async (req, res) => {
@@ -163,7 +164,7 @@ router.put('/orders/:id', requireAdmin, async (req, res) => {
   if (!sets.length) return res.json({ success: true });
   values.push(id);
   try { await query(`UPDATE preorder_orders SET ${sets.join(', ')} WHERE id = ?`, values); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'PUT /preorders/orders/:id'); }
 });
 
 module.exports = router;

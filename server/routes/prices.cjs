@@ -6,6 +6,7 @@
 const express = require('express');
 const { query } = require('../db.cjs');
 const { requireAdmin } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 const G2BULK_API_URL = 'https://api.g2bulk.com/v1';
@@ -65,10 +66,7 @@ router.post('/', requireAdmin, async (req, res) => {
     }
 
     return res.json({ success: true, updated, errors });
-  } catch (err) {
-    console.error('[UpdatePrices] Error:', err.message);
-    return res.status(500).json({ success: false, error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /update-prices'); }
 });
 
 module.exports = router;

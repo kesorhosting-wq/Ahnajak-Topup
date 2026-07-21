@@ -3,7 +3,8 @@
  */
 const express = require('express');
 const { query, queryOne, uuid } = require('../db.cjs');
-const { requireAuth, requireAdmin } = require('../auth.cjs');
+const { requireAuth, requireAdmin, optionalAuth } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ router.get('/api-configs', requireAuth, requireAdmin, async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM api_configurations ORDER BY api_name');
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /api-configs'); }
 });
 
 router.put('/api-configs/:apiName', requireAuth, requireAdmin, async (req, res) => {
@@ -34,15 +35,15 @@ router.put('/api-configs/:apiName', requireAuth, requireAdmin, async (req, res) 
       );
     }
     res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'PUT /api-configs/:apiName'); }
 });
 
 // ── Game verification configs ──────────────────────────────────────────────
-router.get('/game-verification', async (req, res) => {
+router.get('/game-verification', optionalAuth, async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM game_verification_configs ORDER BY game_name');
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /game-verification'); }
 });
 
 router.post('/game-verification', requireAuth, requireAdmin, async (req, res) => {
@@ -60,7 +61,7 @@ router.post('/game-verification', requireAuth, requireAdmin, async (req, res) =>
       inserted.push(await queryOne('SELECT * FROM game_verification_configs WHERE id = ?', [id]));
     }
     res.json(inserted);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'POST /game-verification'); }
 });
 
 router.put('/game-verification/:id', requireAuth, requireAdmin, async (req, res) => {
@@ -79,17 +80,17 @@ router.put('/game-verification/:id', requireAuth, requireAdmin, async (req, res)
   if (!sets.length) return res.json({ success: true });
   values.push(id);
   try { await query(`UPDATE game_verification_configs SET ${sets.join(', ')} WHERE id = ?`, values); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'PUT /game-verification/:id'); }
 });
 
 router.delete('/game-verification/:id', requireAuth, requireAdmin, async (req, res) => {
   try { await query('DELETE FROM game_verification_configs WHERE id = ?', [req.params.id]); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'DELETE /game-verification/:id'); }
 });
 
 router.delete('/game-verification', requireAuth, requireAdmin, async (req, res) => {
   try { await query('DELETE FROM game_verification_configs'); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'DELETE /game-verification'); }
 });
 
 // ── G2Bulk products ─────────────────────────────────────────────────────────
@@ -97,12 +98,12 @@ router.get('/g2bulk-products', requireAuth, requireAdmin, async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM g2bulk_products ORDER BY game_name, product_name');
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /g2bulk-products'); }
 });
 
 router.delete('/g2bulk-products/:id', requireAuth, requireAdmin, async (req, res) => {
   try { await query('DELETE FROM g2bulk_products WHERE id = ?', [req.params.id]); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'DELETE /g2bulk-products/:id'); }
 });
 
 module.exports = router;

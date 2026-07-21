@@ -7,6 +7,7 @@ const express = require('express');
 const crypto = require('crypto');
 const { query, queryOne } = require('../db.cjs');
 const { requireAuth, requireAdmin, optionalAuth } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
@@ -54,7 +55,6 @@ router.get('/public', async (req, res) => {
     slug: r.slug,
     name: r.name,
     enabled: !!r.enabled,
-    config: typeof r.config === 'string' ? JSON.parse(r.config) : r.config,
   }));
   res.json(list);
 });
@@ -67,7 +67,7 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM payment_gateways ORDER BY slug');
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /payment-gateways'); }
 });
 
 router.get('/:slug', requireAuth, requireAdmin, async (req, res) => {
@@ -75,7 +75,7 @@ router.get('/:slug', requireAuth, requireAdmin, async (req, res) => {
     const row = await queryOne('SELECT * FROM payment_gateways WHERE slug = ?', [req.params.slug]);
     if (!row) return res.status(404).json({ error: 'Gateway not found' });
     res.json(row);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /payment-gateways/:slug'); }
 });
 
 router.put('/:slug', requireAuth, requireAdmin, async (req, res) => {
@@ -93,7 +93,7 @@ router.put('/:slug', requireAuth, requireAdmin, async (req, res) => {
     await query(`UPDATE payment_gateways SET ${sets.join(', ')} WHERE ${where}`, values);
     await refreshGatewayCache();
     res.json({ success: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'PUT /payment-gateways/:slug'); }
 });
 
 // ── Create payment URL (KHQRcc / ABA Pay) ─────────────────────────────────
@@ -178,7 +178,7 @@ router.get('/qr-settings', async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM payment_qr_settings');
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /payment-gateways/qr-settings'); }
 });
 
 router.put('/qr-settings/:id', requireAdmin, async (req, res) => {
@@ -190,7 +190,7 @@ router.put('/qr-settings/:id', requireAdmin, async (req, res) => {
   if (!sets.length) return res.json({ success: true });
   values.push(id);
   try { await query(`UPDATE payment_qr_settings SET ${sets.join(', ')} WHERE id = ?`, values); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'PUT /payment-gateways/qr-settings/:id'); }
 });
 
 module.exports = router;

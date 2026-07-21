@@ -7,6 +7,7 @@
 const express = require('express');
 const { query, queryOne, uuid } = require('../db.cjs');
 const { requireAuth, requireAdmin } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.get('/configs', async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM point_exchange_configs WHERE is_active = 1 ORDER BY points_required ASC');
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /points/configs'); }
 });
 
 // List all configs (admin — for management)
@@ -23,7 +24,7 @@ router.get('/configs/all', requireAdmin, async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM point_exchange_configs ORDER BY created_at DESC');
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /points/configs/all'); }
 });
 
 // Create/update/delete config (admin)
@@ -37,7 +38,7 @@ router.post('/configs', requireAdmin, async (req, res) => {
       [id, b.name, b.description || null, b.points_required, b.exchange_type, b.exchange_value, b.coupon_valid_days ?? 30, b.is_active ?? 1]
     );
     res.json(await queryOne('SELECT * FROM point_exchange_configs WHERE id = ?', [id]));
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'POST /points/configs'); }
 });
 
 router.put('/configs/:id', requireAdmin, async (req, res) => {
@@ -49,12 +50,12 @@ router.put('/configs/:id', requireAdmin, async (req, res) => {
   if (!sets.length) return res.json({ success: true });
   values.push(id);
   try { await query(`UPDATE point_exchange_configs SET ${sets.join(', ')} WHERE id = ?`, values); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'PUT /points/configs/:id'); }
 });
 
 router.delete('/configs/:id', requireAdmin, async (req, res) => {
   try { await query('DELETE FROM point_exchange_configs WHERE id = ?', [req.params.id]); res.json({ success: true }); }
-  catch (err) { res.status(500).json({ error: err.message }); }
+  catch (err) { sendError(res, err, 'DELETE /points/configs/:id'); }
 });
 
 // Exchange points for coupon (auth — replaces RPC exchange_points_for_coupon)
@@ -110,9 +111,7 @@ router.post('/exchange', requireAuth, async (req, res) => {
       conn.release();
       throw txErr;
     }
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+  } catch (err) { sendError(res, err, 'POST /points/exchange'); }
 });
 
 // List user's point transactions (auth)
@@ -120,7 +119,7 @@ router.get('/transactions', requireAuth, async (req, res) => {
   try {
     const [rows] = await query('SELECT * FROM point_transactions WHERE user_id = ? ORDER BY created_at DESC', [req.user.id]);
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) { sendError(res, err, 'GET /points/transactions'); }
 });
 
 module.exports = router;

@@ -9,6 +9,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { requireAdmin } = require('../auth.cjs');
+const { sendError } = require('../helpers/errors.cjs');
 
 const router = express.Router();
 
@@ -53,7 +54,7 @@ router.delete('/', requireAdmin, async (req, res) => {
   const { path: filePath } = req.body;
   if (!filePath) return res.status(400).json({ error: 'path required' });
   // Security: only allow deleting within uploads dir
-  const fullPath = path.resolve(process.cwd(), filePath.replace(/^\//, ''));
+  const fullPath = path.normalize(path.resolve(process.cwd(), filePath));
   const normalizedUpload = path.resolve(UPLOAD_DIR);
   if (!fullPath.startsWith(normalizedUpload)) {
     return res.status(403).json({ error: 'Can only delete uploaded files' });
@@ -61,9 +62,7 @@ router.delete('/', requireAdmin, async (req, res) => {
   try {
     if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { sendError(res, err, 'DELETE /uploads'); }
 });
 
 module.exports = router;
