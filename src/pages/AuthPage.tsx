@@ -25,6 +25,22 @@ const AuthPage: React.FC = () => {
 
   const primaryColor = settings.primaryColor || '#E53E3E';
 
+  const processTelegramLogin = async (data: any) => {
+    if (!data || data.error) return;
+    setIsLoading(true);
+    try {
+      const { error } = await signIn('telegram-oidc', { id_token: data.id_token, user: data.user });
+      if (error) {
+        toast({ title: 'Telegram Login Failed', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'Welcome!' });
+        navigate('/');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       const redirect = searchParams.get('redirect') || '/';
@@ -33,23 +49,26 @@ const AuthPage: React.FC = () => {
   }, [user, navigate, searchParams]);
 
   useEffect(() => {
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+      const params = new URLSearchParams(hash);
+      const idToken = params.get('id_token');
+      const state = params.get('state');
+      const savedState = sessionStorage.getItem('tg_oauth_state');
+      if (idToken && state === savedState) {
+        sessionStorage.removeItem('tg_oauth_state');
+        window.history.replaceState(null, '', window.location.pathname);
+        processTelegramLogin({ id_token: idToken, user: null });
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     const clientId = settings.telegramClientId;
     if (!clientId) return;
 
     (window as any).onTelegramAuth = async (data: any) => {
-      if (data.error) return;
-      setIsLoading(true);
-      try {
-        const { error } = await signIn('telegram-oidc', { id_token: data.id_token, user: data.user });
-        if (error) {
-          toast({ title: 'Telegram Login Failed', description: error.message, variant: 'destructive' });
-        } else {
-          toast({ title: 'Welcome!' });
-          navigate('/');
-        }
-      } finally {
-        setIsLoading(false);
-      }
+      await processTelegramLogin(data);
     };
 
     if (document.querySelector('script[data-client-id]')) return;
@@ -58,9 +77,43 @@ const AuthPage: React.FC = () => {
     s.async = true;
     s.setAttribute('data-client-id', clientId);
     s.setAttribute('data-onauth', 'onTelegramAuth');
-    s.setAttribute('data-request-access', 'write');
     document.body.appendChild(s);
   }, [settings.telegramClientId]);
+
+  const handleTelegramLogin = () => {
+    const clientId = settings.telegramClientId;
+    if (!clientId) return;
+
+    const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      const redirectUri = window.location.origin + window.location.pathname;
+      const state = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
+      sessionStorage.setItem('tg_oauth_state', state);
+
+      const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        scope: 'openid profile',
+        response_type: 'id_token',
+        state: state,
+      });
+
+      window.location.href = `https://oauth.telegram.org/auth?${params}`;
+    } else {
+      const lib = (window as any).Telegram?.Login;
+      if (!lib) {
+        toast({ title: 'Telegram login loading...', description: 'Please wait a moment and try again.', variant: 'destructive' });
+        return;
+      }
+      lib.auth(
+        { client_id: Number(clientId), scope: ['profile', 'write'] },
+        async (data: any) => {
+          await processTelegramLogin(data);
+        }
+      );
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,13 +217,15 @@ const AuthPage: React.FC = () => {
 
                 <div className="flex justify-center">
                   {settings.telegramClientId ? (
-                    <div
-                      className="tg-auth-button"
-                      data-style="rounded"
-                      data-size="large"
-                      tabIndex={0}
-                      role="button"
-                    />
+                    <Button
+                      variant="outline"
+                      className="w-full flex items-center justify-center gap-2 rounded-xl py-6 border-[#0088cc]/30 hover:bg-[#0088cc]/5"
+                      onClick={handleTelegramLogin}
+                      disabled={isLoading}
+                    >
+                      <MessageCircle className="w-5 h-5 text-[#0088cc]" />
+                      <span>Sign In with Telegram</span>
+                    </Button>
                   ) : (
                     <Button
                       variant="outline"
