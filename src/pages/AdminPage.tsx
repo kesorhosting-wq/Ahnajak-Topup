@@ -772,14 +772,14 @@ const AdminPage: React.FC = () => {
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium mb-2 block">Telegram Bot Username</label>
+                          <label className="text-sm font-medium mb-2 block">Telegram Client ID</label>
                           <Input
-                            value={settings.telegramBotUsername || ''}
-                            onChange={(e) => handleUpdateSettings("telegramBotUsername", e.target.value)}
+                            value={settings.telegramClientId || ''}
+                            onChange={(e) => handleUpdateSettings("telegramClientId", e.target.value)}
                             className="border-gold/50"
-                            placeholder="e.g. MyTopupBot (without @)"
+                            placeholder="e.g. 8124926461"
                           />
-                          <p className="text-xs text-muted-foreground mt-1">Required for Telegram Login. Create a bot via @BotFather and paste the username here.</p>
+                          <p className="text-xs text-muted-foreground mt-1">Numeric bot ID (Client ID) from @BotFather → Bot Settings → Web Login. This enables the new Telegram Login button.</p>
                         </div>
                       </div>
                     </div>

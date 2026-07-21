@@ -147,6 +147,7 @@ export interface SiteSettings {
   // Featured games title customization
   featuredGamesTitle?: string;
   telegramBotUsername?: string;
+  telegramClientId?: string;
 }
 
 interface SiteContextType {
@@ -259,6 +260,7 @@ const defaultSettings: SiteSettings = {
   contactButtonIcon: '',
   featuredGamesTitle: 'Featured Games',
   telegramBotUsername: '',
+  telegramClientId: '',
 };
 
 const defaultPaymentMethods: PaymentMethod[] = [
@@ -427,6 +429,7 @@ export const SiteProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (row.key === 'iconCdnBaseUrl') loadedSettings.iconCdnBaseUrl = row.value as string;
           if (row.key === 'contactButtonIcon') loadedSettings.contactButtonIcon = row.value as string;
           if (row.key === 'telegramBotUsername') loadedSettings.telegramBotUsername = row.value as string;
+          if (row.key === 'telegramClientId') loadedSettings.telegramClientId = row.value as string;
         });
         setSettings(prev => ({ ...prev, ...loadedSettings }));
       }

@@ -97,6 +97,57 @@ router.post('/telegram', async (req, res) => {
   } catch (err) { sendError(res, err, 'POST /auth/telegram'); }
 });
 
+// Telegram login via OIDC (new JS library, returns id_token JWT)
+router.post('/telegram-oidc', async (req, res) => {
+  const { id_token } = req.body;
+  if (!id_token) {
+    return res.status(400).json({ error: 'Missing id_token' });
+  }
+
+  try {
+    // Fetch JWKS from Telegram
+    const jwksRes = await fetch('https://oauth.telegram.org/.well-known/jwks.json');
+    const jwks = await jwksRes.json();
+
+    // Decode header to find key
+    const header = JSON.parse(Buffer.from(id_token.split('.')[0], 'base64url').toString());
+    const key = jwks.keys.find((k: any) => k.kid === header.kid);
+    if (!key) return res.status(401).json({ error: 'Unable to verify Telegram login' });
+
+    // Import JWK as public key
+    const publicKey = crypto.createPublicKey({ format: 'jwk', key });
+
+    // Verify the JWT
+    const decoded = jwt.verify(id_token, publicKey, {
+      algorithms: ['RS256', 'ES256'],
+      issuer: 'https://oauth.telegram.org',
+    });
+
+    const telegramId = String(decoded.sub || decoded.id);
+    const displayName = decoded.name || decoded.preferred_username || 'Telegram User';
+    const email = `tg_${telegramId}@telegram.local`;
+
+    let user = await queryOne('SELECT id, email, display_name FROM users WHERE email = ?', [email]);
+
+    if (!user) {
+      const userId = uuid();
+      await query('INSERT INTO users (id, email, password_hash, display_name) VALUES (?, ?, "", ?)',
+        [userId, email, displayName]);
+      await query('INSERT INTO profiles (id, user_id, email, display_name, wallet_balance, reward_points) VALUES (?, ?, ?, ?, 0, 0)',
+        [uuid(), userId, email, displayName]);
+      await query('INSERT INTO user_roles (id, user_id, role) VALUES (?, ?, ?)',
+        [uuid(), userId, 'user']);
+      user = { id: userId, email, display_name: displayName };
+    }
+
+    const token = signToken({ id: user.id, email: user.email, display_name: user.display_name });
+    return res.json({
+      user: { id: user.id, email: user.email, display_name: user.display_name },
+      session: { access_token: token },
+    });
+  } catch (err) { sendError(res, err, 'POST /auth/telegram-oidc'); }
+});
+
 // Signout (stateless JWT — client just removes the token)
 router.post('/signout', (req, res) => {
   res.json({ success: true });

@@ -135,6 +135,16 @@ const api = {
       return result;
     },
 
+    signInWithTelegramOidc: async (payload: { id_token: string }) => {
+      const result = await request('POST', '/auth/telegram-oidc', payload);
+      if (result.data?.session?.access_token) {
+        setToken(result.data.session.access_token);
+        localStorage.setItem(USER_KEY, JSON.stringify(result.data.user));
+        notifyAuthListeners('SIGNED_IN', result.data.user);
+      }
+      return result;
+    },
+
     signIn: async (email: string, password: string) => {
       const result = await request('POST', '/auth/signin', { email, password });
       if (result.data?.session?.access_token) {

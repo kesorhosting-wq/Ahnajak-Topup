@@ -20,6 +20,7 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  signInWithTelegram: (userData: any) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,6 +72,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       if (emailOrMethod === 'telegram') {
         const { error } = await api.auth.signInWithTelegram(passwordOrData);
+        if (error) return { error: new Error(error.message) };
+        return { error: null };
+      }
+      if (emailOrMethod === 'telegram-oidc') {
+        const { error } = await api.auth.signInWithTelegramOidc(passwordOrData);
         if (error) return { error: new Error(error.message) };
         return { error: null };
       }
