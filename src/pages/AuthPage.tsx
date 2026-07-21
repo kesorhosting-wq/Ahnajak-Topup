@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, User, MessageCircle } from 'lucide-react';
@@ -17,7 +17,6 @@ const AuthPage: React.FC = () => {
   const { user, signIn } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const telegramInitRef = useRef(false);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,78 +36,31 @@ const AuthPage: React.FC = () => {
     const clientId = settings.telegramClientId;
     if (!clientId) return;
 
-    const registerCallback = () => {
-      const lib = (window as any).Telegram?.Login;
-      if (!lib) { setTimeout(registerCallback, 300); return; }
-
-      if (!telegramInitRef.current) {
-        telegramInitRef.current = true;
-        lib.init(
-          { client_id: Number(clientId), scope: ['profile', 'write'] },
-          async (data: any) => {
-            if (!data || data.error) return;
-            setIsLoading(true);
-            try {
-              const { error } = await signIn('telegram-oidc', { id_token: data.id_token, user: data.user });
-              if (error) {
-                toast({ title: 'Telegram Login Failed', description: error.message, variant: 'destructive' });
-              } else {
-                toast({ title: 'Welcome!' });
-                navigate('/');
-              }
-            } finally {
-              setIsLoading(false);
-            }
-          }
-        );
+    (window as any).onTelegramAuth = async (data: any) => {
+      if (data.error) return;
+      setIsLoading(true);
+      try {
+        const { error } = await signIn('telegram-oidc', { id_token: data.id_token, user: data.user });
+        if (error) {
+          toast({ title: 'Telegram Login Failed', description: error.message, variant: 'destructive' });
+        } else {
+          toast({ title: 'Welcome!' });
+          navigate('/');
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (!(window as any).Telegram?.Login) {
-      const s = document.createElement('script');
-      s.src = 'https://oauth.telegram.org/js/telegram-login.js?5';
-      s.async = true;
-      s.onload = registerCallback;
-      document.head.appendChild(s);
-    } else {
-      registerCallback();
-    }
+    if (document.querySelector('script[data-client-id]')) return;
+    const s = document.createElement('script');
+    s.src = 'https://oauth.telegram.org/js/telegram-login.js?5';
+    s.async = true;
+    s.setAttribute('data-client-id', clientId);
+    s.setAttribute('data-onauth', 'onTelegramAuth');
+    s.setAttribute('data-request-access', 'write');
+    document.body.appendChild(s);
   }, [settings.telegramClientId]);
-
-  const handleTelegramLogin = () => {
-    const clientId = settings.telegramClientId;
-    if (!clientId) return;
-    const lib = (window as any).Telegram?.Login;
-    if (!lib) {
-      toast({ title: 'Telegram login loading...', description: 'Please wait a moment and try again.' });
-      return;
-    }
-    lib.auth(
-      {
-        client_id: Number(clientId),
-        scope: ['profile', 'write'],
-        redirect_url: window.location.href,
-      },
-      async (data: any) => {
-        if (data.error) {
-          toast({ title: 'Telegram Login Failed', description: data.error, variant: 'destructive' });
-          return;
-        }
-        setIsLoading(true);
-        try {
-          const { error } = await signIn('telegram-oidc', { id_token: data.id_token, user: data.user });
-          if (error) {
-            toast({ title: 'Telegram Login Failed', description: error.message, variant: 'destructive' });
-          } else {
-            toast({ title: 'Welcome!' });
-            navigate('/');
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    );
-  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -212,15 +164,13 @@ const AuthPage: React.FC = () => {
 
                 <div className="flex justify-center">
                   {settings.telegramClientId ? (
-                    <Button
-                      variant="outline"
-                      className="w-full flex items-center justify-center gap-2 rounded-xl py-6 border-[#0088cc]/30 hover:bg-[#0088cc]/5"
-                      onClick={handleTelegramLogin}
-                      disabled={isLoading}
-                    >
-                      <MessageCircle className="w-5 h-5 text-[#0088cc]" />
-                      <span>Sign In with Telegram</span>
-                    </Button>
+                    <div
+                      className="tg-auth-button"
+                      data-style="rounded"
+                      data-size="large"
+                      tabIndex={0}
+                      role="button"
+                    />
                   ) : (
                     <Button
                       variant="outline"
