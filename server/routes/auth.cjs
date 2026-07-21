@@ -7,6 +7,7 @@
  */
 const express = require('express');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { query, queryOne, uuid } = require('../db.cjs');
 const { signToken, hashPassword, comparePassword, hasRole, requireAuth } = require('../auth.cjs');
@@ -111,7 +112,7 @@ router.post('/telegram-oidc', async (req, res) => {
 
     // Decode header to find key
     const header = JSON.parse(Buffer.from(id_token.split('.')[0], 'base64url').toString());
-    const key = jwks.keys.find((k: any) => k.kid === header.kid);
+    const key = jwks.keys.find((k) => k.kid === header.kid);
     if (!key) return res.status(401).json({ error: 'Unable to verify Telegram login' });
 
     // Import JWK as public key
