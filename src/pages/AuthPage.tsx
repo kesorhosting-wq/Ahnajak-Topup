@@ -25,6 +25,7 @@ const AuthPage: React.FC = () => {
 
   const primaryColor = settings.primaryColor || '#E53E3E';
 
+  // Process Telegram login (shared by popup and redirect-back)
   const processTelegramLogin = async (data: any) => {
     if (!data || data.error) return;
     setIsLoading(true);
@@ -48,21 +49,7 @@ const AuthPage: React.FC = () => {
     }
   }, [user, navigate, searchParams]);
 
-  useEffect(() => {
-    const hash = window.location.hash.substring(1);
-    if (hash) {
-      const params = new URLSearchParams(hash);
-      const idToken = params.get('id_token');
-      const state = params.get('state');
-      const savedState = sessionStorage.getItem('tg_oauth_state');
-      if (idToken && state === savedState) {
-        sessionStorage.removeItem('tg_oauth_state');
-        window.history.replaceState(null, '', window.location.pathname);
-        processTelegramLogin({ id_token: idToken, user: null });
-      }
-    }
-  }, []);
-
+  // Load Telegram OIDC library for desktop popup
   useEffect(() => {
     const clientId = settings.telegramClientId;
     if (!clientId) return;
@@ -71,7 +58,7 @@ const AuthPage: React.FC = () => {
       await processTelegramLogin(data);
     };
 
-    if (document.querySelector('script[data-client-id]')) return;
+    if (document.querySelector('script[src*="telegram-login"]')) return;
     const s = document.createElement('script');
     s.src = 'https://oauth.telegram.org/js/telegram-login.js?5';
     s.async = true;
@@ -87,20 +74,24 @@ const AuthPage: React.FC = () => {
     const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobile) {
-      const redirectUri = window.location.origin + window.location.pathname;
+      // Use OIDC Authorization Code flow (full-page redirect, works on mobile)
       const state = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
       sessionStorage.setItem('tg_oauth_state', state);
+
+      const frontendOrigin = window.location.origin;
+      const redirectUri = `${frontendOrigin}/api/auth/telegram-callback`;
 
       const params = new URLSearchParams({
         client_id: clientId,
         redirect_uri: redirectUri,
+        response_type: 'code',
         scope: 'openid profile',
-        response_type: 'id_token',
         state: state,
       });
 
       window.location.href = `https://oauth.telegram.org/auth?${params}`;
     } else {
+      // Desktop: use popup via Telegram OIDC library
       const lib = (window as any).Telegram?.Login;
       if (!lib) {
         toast({ title: 'Telegram login loading...', description: 'Please wait a moment and try again.', variant: 'destructive' });

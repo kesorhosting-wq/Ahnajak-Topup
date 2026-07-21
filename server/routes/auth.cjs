@@ -149,6 +149,97 @@ router.post('/telegram-oidc', async (req, res) => {
   } catch (err) { sendError(res, err, 'POST /auth/telegram-oidc'); }
 });
 
+// Telegram OIDC callback — handles redirect after auth (mobile-friendly code flow)
+// After user authorizes, Telegram redirects the browser here with ?code=xxx&state=yyy.
+// We exchange the code for an id_token and redirect to the frontend with a JWT.
+router.get('/telegram-callback', async (req, res) => {
+  const { code, state } = req.query;
+  if (!code) {
+    return res.redirect((process.env.FRONTEND_URL || '') + '/auth?error=missing_code');
+  }
+
+  let clientId;
+  try {
+    const setting = await queryOne("SELECT `value` FROM `settings` WHERE `key` = 'telegramClientId'");
+    clientId = setting?.value;
+  } catch (e) {
+    clientId = process.env.TELEGRAM_CLIENT_ID;
+  }
+  const clientSecret = process.env.TELEGRAM_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    return res.redirect((process.env.FRONTEND_URL || '') + '/auth?error=telegram_not_configured');
+  }
+
+  // Derive the redirect_uri from the incoming request so it matches the frontend URL
+  const proto = req.headers['x-forwarded-proto'] || req.protocol;
+  const host = req.get('host');
+  const redirectUri = `${proto}://${host}/api/auth/telegram-callback`;
+
+  try {
+    // Exchange authorization code for tokens
+    const tokenRes = await fetch('https://oauth.telegram.org/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64'),
+      },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: redirectUri,
+        client_id: clientId,
+      }),
+    });
+
+    const tokenData = await tokenRes.json();
+    if (!tokenData.id_token) {
+      console.error('Token exchange failed:', tokenData);
+      return res.redirect((process.env.FRONTEND_URL || '') + '/auth?error=token_exchange_failed');
+    }
+
+    const idToken = tokenData.id_token;
+
+    // Verify the id_token using JWKS
+    const jwksRes = await fetch('https://oauth.telegram.org/.well-known/jwks.json');
+    const jwks = await jwksRes.json();
+    const header = JSON.parse(Buffer.from(idToken.split('.')[0], 'base64url').toString());
+    const key = jwks.keys.find((k) => k.kid === header.kid);
+    if (!key) return res.redirect((process.env.FRONTEND_URL || '') + '/auth?error=verification_failed');
+
+    const publicKey = crypto.createPublicKey({ format: 'jwk', key });
+    const decoded = jwt.verify(idToken, publicKey, {
+      algorithms: ['RS256', 'ES256'],
+      issuer: 'https://oauth.telegram.org',
+    });
+
+    // Create or find user
+    const telegramId = String(decoded.sub || decoded.id);
+    const displayName = decoded.name || decoded.preferred_username || 'Telegram User';
+    const email = `tg_${telegramId}@telegram.local`;
+
+    let user = await queryOne('SELECT id, email, display_name FROM users WHERE email = ?', [email]);
+
+    if (!user) {
+      const userId = uuid();
+      await query('INSERT INTO users (id, email, password_hash, display_name) VALUES (?, ?, "", ?)',
+        [userId, email, displayName]);
+      await query('INSERT INTO profiles (id, user_id, email, display_name, wallet_balance, reward_points) VALUES (?, ?, ?, ?, 0, 0)',
+        [uuid(), userId, email, displayName]);
+      await query('INSERT INTO user_roles (id, user_id, role) VALUES (?, ?, ?)',
+        [uuid(), userId, 'user']);
+      user = { id: userId, email, display_name: displayName };
+    }
+
+    const token = signToken({ id: user.id, email: user.email, display_name: user.display_name });
+    const frontendUrl = process.env.FRONTEND_URL || process.env.PUBLIC_BASE_URL || '';
+    const stateParam = state ? `&state=${encodeURIComponent(state)}` : '';
+    return res.redirect(`${frontendUrl}/auth#token=${token}${stateParam}`);
+  } catch (err) {
+    console.error('Telegram callback error:', err);
+    return res.redirect((process.env.FRONTEND_URL || '') + '/auth?error=server_error');
+  }
+});
+
 // Signout (stateless JWT — client just removes the token)
 router.post('/signout', (req, res) => {
   res.json({ success: true });
