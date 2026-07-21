@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, LogIn, Eye, EyeOff, User, MessageCircle } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Eye, EyeOff, User, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -38,35 +38,46 @@ const AuthPage: React.FC = () => {
     if (!clientId || telegramInitRef.current) return;
     telegramInitRef.current = true;
 
-    const checkLib = () => {
-      if ((window as any).Telegram?.Login) {
-        (window as any).Telegram.Login.init(
-          { client_id: Number(clientId), scope: ['profile', 'write'] },
-          async (data: any) => {
-            if (data.error) {
-              toast({ title: 'Telegram Login Failed', description: data.error, variant: 'destructive' });
-              return;
-            }
-            setIsLoading(true);
-            try {
-              const { error } = await signIn('telegram-oidc', { id_token: data.id_token, user: data.user });
-              if (error) {
-                toast({ title: 'Telegram Login Failed', description: error.message, variant: 'destructive' });
-              } else {
-                toast({ title: 'Welcome!' });
-                navigate('/');
-              }
-            } finally {
-              setIsLoading(false);
-            }
-          }
-        );
-      } else {
-        setTimeout(checkLib, 200);
-      }
+    const loadScript = () => {
+      if ((window as any).Telegram?.Login) return;
+      const s = document.createElement('script');
+      s.src = 'https://oauth.telegram.org/js/telegram-login.js?5';
+      s.async = true;
+      document.head.appendChild(s);
     };
-    checkLib();
+    loadScript();
   }, [settings.telegramClientId]);
+
+  const handleTelegramLogin = () => {
+    const clientId = settings.telegramClientId;
+    if (!clientId) return;
+    const lib = (window as any).Telegram?.Login;
+    if (!lib) {
+      toast({ title: 'Telegram login loading...', description: 'Please wait a moment and try again.' });
+      return;
+    }
+    lib.auth(
+      { client_id: Number(clientId), scope: ['profile', 'write'] },
+      async (data: any) => {
+        if (data.error) {
+          toast({ title: 'Telegram Login Failed', description: data.error, variant: 'destructive' });
+          return;
+        }
+        setIsLoading(true);
+        try {
+          const { error } = await signIn('telegram-oidc', { id_token: data.id_token, user: data.user });
+          if (error) {
+            toast({ title: 'Telegram Login Failed', description: error.message, variant: 'destructive' });
+          } else {
+            toast({ title: 'Welcome!' });
+            navigate('/');
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    );
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,17 +181,15 @@ const AuthPage: React.FC = () => {
 
                 <div className="flex justify-center">
                   {settings.telegramClientId ? (
-                    <>
-                      <script async src="https://oauth.telegram.org/js/telegram-login.js?5" />
-                      <div
-                        className="tg-auth-button"
-                        data-style="rounded"
-                        tabIndex={0}
-                        aria-label="Log in with Telegram"
-                      >
-                        Sign In with Telegram
-                      </div>
-                    </>
+                    <Button
+                      variant="outline"
+                      className="w-full flex items-center justify-center gap-2 rounded-xl py-6 border-[#0088cc]/30 hover:bg-[#0088cc]/5"
+                      onClick={handleTelegramLogin}
+                      disabled={isLoading}
+                    >
+                      <MessageCircle className="w-5 h-5 text-[#0088cc]" />
+                      <span>Sign In with Telegram</span>
+                    </Button>
                   ) : (
                     <Button
                       variant="outline"
