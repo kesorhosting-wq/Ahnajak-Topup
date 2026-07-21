@@ -4,9 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSite } from '@/contexts/SiteContext';
 import { toast } from '@/hooks/use-toast';
-import { Sparkles, Save, RefreshCw, Paintbrush, ShieldCheck, Image, Video, MonitorPlay } from 'lucide-react';
-import api from '@/lib/api';
-import { db } from '@/integrations/db/client';
+import { Sparkles, Save, Paintbrush, ShieldCheck, Image, Video, MonitorPlay } from 'lucide-react';
 
 const AiTab: React.FC = () => {
   const { settings, updateSettings } = useSite();
@@ -40,7 +38,6 @@ const AiTab: React.FC = () => {
   const handleSaveAndTrain = async () => {
     setSaving(true);
     try {
-      // 1. Update database site settings
       const updates = {
         siteName: siteName,
         browserTitle: `${siteName} - Game Topup Cambodia`,
@@ -52,32 +49,10 @@ const AiTab: React.FC = () => {
         bgVideoUrl: bgVideoUrl,
       };
 
-      for (const [key, value] of Object.entries(updates)) {
-        await db.from('site_settings').upsert({
-          key,
-          value: JSON.stringify(value),
-        });
-      }
-
-      // 2. Trigger AI training endpoint to update .agents/AGENTS.md
-      const { error: trainError } = await api.post('/settings/ai-train', {
-        siteName,
-        primaryColor,
-        accentColor,
-        bgType,
-        backgroundColor,
-        bgImageUrl,
-        bgVideoUrl,
-      });
-
-      if (trainError) {
-        throw new Error(trainError.message || 'Failed to update AI guidelines file');
-      }
-
       updateSettings(updates);
       toast({
-        title: 'Settings saved & AI Trained! 🤖',
-        description: `Successfully renamed brand to "${siteName}" and updated background/colors. Future AI agents will adapt to this configuration automatically.`,
+        title: 'Settings saved!',
+        description: `Brand renamed to "${siteName}" with new colors and background.`,
       });
     } catch (error: any) {
       console.error(error);
@@ -326,13 +301,12 @@ const AiTab: React.FC = () => {
         >
           {saving ? (
             <>
-              <RefreshCw className="w-5 h-5 animate-spin" />
-              Saving & Training AI...
+              Saving...
             </>
           ) : (
             <>
               <Save className="w-5 h-5" />
-              Save & Train AI Guidelines
+              Save Settings
             </>
           )}
         </Button>
