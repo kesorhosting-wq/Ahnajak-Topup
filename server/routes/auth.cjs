@@ -154,8 +154,15 @@ router.post('/telegram-oidc', async (req, res) => {
 // We exchange the code for an id_token and redirect to the frontend with a JWT.
 router.get('/telegram-callback', async (req, res) => {
   const { code, state } = req.query;
+
+  // Derive the frontend URL from the incoming request
+  const proto = req.headers['x-forwarded-proto'] || req.protocol;
+  const host = req.get('host');
+  const baseUrl = `${proto}://${host}`;
+  const redirectUri = `${baseUrl}/api/auth/telegram-callback`;
+
   if (!code) {
-    return res.redirect((process.env.FRONTEND_URL || '') + '/auth?error=missing_code');
+    return res.redirect(`${baseUrl}/auth?error=missing_code`);
   }
 
   let clientId;
@@ -167,13 +174,8 @@ router.get('/telegram-callback', async (req, res) => {
   }
   const clientSecret = process.env.TELEGRAM_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
-    return res.redirect((process.env.FRONTEND_URL || '') + '/auth?error=telegram_not_configured');
+    return res.redirect(`${baseUrl}/auth?error=telegram_not_configured`);
   }
-
-  // Derive the redirect_uri from the incoming request so it matches the frontend URL
-  const proto = req.headers['x-forwarded-proto'] || req.protocol;
-  const host = req.get('host');
-  const redirectUri = `${proto}://${host}/api/auth/telegram-callback`;
 
   try {
     // Exchange authorization code for tokens
@@ -194,7 +196,7 @@ router.get('/telegram-callback', async (req, res) => {
     const tokenData = await tokenRes.json();
     if (!tokenData.id_token) {
       console.error('Token exchange failed:', tokenData);
-      return res.redirect((process.env.FRONTEND_URL || '') + '/auth?error=token_exchange_failed');
+      return res.redirect(`${baseUrl}/auth?error=token_exchange_failed`);
     }
 
     const idToken = tokenData.id_token;
@@ -204,7 +206,7 @@ router.get('/telegram-callback', async (req, res) => {
     const jwks = await jwksRes.json();
     const header = JSON.parse(Buffer.from(idToken.split('.')[0], 'base64url').toString());
     const key = jwks.keys.find((k) => k.kid === header.kid);
-    if (!key) return res.redirect((process.env.FRONTEND_URL || '') + '/auth?error=verification_failed');
+    if (!key) return res.redirect(`${baseUrl}/auth?error=verification_failed`);
 
     const publicKey = crypto.createPublicKey({ format: 'jwk', key });
     const decoded = jwt.verify(idToken, publicKey, {
@@ -231,12 +233,11 @@ router.get('/telegram-callback', async (req, res) => {
     }
 
     const token = signToken({ id: user.id, email: user.email, display_name: user.display_name });
-    const frontendUrl = process.env.FRONTEND_URL || process.env.PUBLIC_BASE_URL || '';
     const stateParam = state ? `&state=${encodeURIComponent(state)}` : '';
-    return res.redirect(`${frontendUrl}/auth#token=${token}${stateParam}`);
+    return res.redirect(`${baseUrl}/auth#token=${token}${stateParam}`);
   } catch (err) {
     console.error('Telegram callback error:', err);
-    return res.redirect((process.env.FRONTEND_URL || '') + '/auth?error=server_error');
+    return res.redirect(`${baseUrl}/auth?error=server_error`);
   }
 });
 
