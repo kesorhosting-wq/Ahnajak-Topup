@@ -35,17 +35,44 @@ const AuthPage: React.FC = () => {
 
   useEffect(() => {
     const clientId = settings.telegramClientId;
-    if (!clientId || telegramInitRef.current) return;
-    telegramInitRef.current = true;
+    if (!clientId) return;
 
-    const loadScript = () => {
-      if ((window as any).Telegram?.Login) return;
+    const registerCallback = () => {
+      const lib = (window as any).Telegram?.Login;
+      if (!lib) { setTimeout(registerCallback, 300); return; }
+
+      if (!telegramInitRef.current) {
+        telegramInitRef.current = true;
+        lib.init(
+          { client_id: Number(clientId), scope: ['profile', 'write'] },
+          async (data: any) => {
+            if (!data || data.error) return;
+            setIsLoading(true);
+            try {
+              const { error } = await signIn('telegram-oidc', { id_token: data.id_token, user: data.user });
+              if (error) {
+                toast({ title: 'Telegram Login Failed', description: error.message, variant: 'destructive' });
+              } else {
+                toast({ title: 'Welcome!' });
+                navigate('/');
+              }
+            } finally {
+              setIsLoading(false);
+            }
+          }
+        );
+      }
+    };
+
+    if (!(window as any).Telegram?.Login) {
       const s = document.createElement('script');
       s.src = 'https://oauth.telegram.org/js/telegram-login.js?5';
       s.async = true;
+      s.onload = registerCallback;
       document.head.appendChild(s);
-    };
-    loadScript();
+    } else {
+      registerCallback();
+    }
   }, [settings.telegramClientId]);
 
   const handleTelegramLogin = () => {
@@ -57,7 +84,11 @@ const AuthPage: React.FC = () => {
       return;
     }
     lib.auth(
-      { client_id: Number(clientId), scope: ['profile', 'write'] },
+      {
+        client_id: Number(clientId),
+        scope: ['profile', 'write'],
+        redirect_url: window.location.href,
+      },
       async (data: any) => {
         if (data.error) {
           toast({ title: 'Telegram Login Failed', description: data.error, variant: 'destructive' });
