@@ -174,7 +174,11 @@ const api = {
         }
         return { data: { session: null, user: null }, error: result.error };
       }
-      const user = result.data?.user || JSON.parse(localStorage.getItem(USER_KEY) || 'null');
+      const user = result.data?.user || (result.data ? {
+        id: (result.data as any).user_id || (result.data as any).id,
+        email: (result.data as any).email,
+        display_name: (result.data as any).display_name,
+      } : null) || JSON.parse(localStorage.getItem(USER_KEY) || 'null');
       return {
         data: {
           session: { access_token: token, user },
