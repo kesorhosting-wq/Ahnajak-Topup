@@ -72,11 +72,7 @@ const FontUpload: React.FC<FontUploadProps> = ({ label, description, value, onCh
   const handleRemove = async () => {
     if (!value) return;
     
-    // Extract file name from URL
-    const fileName = value.split('/').pop();
-    if (fileName) {
-      await api.deleteUpload(fileName);
-    }
+    await api.deleteUpload(value);
     
     onChange('');
     toast({ title: 'Font removed' });

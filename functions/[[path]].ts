@@ -1,12 +1,12 @@
 export async function onRequest(context) {
   const url = new URL(context.request.url);
   
-  if (!url.pathname.startsWith('/api/') && url.pathname !== '/api') {
+  if (!url.pathname.startsWith('/api/') && url.pathname !== '/api' && !url.pathname.startsWith('/uploads/')) {
     return context.next();
   }
   
   const isBodyless = context.request.method === 'GET' || context.request.method === 'HEAD';
-  const body = isBodyless ? undefined : await context.request.text();
+  const body = isBodyless ? undefined : await context.request.arrayBuffer();
 
   for (const port of [3010, 80]) {
     try {

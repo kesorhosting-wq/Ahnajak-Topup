@@ -94,10 +94,7 @@ const BannerImagesUpload: React.FC<BannerImagesUploadProps> = ({
     
     // Try to delete from storage
     try {
-      const fileName = urlToRemove.split('/').pop();
-      if (fileName) {
-        await api.deleteUpload(fileName);
-      }
+      await api.deleteUpload(urlToRemove);
     } catch (error) {
       console.error('Failed to delete from storage:', error);
     }
