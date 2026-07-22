@@ -16,6 +16,12 @@ const router = express.Router();
 const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads', 'site-assets');
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  try {
+    fs.chmodSync(path.resolve(process.cwd(), 'uploads'), 0o755);
+    fs.chmodSync(UPLOAD_DIR, 0o755);
+  } catch (err) {
+    console.error('Failed to set uploads directory permissions:', err);
+  }
 }
 
 const storage = multer.diskStorage({
@@ -46,6 +52,14 @@ const upload = multer({
 
 router.post('/', requireAdmin, upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+  // Ensure the uploaded file is readable by Nginx (www-data)
+  try {
+    fs.chmodSync(req.file.path, 0o644);
+  } catch (err) {
+    console.error('Failed to set permissions on uploaded file:', err);
+  }
+
   const publicPath = `/uploads/site-assets/${req.file.filename}`;
   res.json({ path: publicPath, url: publicPath });
 });

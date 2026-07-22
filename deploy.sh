@@ -192,7 +192,7 @@ server {
     }
 
     location /uploads/ {
-        alias $APP_DIR/uploads/;
+        root $APP_DIR;
         expires 7d;
         add_header Cache-Control "public, max-age=604800";
     }
