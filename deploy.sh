@@ -172,6 +172,7 @@ EOT
 server {
     listen 80;
     server_name ${NGINX_DOMAIN};
+    client_max_body_size 10M;
 
     root $APP_DIR/dist;
     index index.html;
