@@ -8,9 +8,11 @@ export async function onRequest(context) {
   const isBodyless = context.request.method === 'GET' || context.request.method === 'HEAD';
   const body = isBodyless ? undefined : await context.request.arrayBuffer();
 
+  const vpsIp = context.env.VPS_INTERNAL_IP || '45.151.155.24';
+
   for (const port of [3010, 80]) {
     try {
-      const apiTarget = `http://45.151.155.24:${port}${url.pathname}${url.search}`;
+      const apiTarget = `http://${vpsIp}:${port}${url.pathname}${url.search}`;
       const response = await fetch(apiTarget, {
         method: context.request.method,
         headers: {
