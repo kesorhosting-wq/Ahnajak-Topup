@@ -99,6 +99,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     toast({ title: 'Image removed' });
   };
 
+  const handleSetUrl = (url: string) => {
+    if (url.trim()) {
+      onChange(url.trim());
+      setUrlInput('');
+      toast({ title: 'Image URL set!' });
+    }
+  };
+
   return (
     <div className={cn('relative', className)}>
       {allowUrl && (
@@ -132,7 +140,29 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         </div>
       )}
 
-      {mode === 'url' && allowUrl ? (
+      {value ? (
+        <div 
+          className={cn(
+            'relative rounded-xl border-2 border-dashed border-gold/50 bg-secondary/30 overflow-hidden transition-colors',
+            aspectClasses[aspectRatio]
+          )}
+        >
+          <img 
+            src={value} 
+            alt="Uploaded" 
+            className="w-full h-full object-cover"
+          />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemove();
+            }}
+            className="absolute top-2 right-2 p-1.5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : mode === 'url' && allowUrl ? (
         <div className="flex gap-2">
           <input
             type="text"
@@ -141,21 +171,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             placeholder="Paste image URL..."
             className="flex-1 px-3 py-2 rounded-lg border border-gold/30 bg-secondary text-sm text-foreground placeholder-muted-foreground outline-none focus:border-gold transition-colors"
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && urlInput.trim()) {
-                onChange(urlInput.trim());
-                toast({ title: 'Image URL set!' });
-              }
+              if (e.key === 'Enter') handleSetUrl(urlInput);
             }}
           />
           <button
             type="button"
-            onClick={() => {
-              if (urlInput.trim()) {
-                onChange(urlInput.trim());
-                toast({ title: 'Image URL set!' });
-              }
-            }}
-            className="px-4 py-2 rounded-lg bg-gold text-black text-sm font-medium hover:bg-gold/80 transition-colors"
+            onClick={() => handleSetUrl(urlInput)}
+            className="px-4 py-2 rounded-lg bg-gold text-black text-sm font-medium hover:bg-gold/80 transition-colors whitespace-nowrap"
           >
             Set
           </button>
@@ -177,41 +199,22 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             )}
             onClick={() => !isUploading && inputRef.current?.click()}
           >
-            {value ? (
-              <>
-                <img 
-                  src={value} 
-                  alt="Uploaded" 
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemove();
-                  }}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </>
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                {isUploading ? (
-                  <>
-                    <Loader2 className="w-8 h-8 animate-spin text-gold" />
-                    <span className="text-sm">Uploading...</span>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center">
-                      <Upload className="w-6 h-6 text-gold" />
-                    </div>
-                    <span className="text-sm font-medium">{placeholder}</span>
-                    <span className="text-xs">Click to upload</span>
-                  </>
-                )}
-              </div>
-            )}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-8 h-8 animate-spin text-gold" />
+                  <span className="text-sm">Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-gold" />
+                  </div>
+                  <span className="text-sm font-medium">{placeholder}</span>
+                  <span className="text-xs">Click to upload</span>
+                </>
+              )}
+            </div>
           </div>
         </>
       )}
