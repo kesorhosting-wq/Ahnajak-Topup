@@ -1,209 +1,264 @@
-# Ahnajak Topup — Game Topup Platform (MySQL Edition)
+# Ahnajak Topup — Game Topup Platform
 
-A full-featured game topup platform built with **React + Vite + Express + MySQL**.
-Formerly powered by Supabase, now fully self-contained with MySQL for easy cloning and deployment.
+React + Express + MySQL game topup platform with payment gateways (KHQR, KHQRcc, IKhode Bakong) and G2Bulk fulfillment.
 
-## Tech Stack
+## VPS Installation (100% Complete)
 
-| Layer | Technology |
-|---|---|
-| Frontend | React 18, Vite 5, TypeScript, Tailwind CSS, shadcn/ui |
-| Backend | Express 5 (Node.js, CommonJS) |
-| Database | MySQL / MariaDB |
-| Auth | JWT + bcrypt (self-contained, no external service) |
-| File Storage | Local `/uploads/` directory (served by Express) |
-| Payments | KHQR (Ahnajak/Kesor), KHQRcc (ABA Pay), IKhode Bakong |
-| Game Fulfillment | G2Bulk API integration |
+Run these commands on a fresh Ubuntu VPS as root:
 
-## Prerequisites
-
-1. **Node.js** 18+ ([download](https://nodejs.org/))
-2. **MySQL** 5.7+ or **MariaDB** 10.2+ (via XAMPP, WAMP, or standalone)
-3. **npm** (comes with Node.js)
-
-## Quick Start (Clone & Run)
+### 1. System Update & Dependencies
 
 ```bash
-# 1. Clone the repository
-git clone <your-repo-url>
-cd Ahnajak-Topup
-
-# 2. Copy environment config and fill in your MySQL credentials
-cp .env.example .env
-# Edit .env — at minimum set DB_PASSWORD and JWT_SECRET
-
-# 3. Install dependencies
-npm install
-
-# 4. Create all database tables (24 tables + 1 view)
-npm run db:migrate
-
-# 5. Insert default data (admin user, site settings, game configs)
-npm run db:seed
-
-# 6. Start both the API server and Vite frontend together
-npm run dev
+apt update && apt upgrade -y
+apt install -y git curl nginx mysql-server certbot python3-certbot-nginx
 ```
 
-Then open **http://localhost:8080** in your browser.
+### 2. Install Node.js 20
 
-### Default Admin Account
-- **Email:** `admin@ahnajak.com`
-- **Password:** `admin123`
-- ⚠️ **Change this password immediately after first login!**
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install -y nodejs
+node -v  # should show v20.x
+```
 
-## Environment Variables (`.env`)
+### 3. Setup MySQL
+
+```bash
+mysql
+```
+
+```sql
+CREATE DATABASE ahnajak_topup CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'ahnajak'@'localhost' IDENTIFIED BY 'YourStrongPassword123';
+GRANT ALL PRIVILEGES ON ahnajak_topup.* TO 'ahnajak'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+Secure MySQL (set root password, remove anonymous users, etc.):
+```bash
+mysql_secure_installation
+```
+
+### 4. Clone Repository
+
+```bash
+cd /root
+git clone https://github.com/kesorhosting-wq/Ahnajak-Topup.git
+cd Ahnajak-Topup
+```
+
+### 5. Configure Environment
+
+```bash
+cp .env.example .env
+nano .env
+```
+
+Minimum required changes in `.env`:
+```env
+DB_PASSWORD=YourStrongPassword123
+JWT_SECRET=<generate a random string: openssl rand -hex 32>
+PUBLIC_BASE_URL=https://woosaastore.com
+```
+
+Optional but recommended:
+```env
+G2BULK_API_KEY=your_g2bulk_key
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_CLIENT_SECRET=your_client_secret
+```
+
+### 6. Install Dependencies & Setup Database
+
+```bash
+npm install
+node scripts/seed.cjs
+```
+
+This creates all tables and inserts default data (admin user, settings).
+
+### 7. Start Backend with PM2
+
+```bash
+npm install -g pm2
+pm2 start server/index.cjs --name ahnajak-api
+pm2 save
+pm2 startup
+```
+
+Follow the on-screen instructions from `pm2 startup` to enable PM2 on boot.
+
+### 8. Build Frontend
+
+```bash
+npm run build
+mkdir -p /var/www/woosaastore
+cp -r dist/* /var/www/woosaastore/
+```
+
+### 9. Configure nginx
+
+```bash
+cat > /etc/nginx/sites-enabled/woosaastore.com << 'NGINX'
+server {
+    listen 80;
+    listen [::]:80;
+    server_name woosaastore.com www.woosaastore.com;
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/woosaastore;
+        default_type "text/plain";
+        allow all;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name woosaastore.com www.woosaastore.com;
+
+    ssl_certificate /etc/letsencrypt/live/woosaastore.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/woosaastore.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1440m;
+
+    root /var/www/woosaastore;
+    index index.html;
+
+    location /api/ {
+        proxy_pass http://localhost:3010;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /uploads/ {
+        proxy_pass http://localhost:3010;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \.(css|js|png|jpg|jpeg|gif|svg|ico|woff2?|ttf)$ {
+        expires 30d;
+        access_log off;
+    }
+}
+NGINX
+```
+
+### 10. Get SSL Certificate
+
+```bash
+certbot --nginx -d woosaastore.com -d www.woosaastore.com
+```
+
+### 11. Restart nginx & Verify
+
+```bash
+nginx -t && systemctl restart nginx
+```
+
+### 12. Verify Everything
+
+```bash
+# Backend running?
+curl -I http://localhost:3010/api/settings
+
+# Frontend serving?
+curl -I https://woosaastore.com
+
+# PM2 status
+pm2 status
+```
+
+Visit `https://woosaastore.com` and login with:
+- Email: `admin@ahnajak.com`
+- Password: `admin123`
+
+**Change the password immediately after first login!**
+
+---
+
+## Updating (Pull Latest Code)
+
+```bash
+cd /root/Ahnajak-Topup
+git pull
+npm install
+pm2 restart ahnajak-api
+npm run build
+rm -rf /var/www/woosaastore/*
+cp -r dist/* /var/www/woosaastore/
+```
+
+---
+
+## Environment Variables
 
 | Variable | Description | Default |
 |---|---|---|
-| `DB_HOST` | MySQL server host | `localhost` |
-| `DB_PORT` | MySQL server port | `3306` |
-| `DB_USER` | MySQL username | `root` |
-| `DB_PASSWORD` | MySQL password | (empty) |
+| `DB_HOST` | MySQL host | `localhost` |
+| `DB_PORT` | MySQL port | `3306` |
+| `DB_USER` | MySQL user | `root` |
+| `DB_PASSWORD` | MySQL password | (required) |
 | `DB_NAME` | Database name | `ahnajak_topup` |
-| `JWT_SECRET` | Secret key for JWT tokens | (change this!) |
-| `JWT_EXPIRES_IN` | Token expiry | `365d` |
+| `JWT_SECRET` | JWT signing key | (required — generate with `openssl rand -hex 32`) |
+| `JWT_EXPIRES_IN` | Token expiry | `24h` |
 | `PORT` | API server port | `3010` |
-| `PUBLIC_BASE_URL` | Public URL for callbacks | `http://localhost:3010` |
-| `ICON_API_KEY` | Icon search API key | |
+| `PUBLIC_BASE_URL` | Public site URL | `http://localhost:3010` |
+| `FRONTEND_URL` | Frontend URL (CORS) | `https://woosaastore.com` |
+| `ALLOWED_ORIGINS` | CORS origins (comma-sep) | (same as FRONTEND_URL) |
 | `G2BULK_API_KEY` | G2Bulk API key | |
-| `TELEGRAM_BOT_TOKEN` | Telegram bot token (optional) | |
-| `TELEGRAM_CHAT_ID` | Telegram chat ID (optional) | |
+| `G2BULK_WEBHOOK_SECRET` | G2Bulk webhook secret | |
+| `TELEGRAM_BOT_TOKEN` | Telegram bot token (old auth) | |
+| `TELEGRAM_CLIENT_ID` | Telegram client ID (OIDC) | |
+| `TELEGRAM_CLIENT_SECRET` | Telegram client secret (OIDC) | |
+| `KHQR_API_KEY` | KHQR API key | |
+| `IKHODE_API_KEY` | IKhode Bakong API key | |
+
+---
 
 ## npm Scripts
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start API server + Vite frontend together |
-| `npm run dev:server` | Start only the API server (port 3010) |
-| `npm run dev:client` | Start only the Vite dev server (port 8080) |
-| `npm run db:migrate` | Create all database tables from `database/schema.sql` |
-| `npm run db:seed` | Insert default data from `database/seed.sql` |
-| `npm run build` | Build the frontend for production |
-| `npm run server` | Start the API server (production) |
+| `npm run dev` | Start API + Vite dev server |
+| `npm run dev:server` | Start API only |
+| `npm run dev:client` | Start Vite only (port 8080) |
+| `npm run build` | Build frontend for production |
+| `npm run server` | Start API server (production) |
 | `npm run lint` | Run ESLint |
-| `npm run preview` | Preview the production build |
+| `node scripts/seed.cjs` | Initialize/reset database |
 
-## Project Structure
+---
 
-```
-ahnajak-topup/
-├── database/                 # MySQL schema + seed data
-│   ├── schema.sql            # All 24 tables + 1 view (consolidated)
-│   └── seed.sql              # Default admin, settings, game configs
-├── scripts/
-│   ├── migrate.cjs           # Run: npm run db:migrate
-│   └── seed.cjs              # Run: npm run db:seed
-├── server/                   # Express API server (replaces Supabase)
-│   ├── index.cjs             # Main server entry (port 3010)
-│   ├── db.cjs                # MySQL connection pool
-│   ├── auth.cjs              # JWT + bcrypt auth middleware
-│   └── routes/               # API route modules
-│       ├── auth.cjs          # Signup, signin, signout, session
-│       ├── settings.cjs      # Site settings CRUD
-│       ├── games.cjs         # Games + packages + special packages
-│       ├── orders.cjs        # Topup orders + polling
-│       ├── preorders.cjs     # Pre-order games/packages/orders
-│       ├── events.cjs        # Events CRUD
-│       ├── coupons.cjs       # Coupon validation (was RPC)
-│       ├── points.cjs        # Reward points + exchange (was RPC)
-│       ├── wallet.cjs        # Wallet transactions
-│       ├── payments.cjs      # Payment gateways + webhooks
-│       ├── uploads.cjs       # File uploads (was Supabase Storage)
-│       ├── process-topup.cjs # G2Bulk fulfillment (was edge function)
-│       ├── verify-game.cjs   # Game ID verification (was edge function)
-│       ├── g2bulk.cjs        # G2Bulk API proxy (was edge function)
-│       ├── ahnajak-khqr.cjs  # KHQR payment generation
-│       ├── ikhode.cjs        # IKhode Bakong payment
-│       ├── prices.cjs        # Price sync from G2Bulk
-│       ├── api-configs.cjs   # API config + game verification config
-│       └── misc.cjs           # Image proxy + icon search
-├── src/                      # React frontend
-│   ├── lib/
-│   │   └── api.ts            # Fetch-based API client for Express+MySQL
-│   ├── integrations/db/
-│   │   └── client.ts         # Database client wrapper (routes to api.ts)
-│   ├── contexts/             # AuthContext, SiteContext, CartContext
-│   ├── pages/                # All page components
-│   ├── components/           # UI + admin components
-│   └── hooks/                # Custom React hooks
-├── uploads/                  # Uploaded files (banners, fonts, images)
-├── .env.example              # Copy to .env and configure
-└── package.json
-```
+## Tech Stack
 
-## Database Schema
-
-24 tables created by `database/schema.sql`:
-
-| Table | Purpose |
-|---|---|
-| `users` | User accounts (email + bcrypt password) |
-| `profiles` | User profiles (wallet balance, reward points) |
-| `user_roles` | Admin/user role assignments |
-| `site_settings` | Key-value store for all site customization |
-| `games` | Game catalog |
-| `packages` | Game topup packages |
-| `special_packages` | Special/featured packages |
-| `preorder_games` | Games available for pre-order |
-| `preorder_packages` | Pre-order packages |
-| `preorder_orders` | Pre-order order records |
-| `topup_orders` | Topup order records |
-| `payment_gateways` | Payment gateway configs (KHQR, KHQRcc, IKhode) |
-| `payment_gateways_public` | View — public-safe gateway config |
-| `payment_qr_settings` | QR code payment settings |
-| `api_configurations` | API credentials (G2Bulk, etc.) |
-| `game_verification_configs` | Game ID verification mappings |
-| `g2bulk_products` | Cached G2Bulk product catalog |
-| `wallet_transactions` | Wallet topup/purchase/refund records |
-| `events` | Admin event posts |
-| `coupons` | Discount coupons |
-| `point_exchange_configs` | Point-to-coupon exchange configs |
-| `point_transactions` | Reward point transaction log |
-
-## Architecture
-
-```
-Browser → Vite Dev Server (:8080)
-              ↓ proxy /api/*
-         Express API Server (:3010)
-              ↓ mysql2
-         MySQL Database (:3306)
-```
-
-- **Frontend** calls `/api/*` endpoints (proxied by Vite in dev, or served directly in production)
-- **Express API** handles auth (JWT), CRUD, payment processing, file uploads, and G2Bulk fulfillment
-- **MySQL** stores all data — no external services required
-
-## Production Deployment
-
-```bash
-# 1. Build the frontend
-npm run build
-
-# 2. Set production environment variables in .env
-#    - Set a strong JWT_SECRET
-#    - Set PUBLIC_BASE_URL to your domain
-#    - Configure DB credentials
-
-# 3. Run database migration
-npm run db:migrate
-npm run db:seed
-
-# 4. Start the API server
-npm run server
-
-# 5. Serve the built frontend (from dist/) with nginx, Apache, or similar
-#    Proxy /api/* to localhost:3010
-```
-
-## Using XAMPP for MySQL
-
-1. Open XAMPP Control Panel
-2. Start MySQL
-3. Verify it's running on port 3306
-4. Set `DB_PASSWORD=` (empty) in `.env` (XAMPP default has no password)
-
-## License
-
-This project is proprietary. All rights reserved.
+- **Frontend:** React 18, Vite 5, TypeScript, Tailwind CSS, shadcn/ui
+- **Backend:** Express 5, Node.js (CommonJS)
+- **Database:** MySQL / MariaDB
+- **Auth:** JWT + bcrypt
+- **File Storage:** Local `/uploads/` directory
+- **Payments:** KHQR, KHQRcc (ABA Pay), IKhode Bakong
+- **Fulfillment:** G2Bulk API
