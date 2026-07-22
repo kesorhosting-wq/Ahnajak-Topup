@@ -59,7 +59,7 @@ Minimum required changes in `.env`:
 ```env
 DB_PASSWORD=YourStrongPassword123
 JWT_SECRET=<generate a random string: openssl rand -hex 32>
-PUBLIC_BASE_URL=https://woosaastore.com
+PUBLIC_BASE_URL=https://example.com
 ```
 
 Optional but recommended:
@@ -93,25 +93,25 @@ Follow the on-screen instructions from `pm2 startup` to enable PM2 on boot.
 
 ```bash
 npm run build
-mkdir -p /var/www/woosaastore
-cp -r dist/* /var/www/woosaastore/
+mkdir -p /var/www/example
+cp -r dist/* /var/www/example/
 ```
 
 ### 9. Configure nginx
 
 ```bash
-cat > /etc/nginx/sites-enabled/woosaastore.com << 'NGINX'
+cat > /etc/nginx/sites-enabled/example.com << 'NGINX'
 server {
     listen 80;
     listen [::]:80;
-    server_name woosaastore.com www.woosaastore.com;
+    server_name example.com www.example.com;
 
     location / {
         return 301 https://$host$request_uri;
     }
 
     location ^~ /.well-known/acme-challenge/ {
-        root /var/www/woosaastore;
+        root /var/www/example;
         default_type "text/plain";
         allow all;
     }
@@ -120,17 +120,17 @@ server {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name woosaastore.com www.woosaastore.com;
+    server_name example.com www.example.com;
 
-    ssl_certificate /etc/letsencrypt/live/woosaastore.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/woosaastore.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
     ssl_prefer_server_ciphers off;
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 1440m;
 
-    root /var/www/woosaastore;
+    root /var/www/example;
     index index.html;
 
     location /api/ {
@@ -170,7 +170,7 @@ NGINX
 ### 10. Get SSL Certificate
 
 ```bash
-certbot --nginx -d woosaastore.com -d www.woosaastore.com
+certbot --nginx -d example.com -d www.example.com
 ```
 
 ### 11. Restart nginx & Verify
@@ -186,13 +186,13 @@ nginx -t && systemctl restart nginx
 curl -I http://localhost:3010/api/settings
 
 # Frontend serving?
-curl -I https://woosaastore.com
+curl -I https://example.com
 
 # PM2 status
 pm2 status
 ```
 
-Visit `https://woosaastore.com` and login with:
+Visit `https://example.com` and login with:
 - Email: `admin@ahnajak.com`
 - Password: `admin123`
 
@@ -208,8 +208,8 @@ git pull
 npm install
 pm2 restart ahnajak-api
 npm run build
-rm -rf /var/www/woosaastore/*
-cp -r dist/* /var/www/woosaastore/
+rm -rf /var/www/example/*
+cp -r dist/* /var/www/example/
 ```
 
 ---
@@ -227,7 +227,7 @@ cp -r dist/* /var/www/woosaastore/
 | `JWT_EXPIRES_IN` | Token expiry | `24h` |
 | `PORT` | API server port | `3010` |
 | `PUBLIC_BASE_URL` | Public site URL | `http://localhost:3010` |
-| `FRONTEND_URL` | Frontend URL (CORS) | `https://woosaastore.com` |
+| `FRONTEND_URL` | Frontend URL (CORS) | `https://example.com` |
 | `ALLOWED_ORIGINS` | CORS origins (comma-sep) | (same as FRONTEND_URL) |
 | `G2BULK_API_KEY` | G2Bulk API key | |
 | `G2BULK_WEBHOOK_SECRET` | G2Bulk webhook secret | |
