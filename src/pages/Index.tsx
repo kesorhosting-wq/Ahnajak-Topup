@@ -12,7 +12,9 @@ import {
   X,
   Sparkles,
   Gamepad2,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,6 +33,7 @@ const mockActivities = [
 const Index: React.FC = () => {
   const { settings, games, isLoading } = useSite();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAllGames, setShowAllGames] = useState(false);
   const [activityIndex, setActivityIndex] = useState(0);
   const [animateActivity, setAnimateActivity] = useState(true);
 
@@ -52,6 +55,8 @@ const Index: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const INITIAL_DISPLAY_COUNT = 24;
+
   // Filter games based on search query
   const filteredGames = useMemo(() => {
     let result = games;
@@ -66,6 +71,11 @@ const Index: React.FC = () => {
 
     return result;
   }, [games, searchQuery]);
+
+  const visibleGames = useMemo(() => {
+    if (searchQuery.trim() || showAllGames) return filteredGames;
+    return filteredGames.slice(0, INITIAL_DISPLAY_COUNT);
+  }, [filteredGames, searchQuery, showAllGames]);
 
   // Filter featured games based on search query
   const featuredGames = useMemo(() => {
@@ -153,7 +163,10 @@ const Index: React.FC = () => {
                     type="text"
                     placeholder="ស្វែងរកហ្គេម... (Search games)"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowAllGames(false);
+                    }}
                     className="pl-11 pr-11 h-12 bg-white/80 dark:bg-zinc-900/30 border-zinc-200 dark:border-zinc-800 focus:border-red-500 rounded-xl text-base shadow-sm focus:ring-1 focus:ring-red-500 transition-all"
                   />
                   {searchQuery && (
@@ -224,7 +237,7 @@ const Index: React.FC = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
-                  {filteredGames.map((game, index) => (
+                  {visibleGames.map((game, index) => (
                     <GameCard
                       key={game.id}
                       game={game}
@@ -236,6 +249,21 @@ const Index: React.FC = () => {
                       index={index}
                     />
                   ))}
+                </div>
+              )}
+
+              {!searchQuery.trim() && filteredGames.length > INITIAL_DISPLAY_COUNT && (
+                <div className="flex justify-center mt-8">
+                  <button
+                    onClick={() => setShowAllGames(!showAllGames)}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-gold/30 text-sm font-medium text-gold hover:bg-gold/10 transition-all"
+                  >
+                    {showAllGames ? (
+                      <>Show Less <ChevronUp className="w-4 h-4" /></>
+                    ) : (
+                      <>Show All ({filteredGames.length} games) <ChevronDown className="w-4 h-4" /></>
+                    )}
+                  </button>
                 </div>
               )}
             </div>
