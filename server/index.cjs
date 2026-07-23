@@ -19,7 +19,7 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const app = express();
-const PORT = parseInt(process.env.PORT || '9911', 10);
+const PORT = parseInt(process.env.PORT || '3010', 10);
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(cors({
