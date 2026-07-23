@@ -42,6 +42,13 @@ async function main() {
   );
 
   try {
+    // Run schema first to create tables
+    const schemaPath = path.resolve(__dirname, '..', 'database', 'schema.sql');
+    const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+    await pool.query(schemaSql);
+    console.log('✓ Schema created successfully');
+
+    // Then run seed data
     await pool.query(sql);
     console.log('✓ Seed data inserted successfully');
     console.log('  - Default admin user: admin@ahnajak.com / ' + adminPassword);
