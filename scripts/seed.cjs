@@ -19,6 +19,7 @@ const DB_NAME = process.env.DB_NAME || 'ahnajak_topup';
 async function main() {
   console.log('── MySQL Seed ──');
   console.log(`DB: ${DB_NAME} @ ${DB_HOST}:${DB_PORT}`);
+  console.log(`User: ${DB_USER}`);
 
   const pool = await mysql.createConnection({
     host: DB_HOST,
