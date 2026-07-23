@@ -3,9 +3,8 @@
  * Also handles G2Bulk webhook callbacks.
  */
 const express = require('express');
-const { query, queryOne } = require('../db.cjs');
+const { query, queryOne, uuid } = require('../db.cjs');
 const { requireAuth, requireAdmin } = require('../auth.cjs');
-const { v4: uuid } = require('uuid');
 
 const router = express.Router();
 const G2BULK_API_URL = 'https://api.g2bulk.com/v1';
