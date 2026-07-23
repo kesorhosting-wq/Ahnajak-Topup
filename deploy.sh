@@ -171,8 +171,6 @@ EOT
 
   info "Building frontend..."
   npm run build
-  mkdir -p "$APP_DIR/dist"
-  cp -r dist/* "$APP_DIR/dist/"
   success "Frontend built"
 
   echo -e "\n${BLUE}>>> [STEP 5/6] Nginx Configuration${NC}" | tee -a "$LOG_PATH"
