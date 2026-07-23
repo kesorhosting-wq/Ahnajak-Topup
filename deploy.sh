@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# ==============================================================================
-# Ahnajak Topup - Interactive Deployment & Installer Script
-# Supports: Ubuntu 22.04 LTS & Ubuntu 24.04 LTS
-# ==============================================================================
-
 set -e
 
 RED='\033[0;31m'
@@ -13,14 +8,25 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+LOG_PATH="/var/log/ahnajak-installer.log"
+
 if [ "$EUID" -ne 0 ]; then
-  echo -e "${RED}* Error: Please run as root (sudo bash deploy.sh)${NC}"
+  echo -e "${RED}* Run as root: sudo bash deploy.sh${NC}"
   exit 1
 fi
 
+error() { echo -e "${RED}[✗] $1${NC}"; }
+info() { echo -e "${BLUE}[*] $1${NC}"; }
+success() { echo -e "${GREEN}[✓] $1${NC}"; }
+warn() { echo -e "${YELLOW}[!] $1${NC}"; }
+
+log() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_PATH"
+}
+
 clear
 echo -e "${BLUE}=====================================================================${NC}"
-echo -e "              AHNAJAK TOPUP INTERACTIVE INSTALLER                    "
+echo -e "              AHNAJAK TOPUP INSTALLER                                   "
 echo -e "${BLUE}=====================================================================${NC}"
 
 show_menu() {
@@ -32,59 +38,90 @@ show_menu() {
   read -p "* Input option (0-3): " OPTION
 }
 
-install_app() {
-  echo -e "\n${BLUE}>>> [STEP 1/6] Gathering Configuration${NC}"
+check_mysql() {
+  if ! [ -x "$(command -v mysql)" ]; then
+    info "MySQL not installed. Installing..."
+    apt install -y mysql-server
+  fi
 
-  read -p "Enter your domain (e.g. example.com): " DOMAIN_NAME
-  DOMAIN_NAME=${DOMAIN_NAME:-example.com}
-  APP_DIR="/var/www/${DOMAIN_NAME}"
+  if ! systemctl is-active --quiet mysql; then
+    info "Starting MySQL..."
+    systemctl start mysql 2>/dev/null || {
+      warn "MySQL failed to start. Reinstalling..."
+      systemctl stop mysql 2>/dev/null || true
+      apt remove --purge mysql-server -y 2>/dev/null || true
+      rm -rf /var/lib/mysql /var/log/mysql 2>/dev/null || true
+      apt install -y mysql-server
+      systemctl start mysql || {
+        error "MySQL cannot start. Check: journalctl -xeu mysql.service"
+        exit 1
+      }
+    }
+  fi
+  success "MySQL is running"
+}
 
-  read -p "Enter API port [default: 3010]: " APP_PORT
-  APP_PORT=${APP_PORT:-3010}
-
-  read -p "Enter Database Name [default: ahnajak_topup]: " DB_NAME
-  DB_NAME=${DB_NAME:-ahnajak_topup}
-
-  read -p "Enter Database User [default: ahnajak]: " DB_USER
-  DB_USER=${DB_USER:-ahnajak}
-
-  SUGGESTED_DB_PASS=$(openssl rand -hex 12)
-  read -p "Enter Database Password [default: $SUGGESTED_DB_PASS]: " DB_PASSWORD
-  DB_PASSWORD=${DB_PASSWORD:-$SUGGESTED_DB_PASS}
-
-  read -p "Enter Admin Email [default: admin@ahnajak.com]: " ADMIN_EMAIL
-  ADMIN_EMAIL=${ADMIN_EMAIL:-admin@ahnajak.com}
-
-  SUGGESTED_ADMIN_PASS="admin$(openssl rand -hex 4)"
-  read -p "Enter Admin Password [default: $SUGGESTED_ADMIN_PASS]: " ADMIN_PASSWORD
-  ADMIN_PASSWORD=${ADMIN_PASSWORD:-$SUGGESTED_ADMIN_PASS}
-
-  read -p "Enter email for Let's Encrypt: " EMAIL_ADDR
-
-  echo -e "\n${BLUE}>>> [STEP 2/6] Installing System Dependencies${NC}"
-
+create_swap() {
   TOTAL_MEM=$(free -m | awk '/^Mem:/{print $2}')
   if [ "$TOTAL_MEM" -lt 1024 ] && [ ! -f /swapfile ]; then
-    echo -e "${YELLOW}* Creating 2GB swap...${NC}"
+    info "Creating 2GB swap..."
     fallocate -l 2G /swapfile
     chmod 600 /swapfile
     mkswap /swapfile
     swapon /swapfile
     echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    success "Swap created"
   fi
+}
+
+install_app() {
+  log "Starting installation"
+
+  echo -e "\n${BLUE}>>> [STEP 1/6] Configuration${NC}"
+  read -p "Domain (e.g. kesortopup.cam): " DOMAIN_NAME
+  DOMAIN_NAME=${DOMAIN_NAME:-example.com}
+  APP_DIR="/var/www/${DOMAIN_NAME}"
+
+  read -p "API port [3010]: " APP_PORT
+  APP_PORT=${APP_PORT:-3010}
+
+  read -p "Database name [ahnajak_topup]: " DB_NAME
+  DB_NAME=${DB_NAME:-ahnajak_topup}
+
+  read -p "Database user [ahnajak]: " DB_USER
+  DB_USER=${DB_USER:-ahnajak}
+
+  SUGGESTED_DB_PASS=$(openssl rand -hex 12)
+  read -p "Database password [$SUGGESTED_DB_PASS]: " DB_PASSWORD
+  DB_PASSWORD=${DB_PASSWORD:-$SUGGESTED_DB_PASS}
+
+  read -p "Admin email [admin@ahnajak.com]: " ADMIN_EMAIL
+  ADMIN_EMAIL=${ADMIN_EMAIL:-admin@ahnajak.com}
+
+  SUGGESTED_ADMIN_PASS="admin$(openssl rand -hex 4)"
+  read -p "Admin password [$SUGGESTED_ADMIN_PASS]: " ADMIN_PASSWORD
+  ADMIN_PASSWORD=${ADMIN_PASSWORD:-$SUGGESTED_ADMIN_PASS}
+
+  read -p "Email for Let's Encrypt: " EMAIL_ADDR
+
+  echo -e "\n${BLUE}>>> [STEP 2/6] System Dependencies${NC}" | tee -a "$LOG_PATH"
+  create_swap
 
   apt update && apt upgrade -y
-  apt install -y curl git nginx mysql-server certbot python3-certbot-nginx
+  apt install -y curl git nginx certbot python3-certbot-nginx
 
   if ! [ -x "$(command -v node)" ]; then
+    info "Installing Node.js 20..."
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
     apt install -y nodejs
   fi
+  success "Node.js $(node -v)"
 
-  systemctl start mysql
-  systemctl enable mysql
+  # MySQL with health check
+  apt install -y mysql-server
+  check_mysql
 
-  echo -e "\n${BLUE}>>> [STEP 3/6] Configuring Database${NC}"
+  echo -e "\n${BLUE}>>> [STEP 3/6] Database Setup${NC}" | tee -a "$LOG_PATH"
   mysql <<SQL
 DROP DATABASE IF EXISTS \`${DB_NAME}\`;
 CREATE DATABASE \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -92,8 +129,9 @@ CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}
 GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost';
 FLUSH PRIVILEGES;
 SQL
+  success "Database '${DB_NAME}' created"
 
-  echo -e "\n${BLUE}>>> [STEP 4/6] Deploying Application${NC}"
+  echo -e "\n${BLUE}>>> [STEP 4/6] Application Deploy${NC}" | tee -a "$LOG_PATH"
   mkdir -p "$APP_DIR"
   if [ "$(pwd)" != "$APP_DIR" ]; then
     cp -r . "$APP_DIR"
@@ -114,19 +152,29 @@ PUBLIC_BASE_URL=https://${DOMAIN_NAME}
 FRONTEND_URL=https://${DOMAIN_NAME}
 ALLOWED_ORIGINS=https://${DOMAIN_NAME}
 EOT
+  success ".env configured"
 
-  npm install
+  info "Installing npm packages..."
+  npm install --loglevel=error
+  success "npm packages installed"
+
+  info "Running database seed (creates tables + default data)..."
   node scripts/seed.cjs
+  success "Database seeded"
 
-  # Set admin credentials
+  # Set custom admin credentials
+  info "Setting admin credentials..."
   BCRYPT_HASH=$(node -e "const bcrypt = require('bcryptjs'); console.log(bcrypt.hashSync('${ADMIN_PASSWORD}', 10));")
   mysql "$DB_NAME" -e "UPDATE users SET email = '${ADMIN_EMAIL}', password_hash = '${BCRYPT_HASH}' WHERE email = 'admin@ahnajak.com';"
+  success "Admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}"
 
+  info "Building frontend..."
   npm run build
   mkdir -p "$APP_DIR/dist"
   cp -r dist/* "$APP_DIR/dist/"
+  success "Frontend built"
 
-  echo -e "\n${BLUE}>>> [STEP 5/6] Configuring Nginx${NC}"
+  echo -e "\n${BLUE}>>> [STEP 5/6] Nginx Configuration${NC}" | tee -a "$LOG_PATH"
   rm -f /etc/nginx/sites-enabled/default
 
   cat > /etc/nginx/sites-available/${DOMAIN_NAME} <<NGINX
@@ -187,76 +235,83 @@ server {
     location / {
         try_files \$uri \$uri/ /index.html;
     }
-
-    location ~* \.(css|js|png|jpg|jpeg|gif|svg|ico|woff2?|ttf)$ {
-        expires 30d;
-        access_log off;
-    }
 }
 NGINX
 
   ln -sf /etc/nginx/sites-available/${DOMAIN_NAME} /etc/nginx/sites-enabled/
+  success "Nginx config created"
 
-  echo -e "\n${BLUE}>>> [STEP 6/6] SSL & PM2${NC}"
+  echo -e "\n${BLUE}>>> [STEP 6/6] SSL, PM2 & Firewall${NC}" | tee -a "$LOG_PATH"
 
-  # Get SSL first so nginx can start with HTTPS
+  # SSL
   if [ -n "$EMAIL_ADDR" ]; then
-    certbot --nginx --non-interactive --agree-tos -m "$EMAIL_ADDR" -d "$DOMAIN_NAME" -d "www.$DOMAIN_NAME" || true
+    info "Getting SSL certificate..."
+    certbot --nginx --non-interactive --agree-tos -m "$EMAIL_ADDR" -d "$DOMAIN_NAME" -d "www.$DOMAIN_NAME" || warn "SSL failed — run option [1] later"
   fi
 
   nginx -t && systemctl restart nginx
+  success "Nginx running"
 
   # PM2
-  npm install -g pm2
+  npm install -g pm2 --silent
   pm2 delete "${DOMAIN_NAME}-api" 2>/dev/null || true
   pm2 start server/index.cjs --name "${DOMAIN_NAME}-api"
   pm2 save
-  pm2 startup || true
+  pm2 startup 2>/dev/null || true
+  success "PM2 started — ${DOMAIN_NAME}-api on port ${APP_PORT}"
 
-  # UFW
-  ufw default deny incoming
-  ufw default allow outgoing
-  ufw allow ssh
-  ufw allow http
-  ufw allow https
-  echo "y" | ufw enable
+  # Firewall
+  ufw default deny incoming 2>/dev/null
+  ufw default allow outgoing 2>/dev/null
+  ufw allow ssh 2>/dev/null
+  ufw allow http 2>/dev/null
+  ufw allow https 2>/dev/null
+  echo "y" | ufw enable 2>/dev/null || true
+  success "Firewall configured"
 
   clear
   echo -e "${GREEN}=====================================================================${NC}"
-  echo -e "       AHNAJAK TOPUP DEPLOYED SUCCESSFULLY!                          "
+  echo -e "       AHNAJAK TOPUP INSTALLED SUCCESSFULLY!                           "
   echo -e "${GREEN}=====================================================================${NC}"
   echo -e " Website:   https://${DOMAIN_NAME}"
   echo -e " Admin:     https://${DOMAIN_NAME}/auth"
   echo -e " Email:     ${ADMIN_EMAIL}"
   echo -e " Password:  ${YELLOW}${ADMIN_PASSWORD}${NC}"
   echo -e "${GREEN}=====================================================================${NC}"
+  log "Installation complete for ${DOMAIN_NAME}"
 }
 
 setup_ssl_only() {
-  read -p "Enter your domain (e.g. example.com): " DOM_NAME
-  read -p "Enter email for Let's Encrypt: " E_ADDR
+  read -p "Domain: " DOM_NAME
+  read -p "Email: " E_ADDR
   if [ -z "$DOM_NAME" ] || [ -z "$E_ADDR" ]; then
-    echo -e "${RED}Domain and email required.${NC}"
+    error "Domain and email required"
     return
   fi
-  sed -i "s/server_name _;/server_name ${DOM_NAME} www.${DOM_NAME};/g" "/etc/nginx/sites-available/${DOM_NAME}" 2>/dev/null || true
-  systemctl restart nginx 2>/dev/null || true
   apt install -y certbot python3-certbot-nginx
   certbot --nginx --non-interactive --agree-tos -m "$E_ADDR" -d "$DOM_NAME" -d "www.$DOM_NAME" || certbot --nginx --non-interactive --agree-tos -m "$E_ADDR" -d "$DOM_NAME"
-  echo -e "${GREEN}[✓] SSL enabled.${NC}"
+  success "SSL enabled for ${DOM_NAME}"
 }
 
 uninstall_app() {
-  read -p "Enter domain to uninstall: " DOM_NAME
+  read -p "Domain to uninstall: " DOM_NAME
+  read -p "Delete database too? (y/N): " DEL_DB
   read -p "Are you sure? (y/N): " CONFIRM
   if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
-    pm2 delete "${DOM_NAME}-api" 2>/dev/null || true
+    info "Stopping PM2..."
+    pm2 delete "${DOMAIN_NAME}-api" 2>/dev/null || true
     pm2 save
-    rm -f "/etc/nginx/sites-enabled/${DOM_NAME}"
-    rm -f "/etc/nginx/sites-available/${DOM_NAME}"
+    info "Removing nginx config..."
+    rm -f "/etc/nginx/sites-enabled/${DOM_NAME}" "/etc/nginx/sites-available/${DOM_NAME}"
     systemctl restart nginx
+    if [[ "$DEL_DB" =~ ^[Yy]$ ]]; then
+      read -p "Database name: " DB_NAME
+      mysql -e "DROP DATABASE IF EXISTS \`${DB_NAME}\`;" 2>/dev/null || warn "Database not found"
+      success "Database deleted"
+    fi
     rm -rf "/var/www/${DOM_NAME}"
-    echo -e "${GREEN}[✓] Uninstalled ${DOM_NAME}.${NC}"
+    success "${DOM_NAME} uninstalled"
+    log "Uninstalled ${DOM_NAME}"
   fi
 }
 
