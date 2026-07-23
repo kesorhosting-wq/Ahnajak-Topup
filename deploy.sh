@@ -7,86 +7,65 @@
 
 set -e
 
-# Formatting & colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Check if running as root
 if [ "$EUID" -ne 0 ]; then
-  echo -e "${RED}* Error: Please run this script as root (use: sudo bash deploy.sh)${NC}"
+  echo -e "${RED}* Error: Please run as root (sudo bash deploy.sh)${NC}"
   exit 1
 fi
 
-# Title screen
 clear
 echo -e "${BLUE}=====================================================================${NC}"
 echo -e "              AHNAJAK TOPUP INTERACTIVE INSTALLER                    "
 echo -e "${BLUE}=====================================================================${NC}"
-echo -e " This script installs Node.js, MySQL, PM2, Nginx, and secures the app."
-echo -e "---------------------------------------------------------------------"
 
-# Option menu selector
 show_menu() {
   echo -e "\nWhat would you like to do?"
-  echo -e " [0] Install Ahnajak Topup (Full Setup with MySQL, Nginx, PM2)"
-  echo -e " [1] Setup/Renew Let's Encrypt SSL (HTTPS)"
-  echo -e " [2] Uninstall/Remove Ahnajak Topup"
-  echo -e " [3] Exit Installer\n"
-  echo -n "* Input option (0-3): "
-  read -r OPTION
+  echo -e " [0] Install Ahnajak Topup (Full Setup)"
+  echo -e " [1] Setup/Renew Let's Encrypt SSL"
+  echo -e " [2] Uninstall Ahnajak Topup"
+  echo -e " [3] Exit\n"
+  read -p "* Input option (0-3): " OPTION
 }
 
 install_app() {
-  echo -e "\n${BLUE}>>> [STEP 1/6] Gathering Configuration Settings${NC}"
-  
-  # App Folder Name
-  read -p "Enter Application Folder Name under /var/www/ [default: ahnajak-topup]: " APP_FOLDER
-  APP_FOLDER=${APP_FOLDER:-ahnajak-topup}
-  APP_DIR="/var/www/${APP_FOLDER}"
+  echo -e "\n${BLUE}>>> [STEP 1/6] Gathering Configuration${NC}"
 
-  # App Port
-  read -p "Enter Application Port [default: 9911]: " APP_PORT
-  APP_PORT=${APP_PORT:-9911}
+  read -p "Enter your domain (e.g. example.com): " DOMAIN_NAME
+  DOMAIN_NAME=${DOMAIN_NAME:-example.com}
+  APP_DIR="/var/www/${DOMAIN_NAME}"
 
-  # DB Name
+  read -p "Enter API port [default: 3010]: " APP_PORT
+  APP_PORT=${APP_PORT:-3010}
+
   read -p "Enter Database Name [default: ahnajak_topup]: " DB_NAME
   DB_NAME=${DB_NAME:-ahnajak_topup}
 
-  # DB User
-  read -p "Enter Database User [default: ahnajak_user]: " DB_USER
-  DB_USER=${DB_USER:-ahnajak_user}
+  read -p "Enter Database User [default: ahnajak]: " DB_USER
+  DB_USER=${DB_USER:-ahnajak}
 
-  # DB Password
   SUGGESTED_DB_PASS=$(openssl rand -hex 12)
   read -p "Enter Database Password [default: $SUGGESTED_DB_PASS]: " DB_PASSWORD
   DB_PASSWORD=${DB_PASSWORD:-$SUGGESTED_DB_PASS}
 
-  # Admin Email
-  read -p "Enter Admin Login Email [default: admin@ahnajak.com]: " ADMIN_EMAIL
+  read -p "Enter Admin Email [default: admin@ahnajak.com]: " ADMIN_EMAIL
   ADMIN_EMAIL=${ADMIN_EMAIL:-admin@ahnajak.com}
 
-  # Admin Password
   SUGGESTED_ADMIN_PASS="admin$(openssl rand -hex 4)"
-  read -p "Enter Admin Login Password [default: $SUGGESTED_ADMIN_PASS]: " ADMIN_PASSWORD
+  read -p "Enter Admin Password [default: $SUGGESTED_ADMIN_PASS]: " ADMIN_PASSWORD
   ADMIN_PASSWORD=${ADMIN_PASSWORD:-$SUGGESTED_ADMIN_PASS}
 
-  # Configure SSL prompt
-  read -p "Do you want to configure Let's Encrypt SSL (HTTPS) right now? (y/N): " SETUP_SSL
-  DOMAIN_NAME=""
-  EMAIL_ADDR=""
-  if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
-    read -p "Enter your Domain Name (e.g. ahnajak.com): " DOMAIN_NAME
-    read -p "Enter your Email Address for Let's Encrypt notifications: " EMAIL_ADDR
-  fi
+  read -p "Enter email for Let's Encrypt: " EMAIL_ADDR
 
-  echo -e "\n${BLUE}>>> [STEP 2/6] Updating System & Installing Core Dependencies${NC}"
-  # Check if swap space is needed
+  echo -e "\n${BLUE}>>> [STEP 2/6] Installing System Dependencies${NC}"
+
   TOTAL_MEM=$(free -m | awk '/^Mem:/{print $2}')
   if [ "$TOTAL_MEM" -lt 1024 ] && [ ! -f /swapfile ]; then
-    echo -e "${YELLOW}* Creating 2GB swap space to prevent memory issues during build...${NC}"
+    echo -e "${YELLOW}* Creating 2GB swap...${NC}"
     fallocate -l 2G /swapfile
     chmod 600 /swapfile
     mkswap /swapfile
@@ -95,44 +74,34 @@ install_app() {
   fi
 
   apt update && apt upgrade -y
-  apt install -y curl git ufw nginx software-properties-common ca-certificates unzip build-essential
+  apt install -y curl git nginx mysql-server certbot python3-certbot-nginx
 
-  # Node.js
   if ! [ -x "$(command -v node)" ]; then
-    echo -e "${BLUE}[*] Installing Node.js v20 LTS...${NC}"
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
     apt install -y nodejs
   fi
 
-  # MySQL Server
-  if ! [ -x "$(command -v mysql)" ]; then
-    echo -e "${BLUE}[*] Installing MySQL Server...${NC}"
-    apt install -y mysql-server
-    systemctl start mysql
-    systemctl enable mysql
-  fi
+  systemctl start mysql
+  systemctl enable mysql
 
-  # Ensure MySQL service is running
-  systemctl start mysql || service mysql start
-  systemctl enable mysql || true
+  echo -e "\n${BLUE}>>> [STEP 3/6] Configuring Database${NC}"
+  mysql <<SQL
+DROP DATABASE IF EXISTS \`${DB_NAME}\`;
+CREATE DATABASE \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';
+GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost';
+FLUSH PRIVILEGES;
+SQL
 
-  echo -e "\n${BLUE}>>> [STEP 3/6] Configuring Database & Users${NC}"
-  # Setup MySQL schema cleanly (drops old database if exists to prevent foreign key errors with leftover tables)
-  mysql -e "DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\`;"
-  mysql -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASSWORD}';"
-  mysql -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost';"
-  mysql -e "FLUSH PRIVILEGES;"
-
-  echo -e "\n${BLUE}>>> [STEP 4/6] Deploying Application Code${NC}"
+  echo -e "\n${BLUE}>>> [STEP 4/6] Deploying Application${NC}"
   mkdir -p "$APP_DIR"
   if [ "$(pwd)" != "$APP_DIR" ]; then
     cp -r . "$APP_DIR"
   fi
   cd "$APP_DIR"
 
-  # Create .env config
   JWT_SECRET=$(openssl rand -hex 32)
-  cat <<EOT > "$APP_DIR/.env"
+  cat > .env <<EOT
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=${DB_USER}
@@ -140,46 +109,58 @@ DB_PASSWORD=${DB_PASSWORD}
 DB_NAME=${DB_NAME}
 PORT=${APP_PORT}
 JWT_SECRET=${JWT_SECRET}
+JWT_EXPIRES_IN=24h
+PUBLIC_BASE_URL=https://${DOMAIN_NAME}
+FRONTEND_URL=https://${DOMAIN_NAME}
+ALLOWED_ORIGINS=https://${DOMAIN_NAME}
 EOT
 
-  # Install deps and seed DB
   npm install
-  mysql "$DB_NAME" < database/schema.sql
-  mysql "$DB_NAME" < database/seed.sql
+  node scripts/seed.cjs
 
-  # Set secure generated admin password hash
+  # Set admin credentials
   BCRYPT_HASH=$(node -e "const bcrypt = require('bcryptjs'); console.log(bcrypt.hashSync('${ADMIN_PASSWORD}', 10));")
   mysql "$DB_NAME" -e "UPDATE users SET email = '${ADMIN_EMAIL}', password_hash = '${BCRYPT_HASH}' WHERE email = 'admin@ahnajak.com';"
 
-  # Build frontend static files
   npm run build
+  mkdir -p "$APP_DIR/dist"
+  cp -r dist/* "$APP_DIR/dist/"
 
-  # Create uploads directories and grant proper permissions for Nginx/Express
-  mkdir -p "$APP_DIR/uploads/site-assets"
-  chown -R www-data:www-data "$APP_DIR/uploads"
-  chmod -R 755 "$APP_DIR/uploads"
-
-  echo -e "\n${BLUE}>>> [STEP 5/6] Configuring Nginx Web Server Proxy${NC}"
+  echo -e "\n${BLUE}>>> [STEP 5/6] Configuring Nginx${NC}"
   rm -f /etc/nginx/sites-enabled/default
-  rm -f /etc/nginx/sites-available/default
 
-  NGINX_DOMAIN="_"
-  if [ -n "$DOMAIN_NAME" ]; then
-    NGINX_DOMAIN="${DOMAIN_NAME} www.${DOMAIN_NAME}"
-  fi
-
-  cat <<EOT > /etc/nginx/sites-available/${APP_FOLDER}
+  cat > /etc/nginx/sites-available/${DOMAIN_NAME} <<NGINX
 server {
     listen 80;
-    server_name ${NGINX_DOMAIN};
-    client_max_body_size 10M;
-
-    root $APP_DIR/dist;
-    index index.html;
+    listen [::]:80;
+    server_name ${DOMAIN_NAME} www.${DOMAIN_NAME};
 
     location / {
-        try_files \$uri \$uri/ /index.html;
+        return 301 https://\$host\$request_uri;
     }
+
+    location ^~ /.well-known/acme-challenge/ {
+        root ${APP_DIR}/dist;
+        default_type "text/plain";
+        allow all;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name ${DOMAIN_NAME} www.${DOMAIN_NAME};
+
+    ssl_certificate /etc/letsencrypt/live/${DOMAIN_NAME}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN_NAME}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1440m;
+
+    root ${APP_DIR}/dist;
+    index index.html;
 
     location /api/ {
         proxy_pass http://localhost:${APP_PORT};
@@ -190,37 +171,49 @@ server {
         proxy_cache_bypass \$http_upgrade;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
     location /uploads/ {
-        root $APP_DIR;
-        expires 7d;
-        add_header Cache-Control "public, max-age=604800";
+        proxy_pass http://localhost:${APP_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    location / {
+        try_files \$uri \$uri/ /index.html;
+    }
+
+    location ~* \.(css|js|png|jpg|jpeg|gif|svg|ico|woff2?|ttf)$ {
+        expires 30d;
+        access_log off;
     }
 }
-EOT
+NGINX
 
-  ln -sf /etc/nginx/sites-available/${APP_FOLDER} /etc/nginx/sites-enabled/
-  systemctl restart nginx
+  ln -sf /etc/nginx/sites-available/${DOMAIN_NAME} /etc/nginx/sites-enabled/
 
-  # PM2 Configuration
+  echo -e "\n${BLUE}>>> [STEP 6/6] SSL & PM2${NC}"
+
+  # Get SSL first so nginx can start with HTTPS
+  if [ -n "$EMAIL_ADDR" ]; then
+    certbot --nginx --non-interactive --agree-tos -m "$EMAIL_ADDR" -d "$DOMAIN_NAME" -d "www.$DOMAIN_NAME" || true
+  fi
+
+  nginx -t && systemctl restart nginx
+
+  # PM2
   npm install -g pm2
-  pm2 delete "${APP_FOLDER}-api" 2>/dev/null || true
-  pm2 start server/index.cjs --name "${APP_FOLDER}-api"
+  pm2 delete "${DOMAIN_NAME}-api" 2>/dev/null || true
+  pm2 start server/index.cjs --name "${DOMAIN_NAME}-api"
   pm2 save
   pm2 startup || true
 
-  # 6. Configure SSL
-  SITE_URL="http://$(curl -s https://api.ipify.org)"
-  if [ -n "$DOMAIN_NAME" ] && [ -n "$EMAIL_ADDR" ]; then
-    echo -e "\n${BLUE}>>> [STEP 6/6] Initializing SSL Configuration via Certbot${NC}"
-    apt install -y certbot python3-certbot-nginx
-    certbot --nginx --non-interactive --agree-tos -m "$EMAIL_ADDR" -d "$DOMAIN_NAME" -d "www.$DOMAIN_NAME" || certbot --nginx --non-interactive --agree-tos -m "$EMAIL_ADDR" -d "$DOMAIN_NAME"
-    SITE_URL="https://${DOMAIN_NAME}"
-  fi
-
-  # Enable Firewall
-  echo -e "\n${BLUE}[*] Securing Ports with UFW Firewall...${NC}"
+  # UFW
   ufw default deny incoming
   ufw default allow outgoing
   ufw allow ssh
@@ -228,79 +221,49 @@ EOT
   ufw allow https
   echo "y" | ufw enable
 
-  # Clear terminal and show finished details
   clear
   echo -e "${GREEN}=====================================================================${NC}"
-  echo -e "       AHNAJAK TOPUP SYSTEM DEPLOYED SUCCESSFULLY!                   "
+  echo -e "       AHNAJAK TOPUP DEPLOYED SUCCESSFULLY!                          "
   echo -e "${GREEN}=====================================================================${NC}"
-  echo -e " Website Link: ${SITE_URL}"
-  echo -e " Admin Login:  ${SITE_URL}/auth"
-  echo -e " Admin User:   ${ADMIN_EMAIL}"
-  echo -e " Admin Pass:   ${YELLOW}${ADMIN_PASSWORD}${NC}"
-  echo -e "---------------------------------------------------------------------"
-  echo -e " Database Configurations:"
-  echo -e "  Database:    ${DB_NAME}"
-  echo -e "  DB User:     ${DB_USER}"
-  echo -e "  DB Password: ${DB_PASSWORD}"
-  echo -e "${GREEN}=====================================================================${NC}\n"
+  echo -e " Website:   https://${DOMAIN_NAME}"
+  echo -e " Admin:     https://${DOMAIN_NAME}/auth"
+  echo -e " Email:     ${ADMIN_EMAIL}"
+  echo -e " Password:  ${YELLOW}${ADMIN_PASSWORD}${NC}"
+  echo -e "${GREEN}=====================================================================${NC}"
 }
 
 setup_ssl_only() {
-  echo -e "\n${BLUE}>>> Setting up SSL (HTTPS Only)${NC}"
-  read -p "Enter Application Folder Name [default: ahnajak-topup]: " APP_FOLDER
-  APP_FOLDER=${APP_FOLDER:-ahnajak-topup}
-  read -p "Enter Domain Name (e.g., yoursite.com): " DOM_NAME
-  read -p "Enter Email Address: " E_ADDR
+  read -p "Enter your domain (e.g. example.com): " DOM_NAME
+  read -p "Enter email for Let's Encrypt: " E_ADDR
   if [ -z "$DOM_NAME" ] || [ -z "$E_ADDR" ]; then
-    echo -e "${RED}Error: Domain name and email are required.${NC}"
+    echo -e "${RED}Domain and email required.${NC}"
     return
   fi
-  # Replace server_name in nginx configuration
-  sed -i "s/server_name _;/server_name ${DOM_NAME} www.${DOM_NAME};/g" "/etc/nginx/sites-available/${APP_FOLDER}" 2>/dev/null || true
-  systemctl restart nginx
+  sed -i "s/server_name _;/server_name ${DOM_NAME} www.${DOM_NAME};/g" "/etc/nginx/sites-available/${DOM_NAME}" 2>/dev/null || true
+  systemctl restart nginx 2>/dev/null || true
   apt install -y certbot python3-certbot-nginx
   certbot --nginx --non-interactive --agree-tos -m "$E_ADDR" -d "$DOM_NAME" -d "www.$DOM_NAME" || certbot --nginx --non-interactive --agree-tos -m "$E_ADDR" -d "$DOM_NAME"
-  echo -e "${GREEN}[✓] SSL enabled successfully.${NC}"
+  echo -e "${GREEN}[✓] SSL enabled.${NC}"
 }
 
 uninstall_app() {
-  read -p "Enter Application Folder Name to uninstall [default: ahnajak-topup]: " APP_FOLDER
-  APP_FOLDER=${APP_FOLDER:-ahnajak-topup}
-
-  read -p "Are you sure you want to delete the entire application, database, and configurations for ${APP_FOLDER}? (y/N): " CONFIRM
+  read -p "Enter domain to uninstall: " DOM_NAME
+  read -p "Are you sure? (y/N): " CONFIRM
   if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
-    echo -e "${RED}[*] Stopping and removing PM2 instances...${NC}"
-    pm2 delete "${APP_FOLDER}-api" 2>/dev/null || true
+    pm2 delete "${DOM_NAME}-api" 2>/dev/null || true
     pm2 save
-    
-    echo -e "${RED}[*] Removing Nginx configurations...${NC}"
-    rm -f "/etc/nginx/sites-enabled/${APP_FOLDER}"
-    rm -f "/etc/nginx/sites-available/${APP_FOLDER}"
+    rm -f "/etc/nginx/sites-enabled/${DOM_NAME}"
+    rm -f "/etc/nginx/sites-available/${DOM_NAME}"
     systemctl restart nginx
-    
-    echo -e "${RED}[*] Removing application folder...${NC}"
-    rm -rf "/var/www/${APP_FOLDER}"
-    
-    echo -e "${GREEN}[✓] ${APP_FOLDER} uninstalled successfully.${NC}"
-  else
-    echo -e "Uninstall canceled."
+    rm -rf "/var/www/${DOM_NAME}"
+    echo -e "${GREEN}[✓] Uninstalled ${DOM_NAME}.${NC}"
   fi
 }
 
-# Main execution loop
 show_menu
 case "$OPTION" in
-  0)
-    install_app
-    ;;
-  1)
-    setup_ssl_only
-    ;;
-  2)
-    uninstall_app
-    ;;
-  *)
-    echo -e "Exiting installer."
-    exit 0
-    ;;
+  0) install_app ;;
+  1) setup_ssl_only ;;
+  2) uninstall_app ;;
+  *) echo "Exiting."; exit 0 ;;
 esac
