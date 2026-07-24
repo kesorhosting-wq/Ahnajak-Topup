@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import HeaderSpacer from '@/components/HeaderSpacer';
@@ -10,8 +10,6 @@ import { useFavicon } from '@/hooks/useFavicon';
 import {
   Search,
   X,
-  Sparkles,
-  Gamepad2,
   AlertCircle,
   ChevronDown,
   ChevronUp
@@ -20,40 +18,16 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-// Mock live activities for Khmer gamers
-const mockActivities = [
-  { name: "Mobile Legends 86 Diamonds", time: "1m ago", player: "Player ***42", game: "MLBB" },
-  { name: "Free Fire 100 Diamonds", time: "3m ago", player: "Player ***09", game: "Free Fire" },
-  { name: "Honor of Kings 100 Tokens", time: "5m ago", player: "Player ***87", game: "HOK" },
-  { name: "Valorant 1250 Points", time: "6m ago", player: "Player ***51", game: "Valorant" },
-  { name: "PUBG Mobile 60 UC", time: "8m ago", player: "Player ***73", game: "PUBG" },
-  { name: "Mobile Legends Weekly Pass", time: "10m ago", player: "Player ***18", game: "MLBB" }
-];
-
 const Index: React.FC = () => {
   const { settings, games, isLoading } = useSite();
   const [searchQuery, setSearchQuery] = useState('');
   const [showAllGames, setShowAllGames] = useState(false);
-  const [activityIndex, setActivityIndex] = useState(0);
-  const [animateActivity, setAnimateActivity] = useState(true);
 
   const isKesor = settings.siteName?.toLowerCase().includes('kesor');
   const primaryColor = settings.primaryColor || (isKesor ? '#D4A84B' : '#E53E3E');
 
   // Update favicon dynamically
   useFavicon(settings.siteIcon);
-
-  // Live topup feed rotation effect
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setAnimateActivity(false);
-      setTimeout(() => {
-        setActivityIndex((prev) => (prev + 1) % mockActivities.length);
-        setAnimateActivity(true);
-      }, 300); // match fade-out duration
-    }, 4500);
-    return () => clearInterval(timer);
-  }, []);
 
   const INITIAL_DISPLAY_COUNT = 24;
 
@@ -76,21 +50,6 @@ const Index: React.FC = () => {
     if (searchQuery.trim() || showAllGames) return filteredGames;
     return filteredGames.slice(0, INITIAL_DISPLAY_COUNT);
   }, [filteredGames, searchQuery, showAllGames]);
-
-  // Filter featured games based on search query
-  const featuredGames = useMemo(() => {
-    let result = games.filter(game => game.tags?.includes('featured'));
-
-    // Apply search query filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(game =>
-        (game.name || '').toLowerCase().includes(query)
-      );
-    }
-
-    return result;
-  }, [games, searchQuery]);
 
   return (
     <>
@@ -134,8 +93,8 @@ const Index: React.FC = () => {
         {/* Games Showcase Section */}
         <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-12 flex-1">
           <div>
-            {/* Header Content */}
-            <div className="flex flex-col items-center justify-center text-center mb-8 sm:mb-12">
+            {/* Header Content — left aligned */}
+            <div className="mb-8 sm:mb-12">
               <div 
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-3 animate-pulse"
                 style={{ 
@@ -146,96 +105,63 @@ const Index: React.FC = () => {
               >
                 🔥 TOP RECHARGES IN CAMBODIA
               </div>
-              <h2 className="font-display text-2xl sm:text-4xl font-black leading-tight text-zinc-900 dark:text-zinc-50 mb-4">
+              <h2 className="font-display text-2xl sm:text-4xl font-black leading-tight text-zinc-900 dark:text-zinc-50 mb-3">
                 {settings.heroText}
               </h2>
               <div 
-                className="w-16 h-1 rounded-full mb-6"
+                className="w-16 h-1 rounded-full"
                 style={{ backgroundColor: primaryColor }}
               />
+            </div>
 
-              {/* Search Bar & Categories Container */}
-              <div className="w-full max-w-xl space-y-4">
-                {/* Custom Search Input */}
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
-                  <Input
-                    type="text"
-                    placeholder="ស្វែងរកហ្គេម... (Search games)"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setShowAllGames(false);
-                    }}
-                    className="pl-11 pr-11 h-12 bg-white/80 dark:bg-zinc-900/30 border-zinc-200 dark:border-zinc-800 focus:border-red-500 rounded-xl text-base shadow-sm focus:ring-1 focus:ring-red-500 transition-all"
-                  />
-                  {searchQuery && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent text-muted-foreground hover:text-foreground"
-                      onClick={() => setSearchQuery('')}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
+            {/* Search Bar */}
+            <div className="mb-8 max-w-xl">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
+                <Input
+                  type="text"
+                  placeholder="ស្វែងរកហ្គេម... (Search games)"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowAllGames(false);
+                  }}
+                  className="pl-11 pr-11 h-12 bg-white/80 dark:bg-zinc-900/30 border-zinc-200 dark:border-zinc-800 focus:border-red-500 rounded-xl text-base shadow-sm focus:ring-1 focus:ring-red-500 transition-all"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent text-muted-foreground hover:text-foreground"
+                    onClick={() => setSearchQuery('')}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
 
-            {/* Featured Games Section */}
-            {!isLoading && featuredGames.length > 0 && (
-              <div className="mb-10 sm:mb-14">
-                <h3 className="text-lg sm:text-xl font-black text-zinc-900 dark:text-zinc-50 mb-5 flex items-center gap-2">
-                  <Sparkles className="w-4.5 h-4.5 text-gold animate-pulse fill-gold" />
-                  {settings.featuredGamesTitle || "Featured Games"}
-                </h3>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
-                  {featuredGames.map((game, index) => (
-                    <GameCard
-                      key={`featured-${game.id}`}
-                      game={game}
-                      cardBgColor={settings.gameCardBgColor}
-                      cardBorderColor={settings.gameCardBorderColor}
-                      cardFrameImage={settings.gameCardFrameImage}
-                      cardBorderImage={settings.gameCardBorderImage}
-                      priority={index < 4}
-                      index={index}
-                    />
-                  ))}
-                </div>
-                <div className="mt-8 border-b border-zinc-200/50 dark:border-zinc-800/20 w-full" />
+            {/* Combined Games Grid */}
+            {isLoading ? (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="aspect-[3/4] rounded-2xl bg-zinc-200 dark:bg-zinc-800 animate-pulse border border-zinc-100 dark:border-zinc-900" />
+                ))}
               </div>
-            )}
-
-            {/* Full Games Section */}
-            <div className="mt-8">
-              {!isLoading && featuredGames.length > 0 && (
-                <h3 className="text-lg sm:text-xl font-black text-zinc-900 dark:text-zinc-50 mb-5 flex items-center gap-2">
-                  <Gamepad2 className="w-4.5 h-4.5 text-zinc-400" />
-                  Full Games
-                </h3>
-              )}
-              
-              {isLoading ? (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="aspect-[3/4] rounded-2xl bg-zinc-200 dark:bg-zinc-800 animate-pulse border border-zinc-100 dark:border-zinc-900" />
-                  ))}
+            ) : filteredGames.length === 0 ? (
+              <div className="text-center py-16 sm:py-24 animate-fade-in bg-white/70 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl p-6 max-w-md mx-auto shadow-sm backdrop-blur-sm">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 mb-4">
+                  <AlertCircle className="w-7 h-7" />
                 </div>
-              ) : filteredGames.length === 0 ? (
-                <div className="text-center py-16 sm:py-24 animate-fade-in bg-white/70 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl p-6 max-w-md mx-auto shadow-sm backdrop-blur-sm">
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 mb-4">
-                    <AlertCircle className="w-7 h-7" />
-                  </div>
-                  <h3 className="text-base sm:text-lg font-bold mb-2 text-zinc-950 dark:text-zinc-50">រកមិនឃើញហ្គេមទេ</h3>
-                  <p className="text-muted-foreground text-xs sm:text-sm">
-                    {searchQuery
-                      ? `មិនមានលទ្ធផលស្វែងរកសម្រាប់ "${searchQuery}" ឡើយ。`
-                      : 'មិនមានហ្គេមឡើយនៅឡើយទេ។'}
-                  </p>
-                </div>
-              ) : (
+                <h3 className="text-base sm:text-lg font-bold mb-2 text-zinc-950 dark:text-zinc-50">រកមិនឃើញហ្គេមទេ</h3>
+                <p className="text-muted-foreground text-xs sm:text-sm">
+                  {searchQuery
+                    ? `មិនមានលទ្ធផលស្វែងរកសម្រាប់ "${searchQuery}" ឡើយ。`
+                    : 'មិនមានហ្គេមឡើយនៅឡើយទេ។'}
+                </p>
+              </div>
+            ) : (
+              <>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
                   {visibleGames.map((game, index) => (
                     <GameCard
@@ -250,23 +176,23 @@ const Index: React.FC = () => {
                     />
                   ))}
                 </div>
-              )}
 
-              {!searchQuery.trim() && filteredGames.length > INITIAL_DISPLAY_COUNT && (
-                <div className="flex justify-center mt-8">
-                  <button
-                    onClick={() => setShowAllGames(!showAllGames)}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-gold/30 text-sm font-medium text-gold hover:bg-gold/10 transition-all"
-                  >
-                    {showAllGames ? (
-                      <>Show Less <ChevronUp className="w-4 h-4" /></>
-                    ) : (
-                      <>Show All ({filteredGames.length} games) <ChevronDown className="w-4 h-4" /></>
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
+                {!searchQuery.trim() && filteredGames.length > INITIAL_DISPLAY_COUNT && (
+                  <div className="flex justify-center mt-8">
+                    <button
+                      onClick={() => setShowAllGames(!showAllGames)}
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-gold/30 text-sm font-medium text-gold hover:bg-gold/10 transition-all"
+                    >
+                      {showAllGames ? (
+                        <>Show Less <ChevronUp className="w-4 h-4" /></>
+                      ) : (
+                        <>Show All ({filteredGames.length} games) <ChevronDown className="w-4 h-4" /></>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </section>
 
