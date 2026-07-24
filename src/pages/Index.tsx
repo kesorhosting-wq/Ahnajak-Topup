@@ -89,6 +89,23 @@ const Index: React.FC = () => {
         <meta name="description" content="Top up your favorite games instantly. Mobile Legends, Free Fire, PUBG, and more. Fast, secure, and affordable." />
       </Helmet>
 
+      <style>{`
+        @keyframes fire {
+          0%, 100% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+          15% { transform: scale(1.25) rotate(-6deg); filter: hue-rotate(-10deg); }
+          30% { transform: scale(0.95) rotate(4deg); filter: hue-rotate(5deg); }
+          45% { transform: scale(1.15) rotate(-3deg); filter: hue-rotate(-5deg); }
+          60% { transform: scale(1.05) rotate(2deg); filter: hue-rotate(8deg); }
+          75% { transform: scale(1.2) rotate(-5deg); filter: hue-rotate(-8deg); }
+          90% { transform: scale(0.9) rotate(3deg); filter: hue-rotate(3deg); }
+        }
+        .animate-fire {
+          animation: fire 0.8s ease-in-out infinite;
+          display: inline-block;
+          transform-origin: center;
+        }
+      `}</style>
+
       <div className="min-h-screen flex flex-col bg-transparent text-foreground relative">
         <div className="absolute inset-0 overflow-hidden pointer-events-none -z-30">
           <div className="absolute top-[5%] left-[5%] w-[45vw] h-[45vw] rounded-full bg-gold/10 blur-[130px]" />
@@ -171,7 +188,7 @@ const Index: React.FC = () => {
                 borderColor: `${primaryColor}25`
               }}
             >
-              🔥 TOP RECHARGES IN CAMBODIA
+              <span className="inline-block animate-fire">🔥</span> TOP RECHARGES IN CAMBODIA
             </div>
             <h2 className="font-display text-xl sm:text-4xl font-black leading-tight text-zinc-900 dark:text-zinc-50 mb-2 sm:mb-3">
               ជ្រើសរើសទំនិញ
