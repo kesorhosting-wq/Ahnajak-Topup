@@ -152,7 +152,7 @@ const Index: React.FC = () => {
                   className="flex gap-3 sm:gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [&::-webkit-scrollbar]:hidden"
                 >
                   {featuredGames.map((game, index) => (
-                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[82vw] sm:w-[45vw] lg:w-[22vw] max-w-[320px] sm:max-w-sm">
+                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[43vw] sm:w-[45vw] lg:w-[22vw] max-w-[200px] sm:max-w-sm">
                       <FeaturedGameCard game={game} index={index} />
                     </div>
                   ))}
@@ -184,7 +184,7 @@ const Index: React.FC = () => {
 
           {/* All Games */}
           {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="aspect-[3/4] rounded-2xl bg-zinc-200 dark:bg-zinc-800 animate-pulse border border-zinc-100 dark:border-zinc-900" />
               ))}
@@ -202,7 +202,7 @@ const Index: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
               {filteredGames.map((game, index) => (
                 <GameCard
                   key={game.id}
