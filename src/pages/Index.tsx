@@ -152,7 +152,7 @@ const Index: React.FC = () => {
                   className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [&::-webkit-scrollbar]:hidden"
                 >
                   {featuredGames.map((game, index) => (
-                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[80vw] sm:w-[45vw] lg:w-[22vw] max-w-sm">
+                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[46vw] sm:w-[45vw] lg:w-[22vw] max-w-sm">
                       <FeaturedGameCard game={game} index={index} />
                     </div>
                   ))}
