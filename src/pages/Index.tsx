@@ -82,9 +82,9 @@ const Index: React.FC = () => {
           bannerHeight={settings.bannerHeight}
         />
 
-        <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-12 flex-1 flex flex-col min-h-0">
+        <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-12 flex-1">
           {/* Header */}
-          <div className="mb-6 shrink-0 text-center">
+          <div className="mb-6 text-center">
             <div 
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-3 animate-pulse"
               style={{ 
@@ -105,7 +105,7 @@ const Index: React.FC = () => {
           </div>
 
           {/* Search */}
-          <div className="mb-6 shrink-0">
+          <div className="mb-6">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
               <Input
@@ -130,7 +130,7 @@ const Index: React.FC = () => {
 
           {/* Featured Games Section */}
           {!isLoading && featuredGames.length > 0 && (
-            <div className="mb-8 shrink-0">
+            <div className="mb-8">
               <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-4 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-gold fill-gold" />
                 {settings.featuredGamesTitle || 'Featured Games'}
@@ -152,14 +152,14 @@ const Index: React.FC = () => {
             </div>
           )}
 
-          {/* All Games - Scrollable Container */}
-          <div className="border border-zinc-300 dark:border-zinc-700 rounded-2xl bg-white/40 dark:bg-zinc-900/20 backdrop-blur-sm overflow-hidden flex flex-col min-h-0 flex-1">
+          {/* All Games */}
+          <div className="border border-zinc-300 dark:border-zinc-700 rounded-2xl bg-white/40 dark:bg-zinc-900/20 backdrop-blur-sm overflow-hidden">
             <div className="p-4 border-b border-zinc-200 dark:border-zinc-700">
               <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
                 All Games ({filteredGames.length})
               </h3>
             </div>
-            <div className="p-4 flex-1 overflow-y-auto min-h-0">
+            <div className="p-4">
               {isLoading ? (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
                   {[...Array(8)].map((_, i) => (
