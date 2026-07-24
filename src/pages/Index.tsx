@@ -84,7 +84,7 @@ const Index: React.FC = () => {
 
         <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-12 flex-1 flex flex-col min-h-0">
           {/* Header */}
-          <div className="mb-6">
+          <div className="mb-6 shrink-0">
             <div 
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-3 animate-pulse"
               style={{ 
@@ -105,7 +105,7 @@ const Index: React.FC = () => {
           </div>
 
           {/* Search */}
-          <div className="mb-6">
+          <div className="mb-6 shrink-0">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
               <Input
@@ -130,7 +130,7 @@ const Index: React.FC = () => {
 
           {/* Featured Games Section */}
           {!isLoading && featuredGames.length > 0 && (
-            <div className="mb-8">
+            <div className="mb-8 shrink-0">
               <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-4 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-gold fill-gold" />
                 {settings.featuredGamesTitle || 'Featured Games'}
