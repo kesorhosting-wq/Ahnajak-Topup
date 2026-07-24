@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSite } from '@/contexts/SiteContext';
-import { Home, PartyPopper, Gamepad2, Receipt, ShoppingCart } from 'lucide-react';
+import { Home, PartyPopper, Gamepad2, Repeat, ShoppingCart } from 'lucide-react';
 
 const NAV_H = 72;
 const BTN_S = 52;
@@ -17,23 +17,24 @@ const MobileBottomNav: React.FC = () => {
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/' },
     { id: 'event', label: 'Event', icon: PartyPopper, path: '/events' },
-    { id: 'topup', label: 'Top Up', icon: ShoppingCart, path: '/', center: true },
+    { id: 'topup', label: 'Top Up', icon: ShoppingCart, path: '/orders', center: true },
     { id: 'game', label: 'Game', icon: Gamepad2, path: '/games' },
-    { id: 'order', label: 'Order', icon: Receipt, path: '/orders' },
+    { id: 'exchange', label: 'Exchange', icon: Repeat, path: '/exchange' },
   ];
 
   // Helper function to safely derive tab state from current path
   const getActiveTabFromPath = (path: string): string => {
     if (path === '/events') return 'event';
-    if (path === '/orders') return 'order';
+    if (path === '/orders') return 'topup';
     if (path === '/games') return 'game';
+    if (path === '/exchange') return 'exchange';
     if (path === '/') return 'home';
     return 'home';
   };
 
   const [activeTab, setActiveTab] = useState(() => getActiveTabFromPath(location.pathname));
 
-  // Safely sync tab state when user navigates or uses back/forward buttons
+  // Sync tab state dynamically when user navigates
   useEffect(() => {
     setActiveTab(getActiveTabFromPath(location.pathname));
   }, [location.pathname]);
@@ -62,9 +63,9 @@ const MobileBottomNav: React.FC = () => {
           }}
         />
 
-        {/* Center Floating Button */}
+        {/* Center Floating Button (Navigates to /orders) */}
         <Link
-          to="/"
+          to="/orders"
           onClick={() => setActiveTab('topup')}
           className="absolute left-1/2 z-20 flex items-center justify-center transition-all duration-300 ease-out rounded-full active:scale-90"
           style={{
