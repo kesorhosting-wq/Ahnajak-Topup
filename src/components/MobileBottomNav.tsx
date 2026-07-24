@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSite } from '@/contexts/SiteContext';
-import { Home, PartyPopper, Gamepad2, Receipt, ShoppingCart } from 'lucide-react';
+import { Home, PartyPopper, Gamepad2, Repeat, ShoppingCart } from 'lucide-react';
 
 const NAV_H = 72;
 const BTN_S = 56;
@@ -18,45 +18,46 @@ const MobileBottomNav: React.FC = () => {
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/' },
     { id: 'event', label: 'Event', icon: PartyPopper, path: '/events' },
-    { id: 'topup', label: 'Top Up', icon: ShoppingCart, path: '/', center: true },
+    { id: 'order', label: 'Order', icon: ShoppingCart, path: '/orders', center: true },
     { id: 'game', label: 'Game', icon: Gamepad2, path: '/' },
-    { id: 'order', label: 'Order', icon: Receipt, path: '/orders' },
+    { id: 'exchange', label: 'Exchange', icon: Repeat, path: '/exchange' },
   ];
 
   const [activeTab, setActiveTab] = useState(() => {
     if (location.pathname === '/events') return 'event';
+    if (location.pathname === '/exchange') return 'exchange';
     if (location.pathname === '/orders') return 'order';
     return 'home';
   });
 
-  const isTopUpActive = activeTab === 'topup';
+  const isCenterActive = activeTab === 'order';
 
-  const btnBottom = isTopUpActive
+  const btnBottom = isCenterActive
     ? NAV_H - OVERLAP + RAISE
     : NAV_H - OVERLAP;
 
-  const btnScale = isTopUpActive ? 1.05 : 1;
+  const btnScale = isCenterActive ? 1.05 : 1;
 
   const notchH = OVERLAP;
-  const notchTop = isTopUpActive ? -RAISE : 0;
+  const notchTop = isCenterActive ? -RAISE : 0;
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3 pb-2">
       <div className="pointer-events-auto relative">
         {/* Center Button */}
         <Link
-          to="/"
-          onClick={() => setActiveTab('topup')}
+          to="/orders"
+          onClick={() => setActiveTab('order')}
           className="absolute left-1/2 z-20 flex items-center justify-center active:scale-95 transition-all duration-300 rounded-full"
           style={{
             width: BTN_S,
             height: BTN_S,
             bottom: btnBottom,
             transform: `translateX(-50%) scale(${btnScale})`,
-            background: isTopUpActive
+            background: isCenterActive
               ? `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`
               : `linear-gradient(135deg, ${primaryColor}cc, ${primaryColor}99)`,
-            boxShadow: isTopUpActive
+            boxShadow: isCenterActive
               ? `0 8px 28px ${primaryColor}66`
               : `0 4px 16px ${primaryColor}33`,
           }}
