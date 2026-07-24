@@ -71,17 +71,17 @@ const GameCard: React.FC<GameCardProps> = ({ game, cardBgColor, cardBorderColor,
           </div>
           
           {/* Game name and Topup Button */}
-          <div className="p-2.5 sm:p-4 space-y-1.5 sm:space-y-2">
-            <h3 className="font-khmer text-xs sm:text-base font-bold text-foreground line-clamp-1 text-center">
+          <div className="p-1.5 sm:p-4 space-y-1 sm:space-y-2">
+            <h3 className="font-khmer text-[9px] sm:text-base font-bold text-foreground line-clamp-1 text-center">
               {game.name}
             </h3>
             <Link to={`/topup/${game.slug}`} className="block">
               <Button 
-                className="w-full gap-1 sm:gap-2 text-white font-semibold transition-all duration-300 shadow-md text-[10px] sm:text-sm h-8 sm:h-9"
+                className="w-full gap-0.5 sm:gap-2 text-white font-semibold transition-all duration-300 shadow-md text-[8px] sm:text-sm h-6 sm:h-9 px-0"
                 style={{ background: `linear-gradient(90deg, ${frameColor} 0%, ${frameColor}dd 100%)` }}
                 size="sm"
               >
-                <Gamepad2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Gamepad2 className="w-2.5 h-2.5 sm:w-4 sm:h-4" />
                 <span className="font-khmer">Topup</span>
               </Button>
             </Link>
@@ -90,11 +90,11 @@ const GameCard: React.FC<GameCardProps> = ({ game, cardBgColor, cardBorderColor,
         
         {/* Corner accents */}
         <div 
-          className="absolute -top-0.5 -left-0.5 w-3 h-3 sm:w-4 sm:h-4 rounded-tl-xl opacity-80 transition-all duration-300 group-hover:opacity-100 group-hover:scale-110"
+          className="absolute -top-0.5 -left-0.5 w-2 h-2 sm:w-4 sm:h-4 rounded-tl-xl opacity-80 transition-all duration-300 group-hover:opacity-100 group-hover:scale-110"
           style={{ background: `linear-gradient(135deg, ${frameColor}, transparent)` }}
         />
         <div 
-          className="absolute -top-0.5 -right-0.5 w-3 h-3 sm:w-4 sm:h-4 rounded-tr-xl opacity-80 transition-all duration-300 group-hover:opacity-100 group-hover:scale-110"
+          className="absolute -top-0.5 -right-0.5 w-2 h-2 sm:w-4 sm:h-4 rounded-tr-xl opacity-80 transition-all duration-300 group-hover:opacity-100 group-hover:scale-110"
           style={{ background: `linear-gradient(225deg, ${frameColor}, transparent)` }}
         />
       </div>
