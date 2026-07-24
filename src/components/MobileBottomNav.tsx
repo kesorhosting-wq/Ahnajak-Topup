@@ -5,8 +5,8 @@ import { Home, PartyPopper, Gamepad2, Receipt, ShoppingCart } from 'lucide-react
 
 const NAV_H = 72;
 const BTN_S = 56;
-const OVERLAP = 36;
-const RAISE = 12;
+const OVERLAP = 32;
+const RAISE = 16;
 
 const MobileBottomNav: React.FC = () => {
   const location = useLocation();
@@ -37,44 +37,48 @@ const MobileBottomNav: React.FC = () => {
 
   const btnScale = isTopUpActive ? 1.05 : 1;
 
-  const notchH = OVERLAP - 4;
+  const notchH = OVERLAP;
   const notchTop = isTopUpActive ? -RAISE : 0;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3 pb-2">
       <div className="pointer-events-auto relative">
+        {/* Center Button */}
         <Link
           to="/"
           onClick={() => setActiveTab('topup')}
-          className="absolute left-1/2 -translate-x-1/2 z-10 flex items-center justify-center active:scale-90 transition-all duration-300 rounded-full"
+          className="absolute left-1/2 z-20 flex items-center justify-center active:scale-95 transition-all duration-300 rounded-full"
           style={{
             width: BTN_S,
             height: BTN_S,
             bottom: btnBottom,
-            transform: `scale(${btnScale})`,
+            transform: `translateX(-50%) scale(${btnScale})`,
             background: isTopUpActive
               ? `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`
               : `linear-gradient(135deg, ${primaryColor}cc, ${primaryColor}99)`,
             boxShadow: isTopUpActive
               ? `0 8px 28px ${primaryColor}66`
-              : `0 4px 20px ${primaryColor}44`,
+              : `0 4px 16px ${primaryColor}33`,
           }}
         >
           <ShoppingCart className="w-6 h-6 text-white" strokeWidth={2.5} />
         </Link>
 
+        {/* Notch Dome */}
         <div
-          className="absolute left-1/2 -translate-x-1/2 z-[1] pointer-events-none transition-all duration-300 bg-white/85 dark:bg-zinc-900/85 border-l border-r border-t border-zinc-200 dark:border-zinc-700/50 border-b-0"
+          className="absolute left-1/2 z-10 pointer-events-none transition-all duration-300 bg-white/90 dark:bg-zinc-900/90 border-l border-r border-t border-zinc-200 dark:border-zinc-700/50"
           style={{
-            width: BTN_S + 8,
+            width: BTN_S + 12,
             height: notchH,
             top: notchTop,
-            borderRadius: `${(BTN_S + 8) / 2}px ${(BTN_S + 8) / 2}px 0 0`,
+            transform: 'translateX(-50%)',
+            borderRadius: `${(BTN_S + 12) / 2}px ${(BTN_S + 12) / 2}px 0 0`,
           }}
         />
 
+        {/* Main Navbar */}
         <nav
-          className="relative rounded-t-[24px] rounded-b-[18px] bg-white/85 dark:bg-zinc-900/85 backdrop-blur-xl border border-zinc-200 dark:border-zinc-700/50 shadow-[0_-4px_30px_rgba(0,0,0,0.08),0_4px_20px_rgba(0,0,0,0.04)]"
+          className="relative rounded-[22px] bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border border-zinc-200 dark:border-zinc-700/50 shadow-[0_-4px_30px_rgba(0,0,0,0.08),0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden"
           style={{ height: NAV_H }}
         >
           <div className="flex items-center h-full">
