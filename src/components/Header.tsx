@@ -6,13 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { resolveIconUrl } from '@/lib/icon-url';
 import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import MobileDrawer from '@/components/MobileDrawer';
 
 const Header: React.FC = () => {
   const isMobile = useIsMobile();
@@ -20,6 +14,7 @@ const Header: React.FC = () => {
   const { settings } = useSite();
   const { user, isAdmin, signOut } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -162,52 +157,17 @@ const Header: React.FC = () => {
           </div>
 
           {/* Mobile hamburger */}
-          <details className="sm:hidden relative">
-            <summary className="list-none p-2 rounded-lg hover:bg-zinc-800 cursor-pointer">
-              <Menu className="w-5 h-5 text-zinc-300" />
-            </summary>
-            <DropdownMenu open={false}>
-              <DropdownMenuTrigger asChild>
-                <button className="hidden" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 mt-2 bg-zinc-900 border-zinc-800">
-                {user && (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link to="/orders" className="flex items-center gap-2">
-                        <Receipt className="w-4 h-4" /> ប្រវត្តិការបញ្ជាទិញ
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile" className="flex items-center gap-2">
-                        <User className="w-4 h-4" /> គណនីរបស់ខ្ញុំ
-                      </Link>
-                    </DropdownMenuItem>
-                    {isAdmin && (
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin" className="flex items-center gap-2">
-                          <Settings className="w-4 h-4" /> Admin Panel
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-rose-400">
-                      <LogOut className="w-4 h-4 mr-2" /> ចាកចេញ
-                    </DropdownMenuItem>
-                  </>
-                )}
-                {!user && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/auth" className="flex items-center gap-2">
-                      <User className="w-4 h-4" /> ចូល
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </details>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="sm:hidden p-2 rounded-lg hover:bg-zinc-800 cursor-pointer transition-colors"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="w-5 h-5 text-zinc-300" />
+          </button>
         </div>
       </div>
+
+      <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </header>
   );
 };
