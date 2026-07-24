@@ -710,7 +710,7 @@ const PreorderGamesTab: React.FC = () => {
                                     <ArrowDown className="w-3 h-3" />
                                   </Button>
                                   <Button variant="ghost" size="icon"
-                                    className="h-7 w-7 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10"
+                                    className="h-7 w-7 text-gold hover:text-gold/80 hover:bg-gold/10"
                                     title="Clone Package"
                                     onClick={() => clonePkg(pg.game_id, pkg)}>
                                     <Copy className="w-3 h-3" />
@@ -743,3 +743,4 @@ const PreorderGamesTab: React.FC = () => {
 };
 
 export default PreorderGamesTab;
+

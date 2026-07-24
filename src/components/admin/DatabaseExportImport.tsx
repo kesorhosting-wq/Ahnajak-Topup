@@ -243,10 +243,10 @@ const DatabaseExportImport: React.FC = () => {
           </div>
 
           {/* Import Section */}
-          <div className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/30 rounded-lg">
+          <div className="p-4 bg-gradient-to-br from-gold/10 to-amber-500/10 border border-gold/30 rounded-lg">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0">
-                <Upload className="w-6 h-6 text-blue-500" />
+              <div className="w-12 h-12 rounded-xl bg-gold/20 flex items-center justify-center shrink-0">
+                <Upload className="w-6 h-6 text-gold" />
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-lg mb-1">Import Database</h3>
@@ -267,7 +267,7 @@ const DatabaseExportImport: React.FC = () => {
                   onClick={handleImportClick}
                   disabled={isImporting}
                   variant="outline"
-                  className="border-blue-500/50 hover:bg-blue-500/10"
+                  className="border-gold/50 hover:bg-gold/10"
                 >
                   {isImporting ? (
                     <>

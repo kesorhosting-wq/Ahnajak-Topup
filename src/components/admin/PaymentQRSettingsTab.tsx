@@ -246,8 +246,8 @@ const PaymentQRSettingsTab: React.FC = () => {
         </Button>
 
         {/* Info Box */}
-        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-600 dark:text-blue-400 mb-2">💡 How it works</h4>
+        <div className="bg-gold/10 border border-gold/30 rounded-lg p-4">
+          <h4 className="font-semibold text-gold dark:text-gold mb-2">💡 How it works</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• Customers see 3 payment buttons: ABA Bank, Wing Bank, KHQR</li>
             <li>• All buttons show the SAME QR code (the one you upload here)</li>
@@ -260,3 +260,4 @@ const PaymentQRSettingsTab: React.FC = () => {
 };
 
 export default PaymentQRSettingsTab;
+

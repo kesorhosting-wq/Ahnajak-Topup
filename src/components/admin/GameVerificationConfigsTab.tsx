@@ -415,7 +415,7 @@ const GameVerificationConfigsTab: React.FC = () => {
                 size="sm" 
                 onClick={syncFromG2Bulk}
                 disabled={syncing}
-                className="border-blue-500/50 text-blue-500 hover:bg-blue-500/10"
+                className="border-gold/50 text-gold hover:bg-gold/10"
               >
                 {syncing ? (
                   <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
@@ -662,7 +662,7 @@ const GameVerificationConfigsTab: React.FC = () => {
                               <span className="text-muted-foreground text-sm">-</span>
                             )}
                             {config.zone_options && config.zone_options.length > 0 ? (
-                              <Badge variant="outline" className="text-xs text-blue-500 border-blue-500/50">
+                              <Badge variant="outline" className="text-xs text-gold border-gold/50">
                                 {config.zone_options.length} servers
                               </Badge>
                             ) : config.requires_zone ? (
@@ -744,7 +744,7 @@ const GameVerificationConfigsTab: React.FC = () => {
       </Card>
 
       {/* Info Card */}
-      <Card className="border-blue-500/30 bg-blue-500/5">
+      <Card className="border-gold/30 bg-gold/5">
         <CardContent className="p-4">
           <p className="text-sm text-muted-foreground">
             <strong>Sync from G2Bulk:</strong> Import all game codes from G2Bulk API. 
@@ -761,3 +761,4 @@ const GameVerificationConfigsTab: React.FC = () => {
 };
 
 export default GameVerificationConfigsTab;
+

@@ -32,7 +32,7 @@ interface PreorderOrder {
 const statusConfig: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
   notpaid: { icon: <AlertTriangle className="w-4 h-4" />, color: 'bg-yellow-500', label: 'Not Paid' },
   paid: { icon: <CreditCard className="w-4 h-4" />, color: 'bg-emerald-500', label: 'Paid' },
-  processing: { icon: <RefreshCw className="w-4 h-4 animate-spin" />, color: 'bg-blue-500', label: 'Processing' },
+  processing: { icon: <RefreshCw className="w-4 h-4 animate-spin" />, color: 'bg-gold', label: 'Processing' },
   completed: { icon: <CheckCircle className="w-4 h-4" />, color: 'bg-green-500', label: 'Completed' },
   failed: { icon: <XCircle className="w-4 h-4" />, color: 'bg-red-500', label: 'Failed' },
 };
@@ -159,9 +159,9 @@ const PreorderOrdersTab: React.FC = () => {
             <p className="text-xs text-muted-foreground">Paid</p>
           </CardContent>
         </Card>
-        <Card className="border-blue-500/30">
+        <Card className="border-gold/30">
           <CardContent className="p-3 text-center">
-            <p className="text-xl font-bold text-blue-500">{stats.processing}</p>
+            <p className="text-xl font-bold text-gold">{stats.processing}</p>
             <p className="text-xs text-muted-foreground">Processing</p>
           </CardContent>
         </Card>
@@ -315,3 +315,4 @@ const PreorderOrdersTab: React.FC = () => {
 };
 
 export default PreorderOrdersTab;
+

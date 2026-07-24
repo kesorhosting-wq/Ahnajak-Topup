@@ -333,7 +333,7 @@ const G2BulkFullImport: React.FC<G2BulkFullImportProps> = ({ onImportComplete })
                 <div className="text-xs text-muted-foreground">Packages Skipped</div>
               </div>
               <div className="text-center p-2 bg-background/50 rounded">
-                <div className="text-lg font-bold text-blue-600">{result.packages_updated}</div>
+                <div className="text-lg font-bold text-gold">{result.packages_updated}</div>
                 <div className="text-xs text-muted-foreground">Prices Updated</div>
               </div>
             </div>
@@ -358,3 +358,4 @@ const G2BulkFullImport: React.FC<G2BulkFullImportProps> = ({ onImportComplete })
 };
 
 export default G2BulkFullImport;
+

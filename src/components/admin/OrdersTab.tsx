@@ -43,7 +43,7 @@ interface Order {
 const statusConfig: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
   pending: { icon: <Clock className="w-4 h-4" />, color: 'bg-yellow-500', label: 'Pending' },
   paid: { icon: <CreditCard className="w-4 h-4" />, color: 'bg-emerald-500', label: 'Paid' },
-  processing: { icon: <RefreshCw className="w-4 h-4 animate-spin" />, color: 'bg-blue-500', label: 'Processing' },
+  processing: { icon: <RefreshCw className="w-4 h-4 animate-spin" />, color: 'bg-gold', label: 'Processing' },
   completed: { icon: <CheckCircle className="w-4 h-4" />, color: 'bg-green-500', label: 'Completed' },
   failed: { icon: <XCircle className="w-4 h-4" />, color: 'bg-red-500', label: 'Failed' },
   pending_manual: { icon: <AlertTriangle className="w-4 h-4" />, color: 'bg-orange-500', label: 'Manual Review' },
@@ -340,9 +340,9 @@ const OrdersTab: React.FC = () => {
             <p className="text-sm text-muted-foreground">Pending</p>
           </CardContent>
         </Card>
-        <Card className="border-blue-500/30">
+        <Card className="border-gold/30">
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-blue-500">{orderStats.processing}</p>
+            <p className="text-2xl font-bold text-gold">{orderStats.processing}</p>
             <p className="text-sm text-muted-foreground">Processing</p>
           </CardContent>
         </Card>
@@ -457,7 +457,7 @@ const OrdersTab: React.FC = () => {
                                   {card.serial && (
                                     <div className="font-mono text-sm">
                                       <span className="text-muted-foreground">Serial: </span>
-                                      <span className="text-blue-400 select-all">{card.serial}</span>
+                                      <span className="text-gold select-all">{card.serial}</span>
                                     </div>
                                   )}
                                   {card.expire && (
@@ -552,7 +552,7 @@ const OrdersTab: React.FC = () => {
                           <Button 
                             size="sm" 
                             variant="outline"
-                            className="text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
+                            className="text-gold border-gold hover:bg-gold hover:text-white"
                             disabled={checkingG2Bulk[order.id]}
                             onClick={() => retryG2BulkOrder(order)}
                           >
@@ -578,3 +578,5 @@ const OrdersTab: React.FC = () => {
 };
 
 export default OrdersTab;
+
+

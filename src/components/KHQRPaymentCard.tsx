@@ -215,7 +215,7 @@ const KHQRPaymentCard = ({
   return (
     <Card className="overflow-hidden border-0 shadow-2xl">
       {/* Header */}
-      <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-6 text-white overflow-hidden">
+      <div className="relative bg-gradient-to-br from-gold via-amber-600 to-amber-800 p-6 text-white overflow-hidden">
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -257,10 +257,10 @@ const KHQRPaymentCard = ({
       <CardContent className="p-6 bg-gradient-to-b from-background to-muted/30">
         {/* QR Code */}
         <div className="relative mx-auto w-fit">
-          <div className="absolute -top-2 -left-2 w-8 h-8 border-t-4 border-l-4 border-blue-600 rounded-tl-lg" />
-          <div className="absolute -top-2 -right-2 w-8 h-8 border-t-4 border-r-4 border-blue-600 rounded-tr-lg" />
-          <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-4 border-l-4 border-blue-600 rounded-bl-lg" />
-          <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-4 border-r-4 border-blue-600 rounded-br-lg" />
+          <div className="absolute -top-2 -left-2 w-8 h-8 border-t-4 border-l-4 border-gold rounded-tl-lg" />
+          <div className="absolute -top-2 -right-2 w-8 h-8 border-t-4 border-r-4 border-gold rounded-tr-lg" />
+          <div className="absolute -bottom-2 -left-2 w-8 h-8 border-b-4 border-l-4 border-gold rounded-bl-lg" />
+          <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-4 border-r-4 border-gold rounded-br-lg" />
 
           <div
             className={`p-4 bg-white rounded-2xl shadow-lg transition-all ${isExpired ? "opacity-50 grayscale" : ""}`}
@@ -292,7 +292,7 @@ const KHQRPaymentCard = ({
         {/* Instructions */}
         <div className="mt-6 p-4 bg-muted/50 rounded-xl space-y-3">
           <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <div className="w-6 h-6 rounded-full bg-gold text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
               1
             </div>
             <p className="text-sm">
@@ -300,7 +300,7 @@ const KHQRPaymentCard = ({
             </p>
           </div>
           <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <div className="w-6 h-6 rounded-full bg-gold text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
               2
             </div>
             <p className="text-sm">
@@ -308,7 +308,7 @@ const KHQRPaymentCard = ({
             </p>
           </div>
           <div className="flex items-start gap-3">
-            <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+            <div className="w-6 h-6 rounded-full bg-gold text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
               3
             </div>
             <p className="text-sm">បញ្ជាក់ការទូទាត់នៅក្នុងកម្មវិធី</p>
@@ -331,7 +331,7 @@ const KHQRPaymentCard = ({
           <Button
             onClick={() => checkPaymentStatus(false)}
             disabled={checking || isExpired}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white gap-2"
+            className="w-full bg-gold hover:bg-gold/80 text-white gap-2"
           >
             {checking ? (
               <>
@@ -366,3 +366,4 @@ const KHQRPaymentCard = ({
 };
 
 export default KHQRPaymentCard;
+

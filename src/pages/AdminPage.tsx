@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+﻿import React, { useState, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import {
@@ -434,7 +434,7 @@ const AdminPage: React.FC = () => {
     const payment: PaymentMethod = {
       id: Date.now().toString(),
       name: newPayment.name,
-      icon: newPayment.icon || "💳",
+      icon: newPayment.icon || "ðŸ’³",
     };
 
     addPaymentMethod(payment);
@@ -610,7 +610,7 @@ const AdminPage: React.FC = () => {
               </TabsTrigger>
               <TabsTrigger
                 value="ai-customization"
-                className="w-full justify-start data-[state=active]:bg-gold data-[state=active]:text-primary-foreground text-xs sm:text-sm text-cyan-400 hover:text-cyan-300"
+                className="w-full justify-start data-[state=active]:bg-gold data-[state=active]:text-primary-foreground text-xs sm:text-sm text-gold hover:text-gold/80"
               >
                 <Sparkles className="w-4 h-4 mr-2 shrink-0 animate-pulse" />
                 <span>AI</span>
@@ -769,7 +769,7 @@ const AdminPage: React.FC = () => {
                             value={settings.featuredGamesTitle || "Featured Games"}
                             onChange={(e) => handleUpdateSettings("featuredGamesTitle", e.target.value)}
                             className="border-gold/50"
-                            placeholder="e.g. ហ្គេមពិសេស / Featured Games"
+                            placeholder="e.g. áž áŸ’áž‚áŸáž˜áž–áž·ážŸáŸážŸ / Featured Games"
                           />
                         </div>
                         <div>
@@ -780,7 +780,7 @@ const AdminPage: React.FC = () => {
                             className="border-gold/50"
                             placeholder="e.g. 8124926461"
                           />
-                          <p className="text-xs text-muted-foreground mt-1">Numeric bot ID (Client ID) from @BotFather → Bot Settings → Web Login. This enables the new Telegram Login button.</p>
+                          <p className="text-xs text-muted-foreground mt-1">Numeric bot ID (Client ID) from @BotFather â†’ Bot Settings â†’ Web Login. This enables the new Telegram Login button.</p>
                         </div>
                       </div>
                     </div>
@@ -841,7 +841,7 @@ const AdminPage: React.FC = () => {
                       {/* Contact Us Floating Button */}
                       <div className="pt-4 border-t border-border">
                         <h4 className="text-sm font-medium mb-2">Floating "Contact Us" Button</h4>
-                        <p className="text-xs text-muted-foreground mb-3">Uses the Telegram URL (set in Home tab → Social Media). Upload a custom icon or paste a URL — leave empty for the default Telegram icon.</p>
+                        <p className="text-xs text-muted-foreground mb-3">Uses the Telegram URL (set in Home tab â†’ Social Media). Upload a custom icon or paste a URL â€” leave empty for the default Telegram icon.</p>
                         <div className="grid gap-4 md:grid-cols-2 max-w-2xl">
                           <div className="space-y-2">
                             <label className="text-sm font-medium block">Button Icon (upload)</label>
@@ -869,7 +869,7 @@ const AdminPage: React.FC = () => {
                       {/* Icon CDN Base URL */}
                       <div className="pt-4 border-t border-border">
                         <h4 className="text-sm font-medium mb-2">Icon CDN / Base URL</h4>
-                        <p className="text-xs text-muted-foreground mb-3">Optional. Prepended to relative package & label icon paths to serve from a CDN. Absolute URLs (https://…) are not modified.</p>
+                        <p className="text-xs text-muted-foreground mb-3">Optional. Prepended to relative package & label icon paths to serve from a CDN. Absolute URLs (https://â€¦) are not modified.</p>
                         <Input
                           value={settings.iconCdnBaseUrl}
                           onChange={(e) => handleUpdateSettings("iconCdnBaseUrl", e.target.value)}
@@ -882,7 +882,7 @@ const AdminPage: React.FC = () => {
                     {/* Falling Animation Controls */}
                     <div className="border-t border-gold/20 pt-6 mt-2">
                       <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                        🌸 Falling Animation
+                        ðŸŒ¸ Falling Animation
                       </h3>
                       <div className="grid gap-6 md:grid-cols-2">
                         <div>
@@ -902,7 +902,7 @@ const AdminPage: React.FC = () => {
                         </div>
                         <div>
                           <label className="text-sm font-medium mb-2 block">
-                            Speed: {(settings.fallingSpeed ?? 1).toFixed(1)}×
+                            Speed: {(settings.fallingSpeed ?? 1).toFixed(1)}Ã—
                           </label>
                           <input
                             type="range"
@@ -1202,15 +1202,15 @@ const AdminPage: React.FC = () => {
                               const currency = e.target.value;
                               const symbols: Record<string, string> = {
                                 USD: "$",
-                                KHR: "៛",
-                                THB: "฿",
-                                VND: "₫",
-                                EUR: "€",
-                                GBP: "£",
+                                KHR: "áŸ›",
+                                THB: "à¸¿",
+                                VND: "â‚«",
+                                EUR: "â‚¬",
+                                GBP: "Â£",
                                 IDR: "Rp",
                                 MYR: "RM",
                                 SGD: "S$",
-                                PHP: "₱",
+                                PHP: "â‚±",
                               };
                               handleUpdateSettings("packageCurrency", currency);
                               handleUpdateSettings("packageCurrencySymbol", symbols[currency] || "$");
@@ -1218,15 +1218,15 @@ const AdminPage: React.FC = () => {
                             className="w-full h-10 px-3 rounded-md border border-gold/50 bg-background text-foreground"
                           >
                             <option value="USD">USD ($)</option>
-                            <option value="KHR">KHR (៛)</option>
-                            <option value="THB">THB (฿)</option>
-                            <option value="VND">VND (₫)</option>
-                            <option value="EUR">EUR (€)</option>
-                            <option value="GBP">GBP (£)</option>
+                            <option value="KHR">KHR (áŸ›)</option>
+                            <option value="THB">THB (à¸¿)</option>
+                            <option value="VND">VND (â‚«)</option>
+                            <option value="EUR">EUR (â‚¬)</option>
+                            <option value="GBP">GBP (Â£)</option>
                             <option value="IDR">IDR (Rp)</option>
                             <option value="MYR">MYR (RM)</option>
                             <option value="SGD">SGD (S$)</option>
-                            <option value="PHP">PHP (₱)</option>
+                            <option value="PHP">PHP (â‚±)</option>
                           </select>
                           <p className="text-xs text-muted-foreground mt-1">
                             Current symbol: {settings.packageCurrencySymbol || "$"}
@@ -1744,7 +1744,7 @@ const AdminPage: React.FC = () => {
                                 }}
                                 className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-white rounded-full text-xs flex items-center justify-center"
                               >
-                                ×
+                                Ã—
                               </button>
                             </div>
                           ))}
@@ -2059,7 +2059,7 @@ const AdminPage: React.FC = () => {
                                       : 'bg-white/60 text-muted-foreground border border-white/40 hover:border-gold/50'
                                       }`}
                                   >
-                                    {tag === 'popular' ? 'ពេញនិយម' : tag === 'mobile' ? 'ទូរស័ព្ទ' : 'កុំព្យូទ័រ'}
+                                    {tag === 'popular' ? 'áž–áŸáž‰áž“áž·áž™áž˜' : tag === 'mobile' ? 'áž‘áž¼ážšážŸáŸáž–áŸ’áž‘' : 'áž€áž»áŸ†áž–áŸ’áž™áž¼áž‘áŸážš'}
                                   </button>
                                 ))}
                               </div>
@@ -2095,7 +2095,7 @@ const AdminPage: React.FC = () => {
                                   </p>
                                   {game.g2bulkCategoryId && (
                                     <span className="text-xs bg-green-500/20 text-green-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                      ✓ G2Bulk Linked
+                                      âœ“ G2Bulk Linked
                                     </span>
                                   )}
                                 </div>
@@ -2296,7 +2296,7 @@ const AdminPage: React.FC = () => {
                                           onChange={(url) => setNewPackage((prev) => ({ ...prev, labelIcon: url }))}
                                           folder="packages"
                                           aspectRatio="square"
-                                          placeholder="🏷️"
+                                          placeholder="ðŸ·ï¸"
                                         />
                                       </div>
                                       <div className="flex items-center gap-1">
@@ -2359,7 +2359,7 @@ const AdminPage: React.FC = () => {
                                         variant={packageListSort === "price" ? "default" : "outline"}
                                         onClick={() => setPackageListSort("price")}
                                       >
-                                        Price ↑
+                                        Price â†‘
                                       </Button>
                                       <Button
                                         type="button"
@@ -2475,7 +2475,7 @@ const AdminPage: React.FC = () => {
                                                   }
                                                   folder="packages"
                                                   aspectRatio="square"
-                                                  placeholder="🏷️"
+                                                  placeholder="ðŸ·ï¸"
                                                 />
                                               </div>
                                               <div className="flex items-center gap-1">
@@ -2555,7 +2555,7 @@ const AdminPage: React.FC = () => {
                                                 />
                                               </div>
                                               <p className="text-xs text-muted-foreground">
-                                                {pkg.amount} units{pkg.label && ` • ${pkg.label}`} • Qty: {pkg.quantity ?? 1}x
+                                                {pkg.amount} units{pkg.label && ` â€¢ ${pkg.label}`} â€¢ Qty: {pkg.quantity ?? 1}x
                                               </p>
                                               <G2BulkProductSelector
                                                 value={pkg.g2bulkProductId}
@@ -2599,7 +2599,7 @@ const AdminPage: React.FC = () => {
                                               <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-7 w-7 text-blue-500 hover:text-blue-600 hover:bg-blue-500/10"
+                                                className="h-7 w-7 text-gold hover:text-gold/80 hover:bg-gold/10"
                                                 title="Clone Package"
                                                 onClick={async () => {
                                                   await addPackage(game.id, {
@@ -2788,7 +2788,7 @@ const AdminPage: React.FC = () => {
                                             }
                                             folder="packages"
                                             aspectRatio="square"
-                                            placeholder="🏷️"
+                                            placeholder="ðŸ·ï¸"
                                           />
                                         </div>
                                         <div className="flex items-center gap-1">
@@ -2907,7 +2907,7 @@ const AdminPage: React.FC = () => {
                                                     }
                                                     folder="packages"
                                                     aspectRatio="square"
-                                                    placeholder="🏷️"
+                                                    placeholder="ðŸ·ï¸"
                                                   />
                                                 </div>
                                                 <div className="flex items-center gap-1">
@@ -2991,7 +2991,7 @@ const AdminPage: React.FC = () => {
                                                   />
                                                 </div>
                                                 <p className="text-xs text-muted-foreground">
-                                                  {pkg.amount} units{pkg.label && ` • ${pkg.label}`}
+                                                  {pkg.amount} units{pkg.label && ` â€¢ ${pkg.label}`}
                                                 </p>
                                                 <G2BulkProductSelector
                                                   value={pkg.g2bulkProductId}
@@ -3264,3 +3264,4 @@ const AdminPage: React.FC = () => {
 };
 
 export default AdminPage;
+

@@ -225,16 +225,16 @@ const G2BulkStatsDashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-transparent">
+        <Card className="border-gold/30 bg-gradient-to-br from-gold/5 to-transparent">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Processing</p>
-                <p className="text-2xl font-bold text-blue-500">
+                <p className="text-2xl font-bold text-gold">
                   {(todayStats?.processing || 0) + (todayStats?.pending || 0)}
                 </p>
               </div>
-              <Clock className="w-8 h-8 text-blue-500 opacity-50" />
+              <Clock className="w-8 h-8 text-gold opacity-50" />
             </div>
           </CardContent>
         </Card>
@@ -363,3 +363,4 @@ const G2BulkStatsDashboard: React.FC = () => {
 };
 
 export default G2BulkStatsDashboard;
+

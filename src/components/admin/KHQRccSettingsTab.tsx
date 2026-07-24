@@ -205,8 +205,8 @@ const KHQRccSettingsTab: React.FC = () => {
         </Button>
 
         {/* Webhook Info */}
-        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-600 dark:text-blue-400 mb-2">🔗 Your Webhook URL</h4>
+        <div className="bg-gold/10 border border-gold/30 rounded-lg p-4">
+          <h4 className="font-semibold text-gold dark:text-gold mb-2">🔗 Your Webhook URL</h4>
           <p className="text-sm text-muted-foreground mb-2">
             Configure this URL in your KHQRcc dashboard as the Global Webhook URL:
           </p>
@@ -223,3 +223,4 @@ const KHQRccSettingsTab: React.FC = () => {
 };
 
 export default KHQRccSettingsTab;
+

@@ -365,7 +365,7 @@ const G2BulkBulkLinker: React.FC<G2BulkBulkLinkerProps> = ({ games, onLinkComple
       return <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Exact Match</Badge>;
     }
     if (confidence >= 70) {
-      return <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">Good Match</Badge>;
+      return <Badge className="bg-gold/20 text-gold border-gold/30">Good Match</Badge>;
     }
     if (confidence >= 50) {
       return <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30">Possible</Badge>;
@@ -546,3 +546,4 @@ const G2BulkBulkLinker: React.FC<G2BulkBulkLinkerProps> = ({ games, onLinkComple
 };
 
 export default G2BulkBulkLinker;
+

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import { Save, Type, Upload, Loader2, X, Globe, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -161,7 +161,7 @@ const FontSettingsTab: React.FC = () => {
         customKhmerFont: khmerFont,
         customEnglishFont: englishFont,
       });
-      toast({ title: '✓ Font settings saved!' });
+      toast({ title: 'âœ“ Font settings saved!' });
     } catch (error) {
       console.error('Error saving font settings:', error);
       toast({ title: 'Failed to save', variant: 'destructive' });
@@ -185,7 +185,7 @@ const FontSettingsTab: React.FC = () => {
         {/* Khmer Font */}
         <FontUpload
           label="Khmer Font"
-          description="Upload a custom font for Khmer text (ភាសាខ្មែរ). This will replace the default Battambang font."
+          description="Upload a custom font for Khmer text (áž—áž¶ážŸáž¶ážáŸ’áž˜áŸ‚ážš). This will replace the default Battambang font."
           value={khmerFont}
           onChange={setKhmerFont}
           icon={<Languages className="w-5 h-5 text-gold" />}
@@ -210,7 +210,7 @@ const FontSettingsTab: React.FC = () => {
                   className="text-lg"
                   style={{ fontFamily: 'CustomKhmer, Battambang, sans-serif' }}
                 >
-                  ភាសាខ្មែរ - សូមស្វាគមន៍មកកាន់ AHNAJAK TOPUP
+                  áž—áž¶ážŸáž¶ážáŸ’áž˜áŸ‚ážš - ážŸáž¼áž˜ážŸáŸ’ážœáž¶áž‚áž˜áž“áŸáž˜áž€áž€áž¶áž“áŸ‹ AHNAJAK TOPUP
                 </p>
               )}
               {englishFont && (
@@ -249,13 +249,13 @@ const FontSettingsTab: React.FC = () => {
         </Button>
 
         {/* Info Box */}
-        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-600 dark:text-blue-400 mb-2">💡 Tips</h4>
+        <div className="bg-gold/10 border border-gold/30 rounded-lg p-4">
+          <h4 className="font-semibold text-gold dark:text-gold mb-2">ðŸ’¡ Tips</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Use .woff2 format for best performance</li>
-            <li>• Khmer fonts should include Khmer Unicode characters</li>
-            <li>• Changes apply site-wide after saving and refreshing</li>
-            <li>• Maximum file size: 5MB per font</li>
+            <li>â€¢ Use .woff2 format for best performance</li>
+            <li>â€¢ Khmer fonts should include Khmer Unicode characters</li>
+            <li>â€¢ Changes apply site-wide after saving and refreshing</li>
+            <li>â€¢ Maximum file size: 5MB per font</li>
           </ul>
         </div>
       </CardContent>
@@ -264,3 +264,4 @@ const FontSettingsTab: React.FC = () => {
 };
 
 export default FontSettingsTab;
+

@@ -9,8 +9,8 @@ import { Sparkles, Save, Paintbrush, ShieldCheck, Image, Video, MonitorPlay } fr
 const AiTab: React.FC = () => {
   const { settings, updateSettings } = useSite();
   const [siteName, setSiteName] = useState(settings.siteName || 'Ahnajak Topup');
-  const [primaryColor, setPrimaryColor] = useState(settings.primaryColor || '#0ea5e9');
-  const [accentColor, setAccentColor] = useState(settings.accentColor || '#0284c7');
+  const [primaryColor, setPrimaryColor] = useState(settings.primaryColor || '#D4A84B');
+  const [accentColor, setAccentColor] = useState(settings.accentColor || '#B38F3D');
   const [bgType, setBgType] = useState<'color' | 'gradient' | 'image' | 'video'>(settings.bgType || 'color');
   const [backgroundColor, setBackgroundColor] = useState(settings.backgroundColor || '#000000');
   const [bgImageUrl, setBgImageUrl] = useState(settings.bgImageUrl || '');
@@ -19,8 +19,8 @@ const AiTab: React.FC = () => {
 
   // Common premium dark theme presets
   const presets = [
-    { name: 'Neon Cyan (Default)', primary: '#0ea5e9', accent: '#0284c7' },
-    { name: 'Amber Gold', primary: '#D4A84B', accent: '#B38F3D' },
+    { name: 'Amber Gold (Default)', primary: '#D4A84B', accent: '#B38F3D' },
+    { name: 'Neon Cyan', primary: '#0ea5e9', accent: '#0284c7' },
     { name: 'Electric Purple', primary: '#a855f7', accent: '#7e22ce' },
     { name: 'Emerald Green', primary: '#10b981', accent: '#047857' },
     { name: 'Crimson Red', primary: '#ef4444', accent: '#b91c1c' },
@@ -69,13 +69,13 @@ const AiTab: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Introduction Card */}
-      <Card className="border-cyan-500/30 bg-cyan-950/10 backdrop-blur-sm">
+      <Card className="border-gold/30 bg-gold/10 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-cyan-400">
+          <CardTitle className="flex items-center gap-2 text-gold">
             <Sparkles className="w-5 h-5 animate-pulse" />
             AI Customization & Training Center
           </CardTitle>
-          <CardDescription className="text-cyan-100/70">
+          <CardDescription className="text-gold/70">
             Configure your brand name, page background types, color codes, and automatically write instructions that train future AI developer agents to match your styling requirements.
           </CardDescription>
         </CardHeader>
@@ -86,7 +86,7 @@ const AiTab: React.FC = () => {
         <Card className="border-border bg-card text-card-foreground">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-cyan-400" />
+              <ShieldCheck className="w-5 h-5 text-gold" />
               Brand & Title Manager
             </CardTitle>
             <CardDescription>Rename your portal everywhere instantly</CardDescription>
@@ -98,7 +98,7 @@ const AiTab: React.FC = () => {
                 value={siteName}
                 onChange={(e) => setSiteName(e.target.value)}
                 placeholder="Enter new brand name (e.g. Ahnajak Topup)"
-                className="bg-background border-input focus:border-cyan-500"
+                className="bg-background border-input focus:border-gold"
               />
             </div>
             <div className="space-y-2">
@@ -116,7 +116,7 @@ const AiTab: React.FC = () => {
         <Card className="border-border bg-card text-card-foreground">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Paintbrush className="w-5 h-5 text-cyan-400" />
+              <Paintbrush className="w-5 h-5 text-gold" />
               Accent Colors
             </CardTitle>
             <CardDescription>Set the colors and accents for your client pages</CardDescription>
@@ -186,7 +186,7 @@ const AiTab: React.FC = () => {
       <Card className="border-border bg-card text-card-foreground">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MonitorPlay className="w-5 h-5 text-cyan-400" />
+            <MonitorPlay className="w-5 h-5 text-gold" />
             Global Website Background Manager (All Pages)
           </CardTitle>
           <CardDescription>Configure the background style that applies to every page on your client website</CardDescription>
@@ -203,7 +203,7 @@ const AiTab: React.FC = () => {
                   onClick={() => setBgType(type)}
                   className={`flex-1 capitalize ${
                     bgType === type 
-                      ? 'bg-cyan-500 text-black hover:bg-cyan-600 font-bold' 
+                      ? 'bg-gold text-black hover:bg-gold/80 font-bold' 
                       : 'border-border hover:bg-accent text-foreground'
                   }`}
                 >
@@ -247,14 +247,14 @@ const AiTab: React.FC = () => {
               {bgType === 'image' && (
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <Image className="w-4 h-4 text-cyan-400" />
+                    <Image className="w-4 h-4 text-gold" />
                     Background Image URL
                   </label>
                   <Input
                     value={bgImageUrl}
                     onChange={(e) => setBgImageUrl(e.target.value)}
                     placeholder="Enter image URL (e.g. https://example.com/bg.jpg)"
-                    className="bg-background border-input focus:border-cyan-500"
+                    className="bg-background border-input focus:border-gold"
                   />
                   <p className="text-xs text-muted-foreground">
                     Provide a public image web address. The image will be centered, stretched, and layered at 40% opacity.
@@ -266,14 +266,14 @@ const AiTab: React.FC = () => {
               {bgType === 'video' && (
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <Video className="w-4 h-4 text-cyan-400" />
+                    <Video className="w-4 h-4 text-gold" />
                     Background Video URL
                   </label>
                   <Input
                     value={bgVideoUrl}
                     onChange={(e) => setBgVideoUrl(e.target.value)}
                     placeholder="Enter video URL (e.g. https://example.com/bg.mp4)"
-                    className="bg-background border-input focus:border-cyan-500"
+                    className="bg-background border-input focus:border-gold"
                   />
                   <p className="text-xs text-muted-foreground">
                     Provide a direct link to an MP4 video. The video will autoplay, loop, and run muted in the background.
@@ -297,7 +297,7 @@ const AiTab: React.FC = () => {
         <Button
           onClick={handleSaveAndTrain}
           disabled={saving}
-          className="bg-cyan-500 hover:bg-cyan-600 text-black font-bold px-6 py-5 rounded-xl shadow-lg shadow-cyan-500/10 flex items-center gap-2"
+          className="bg-gold hover:bg-gold/80 text-black font-bold px-6 py-5 rounded-xl shadow-lg shadow-gold/10 flex items-center gap-2"
         >
           {saving ? (
             <>

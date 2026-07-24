@@ -336,8 +336,8 @@ const KesorSettingsTab: React.FC = () => {
         </div>
 
         {/* Info Box */}
-        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-600 dark:text-blue-400 mb-2">💡 How KHQR Gateway Works</h4>
+        <div className="bg-gold/10 border border-gold/30 rounded-lg p-4">
+          <h4 className="font-semibold text-gold dark:text-gold mb-2">💡 How KHQR Gateway Works</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• Node.js API generates dynamic KHQR codes for each payment</li>
             <li>• Customers scan QR and pay via any Bakong-linked bank</li>
@@ -381,3 +381,4 @@ const KesorSettingsTab: React.FC = () => {
 };
 
 export default KesorSettingsTab;
+

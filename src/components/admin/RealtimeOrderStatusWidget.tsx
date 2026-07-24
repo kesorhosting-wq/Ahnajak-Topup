@@ -86,7 +86,7 @@ const RealtimeOrderStatusWidget: React.FC = () => {
       case 'failed':
         return <XCircle className="w-4 h-4 text-red-500" />;
       case 'processing':
-        return <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />;
+        return <Loader2 className="w-4 h-4 text-gold animate-spin" />;
       case 'paid':
         return <Zap className="w-4 h-4 text-yellow-500" />;
       default:
@@ -98,7 +98,7 @@ const RealtimeOrderStatusWidget: React.FC = () => {
     const variants: Record<string, { className: string; label: string }> = {
       completed: { className: 'bg-green-500/20 text-green-500 border-green-500/30', label: 'Completed' },
       failed: { className: 'bg-red-500/20 text-red-500 border-red-500/30', label: 'Failed' },
-      processing: { className: 'bg-blue-500/20 text-blue-500 border-blue-500/30', label: 'Processing' },
+      processing: { className: 'bg-gold/20 text-gold border-gold/30', label: 'Processing' },
       paid: { className: 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30', label: 'Paid' },
       pending: { className: 'bg-muted text-muted-foreground border-border', label: 'Pending' }
     };
@@ -159,7 +159,7 @@ const RealtimeOrderStatusWidget: React.FC = () => {
             </div>
           )}
           {statusCounts.processing !== undefined && (
-            <div className="flex items-center gap-1 text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded">
+            <div className="flex items-center gap-1 text-xs bg-gold/10 text-gold px-2 py-1 rounded">
               <Loader2 className="w-3 h-3" />
               <span>{statusCounts.processing || 0} Processing</span>
             </div>
@@ -240,3 +240,4 @@ const RealtimeOrderStatusWidget: React.FC = () => {
 };
 
 export default RealtimeOrderStatusWidget;
+

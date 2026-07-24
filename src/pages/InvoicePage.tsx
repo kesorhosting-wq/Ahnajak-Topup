@@ -121,7 +121,7 @@ const InvoicePage = () => {
         );
       case "processing":
         return (
-          <Badge className="bg-blue-500 hover:bg-blue-600 text-white gap-1">
+          <Badge className="bg-gold hover:bg-gold/80 text-white gap-1">
             <Loader2 className="w-3 h-3 animate-spin" />
             កំពុងដំណើរការ
           </Badge>
@@ -251,10 +251,10 @@ const InvoicePage = () => {
             )}
             
             {isProcessing && (
-              <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-6 text-white text-center">
+              <div className="bg-gradient-to-r from-gold to-amber-600 p-6 text-white text-center">
                 <Loader2 className="w-16 h-16 mx-auto mb-3 animate-spin" />
                 <h1 className="text-2xl font-bold mb-1">កំពុងដំណើរការ...</h1>
-                <p className="text-blue-100">សូមរង់ចាំ យើងកំពុងបំពេញការបញ្ជាទិញ</p>
+                <p className="text-white/80">សូមរង់ចាំ យើងកំពុងបំពេញការបញ្ជាទិញ</p>
               </div>
             )}
             
