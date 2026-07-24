@@ -356,7 +356,7 @@ const InvoicePage = () => {
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">ចំនួនសរុប</span>
                   <span className="text-2xl font-bold text-gold">
-                    ${order.amount?.toFixed(2)} {order.currency}
+                    ${Number(order.amount ?? 0).toFixed(2)} {order.currency}
                   </span>
                 </div>
               </div>

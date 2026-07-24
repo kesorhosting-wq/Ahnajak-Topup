@@ -219,8 +219,8 @@ const OrderHistoryPage = () => {
                       
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="text-lg font-bold text-gold">
-                            ${order.amount?.toFixed(2)}
+                            <p className="text-lg font-bold text-gold">
+                              ${Number(order.amount ?? 0).toFixed(2)}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {order.currency}
