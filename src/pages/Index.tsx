@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
@@ -25,15 +25,29 @@ const Index: React.FC = () => {
   const primaryColor = settings.primaryColor || (isKesor ? '#D4A84B' : '#E53E3E');
 
   const featuredRef = useRef<HTMLDivElement>(null);
+  const [featuredIdx, setFeaturedIdx] = useState(0);
 
-  const scrollFeatured = (dir: 'left' | 'right') => {
+  const scrollToIndex = useCallback((dir: 'left' | 'right') => {
     if (!featuredRef.current) return;
-    const scrollAmount = featuredRef.current.clientWidth * 0.8;
-    featuredRef.current.scrollBy({
-      left: dir === 'left' ? -scrollAmount : scrollAmount,
-      behavior: 'smooth',
+    const cards = Array.from(featuredRef.current.children) as HTMLElement[];
+    if (!cards.length) return;
+
+    // Find current visible card (closest to left edge)
+    const containerLeft = featuredRef.current.getBoundingClientRect().left;
+    let currentIdx = 0;
+    let minDist = Infinity;
+    cards.forEach((card, i) => {
+      const dist = Math.abs(card.getBoundingClientRect().left - containerLeft);
+      if (dist < minDist) { minDist = dist; currentIdx = i; }
     });
-  };
+
+    const next = dir === 'right'
+      ? Math.min(currentIdx + 1, cards.length - 1)
+      : Math.max(currentIdx - 1, 0);
+
+    cards[next].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    setFeaturedIdx(next);
+  }, []);
 
   useFavicon(settings.siteIcon);
 
@@ -47,6 +61,15 @@ const Index: React.FC = () => {
     }
     return result;
   }, [games, searchQuery]);
+
+  // Auto-slide every 10s
+  useEffect(() => {
+    if (featuredGames.length < 2) return;
+    const id = setInterval(() => {
+      scrollToIndex('right');
+    }, 10000);
+    return () => clearInterval(id);
+  }, [featuredGames.length, scrollToIndex]);
 
   const filteredGames = useMemo(() => {
     let result = games;
@@ -106,14 +129,14 @@ const Index: React.FC = () => {
                 </h3>
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={(e) => { e.preventDefault(); scrollFeatured('left'); }}
+                    onClick={(e) => { e.preventDefault(); scrollToIndex('left'); }}
                     className="w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
                     aria-label="Previous"
                   >
                     <ChevronLeft className="w-4 h-4 text-zinc-500" />
                   </button>
                   <button
-                    onClick={(e) => { e.preventDefault(); scrollFeatured('right'); }}
+                    onClick={(e) => { e.preventDefault(); scrollToIndex('right'); }}
                     className="w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
                     aria-label="Next"
                   >
@@ -128,7 +151,7 @@ const Index: React.FC = () => {
                   ref={featuredRef}
                   className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [&::-webkit-scrollbar]:hidden"
                 >
-                  {featuredGames.slice(0, 5).map((game, index) => (
+                  {featuredGames.map((game, index) => (
                     <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[80vw] sm:w-[45vw] lg:w-[22vw] max-w-sm">
                       <FeaturedGameCard game={game} index={index} />
                     </div>
