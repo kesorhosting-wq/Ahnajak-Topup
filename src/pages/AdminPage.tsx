@@ -115,6 +115,7 @@ const AdminPage: React.FC = () => {
   // Game state
   const [editingGame, setEditingGame] = useState<string | null>(null);
   const [newGame, setNewGame] = useState({ name: "", slug: "", image: "", g2bulkCategoryId: "" });
+  const [gameSearch, setGameSearch] = useState('');
   const [editGameData, setEditGameData] = useState<{ name: string; slug: string; image: string; coverImage: string; g2bulkCategoryId: string; defaultPackageIcon: string; tags: string[] }>({
     name: "",
     slug: "",
@@ -1928,8 +1929,30 @@ const AdminPage: React.FC = () => {
                   </CardContent>
                 </Card>
 
+                {/* Search games */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search games..."
+                    value={gameSearch}
+                    onChange={(e) => setGameSearch(e.target.value)}
+                    className="pl-10 h-10 border-gold/30"
+                  />
+                  {gameSearch && (
+                    <button
+                      onClick={() => setGameSearch('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
                 <div className="space-y-4">
-                  {games.map((game) => (
+                  {games.filter(game =>
+                    !gameSearch.trim() || (game.name || '').toLowerCase().includes(gameSearch.toLowerCase())
+                  ).map((game) => (
                     <Card key={game.id} className="border-gold/30">
                       <CardContent className="p-4">
                         {editingGame === game.id ? (
