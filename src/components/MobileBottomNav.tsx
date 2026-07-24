@@ -13,6 +13,8 @@ const MobileBottomNav: React.FC = () => {
   const { settings } = useSite();
   const primaryColor = settings.primaryColor || '#D4A84B';
 
+  if (location.pathname.startsWith('/topup/') || location.pathname === '/checkout') return null;
+
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/' },
     { id: 'event', label: 'Event', icon: PartyPopper, path: '/events' },
