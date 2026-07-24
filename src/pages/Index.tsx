@@ -25,11 +25,19 @@ const Index: React.FC = () => {
   useFavicon(settings.siteIcon);
 
   const filteredGames = useMemo(() => {
-    if (!searchQuery.trim()) return games;
-    const query = searchQuery.toLowerCase();
-    return games.filter(game =>
-      (game.name || '').toLowerCase().includes(query)
-    );
+    let result = games;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(game =>
+        (game.name || '').toLowerCase().includes(query)
+      );
+    }
+    // Sort: featured first, then rest
+    return [...result].sort((a, b) => {
+      const aF = a.tags?.includes('featured') ? 0 : 1;
+      const bF = b.tags?.includes('featured') ? 0 : 1;
+      return aF - bF;
+    });
   }, [games, searchQuery]);
 
   return (
@@ -67,7 +75,7 @@ const Index: React.FC = () => {
           bannerHeight={settings.bannerHeight}
         />
 
-        <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-12 flex-1">
+        <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-12 flex-1 flex flex-col min-h-0">
           {/* Header */}
           <div className="mb-6">
             <div 
@@ -90,7 +98,7 @@ const Index: React.FC = () => {
           </div>
 
           {/* Bordered container with search + scrollable grid */}
-          <div className="border border-zinc-300 dark:border-zinc-700 rounded-2xl bg-white/40 dark:bg-zinc-900/20 backdrop-blur-sm overflow-hidden">
+          <div className="border border-zinc-300 dark:border-zinc-700 rounded-2xl bg-white/40 dark:bg-zinc-900/20 backdrop-blur-sm overflow-hidden flex flex-col min-h-0 flex-1">
             {/* Search bar inside the container */}
             <div className="p-4 pb-0">
               <div className="relative">
@@ -116,7 +124,7 @@ const Index: React.FC = () => {
             </div>
 
             {/* Scrollable game grid */}
-            <div className="p-4 max-h-[calc(100vh-300px)] overflow-y-auto">
+            <div className="p-4 flex-1 overflow-y-auto min-h-0">
               {isLoading ? (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
                   {[...Array(8)].map((_, i) => (
