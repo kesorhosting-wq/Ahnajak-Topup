@@ -104,16 +104,16 @@ const Index: React.FC = () => {
                   <Sparkles className="w-5 h-5" style={{ color: primaryColor }} />
                   {settings.featuredGamesTitle || 'Featured Games'}
                 </h3>
-                <div className="hidden sm:flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => scrollFeatured('left')}
+                    onClick={(e) => { e.preventDefault(); scrollFeatured('left'); }}
                     className="w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
                     aria-label="Previous"
                   >
                     <ChevronLeft className="w-4 h-4 text-zinc-500" />
                   </button>
                   <button
-                    onClick={() => scrollFeatured('right')}
+                    onClick={(e) => { e.preventDefault(); scrollFeatured('right'); }}
                     className="w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
                     aria-label="Next"
                   >
@@ -128,8 +128,8 @@ const Index: React.FC = () => {
                   ref={featuredRef}
                   className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [&::-webkit-scrollbar]:hidden"
                 >
-                  {featuredGames.slice(0, 4).map((game, index) => (
-                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[85vw] sm:w-[48vw] lg:w-[23.5vw] max-w-sm">
+                  {featuredGames.slice(0, 5).map((game, index) => (
+                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[80vw] sm:w-[45vw] lg:w-[22vw] max-w-sm">
                       <FeaturedGameCard game={game} index={index} />
                     </div>
                   ))}
