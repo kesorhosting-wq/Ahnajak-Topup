@@ -37,6 +37,7 @@ import {
   CloudUpload,
   Globe,
   Search,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,8 @@ import FontSettingsTab from "@/components/admin/FontSettingsTab";
 import { useG2BulkProductStatus } from "@/hooks/useG2BulkProductStatus";
 import api from "@/lib/api";
 import EventsTab from "@/components/admin/EventsTab";
+import EventBannersTab from "@/components/admin/EventBannersTab";
+import EventBannersTab from "@/components/admin/EventBannersTab";
 import PreorderGamesTab from "@/components/admin/PreorderGamesTab";
 import PreorderOrdersTab from "@/components/admin/PreorderOrdersTab";
 import SalesActivityTab from "@/components/admin/SalesActivityTab";
@@ -558,6 +561,13 @@ const AdminPage: React.FC = () => {
               >
                 <Calendar className="w-4 h-4 mr-2 shrink-0" />
                 <span>Events</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="event-banners"
+                className="w-full justify-start data-[state=active]:bg-gold data-[state=active]:text-primary-foreground text-xs sm:text-sm"
+              >
+                <ImageIcon className="w-4 h-4 mr-2 shrink-0" />
+                <span>Event Banners</span>
               </TabsTrigger>
               <TabsTrigger
                 value="preorder-games"
@@ -3097,6 +3107,11 @@ const AdminPage: React.FC = () => {
               {/* Events */}
               <TabsContent value="events">
                 <EventsTab />
+              </TabsContent>
+
+              {/* Event Banners */}
+              <TabsContent value="event-banners">
+                <EventBannersTab />
               </TabsContent>
 
               {/* Pre-order Games */}

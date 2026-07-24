@@ -7,6 +7,7 @@ import HeaderSpacer from '@/components/HeaderSpacer';
 import HeroBanner from '@/components/HeroBanner';
 import GameCard from '@/components/GameCard';
 import FeaturedGameCard from '@/components/FeaturedGameCard';
+import EventBannerCarousel from '@/components/EventBannerCarousel';
 import Footer from '@/components/Footer';
 import { useSite } from '@/contexts/SiteContext';
 import { useFavicon } from '@/hooks/useFavicon';
@@ -136,6 +137,9 @@ const Index: React.FC = () => {
         />
 
         <section className="w-[90%] mx-auto py-6 sm:py-12 flex-1">
+          {/* Event Banners Section */}
+          <EventBannerCarousel />
+
           {/* Featured Games Section */}
           {!isLoading && featuredGames.length > 0 && (
             <div className="mb-8 sm:mb-10">

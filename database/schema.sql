@@ -442,4 +442,19 @@ CREATE TABLE point_transactions (
   INDEX idx_point_tx_user (user_id)
 );
 
+-- ----------------------------------------------------------------------------
+-- event_banners (homepage promotions carousel)
+-- ----------------------------------------------------------------------------
+DROP TABLE IF EXISTS event_banners;
+CREATE TABLE event_banners (
+  id          CHAR(36)     NOT NULL DEFAULT (UUID()) PRIMARY KEY,
+  title       VARCHAR(255) DEFAULT NULL,
+  image       TEXT         NOT NULL,
+  link        TEXT         DEFAULT NULL,
+  is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+  sort_order  INT          DEFAULT 0,
+  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 SET FOREIGN_KEY_CHECKS = 1;

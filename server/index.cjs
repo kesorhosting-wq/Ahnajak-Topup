@@ -75,6 +75,9 @@ app.use('/api/preorders', require('./routes/preorders.cjs'));
 // Events
 app.use('/api/events', require('./routes/events.cjs'));
 
+// Event Banners (homepage promotion banners)
+app.use('/api/event-banners', require('./routes/event-banners.cjs'));
+
 // Coupons (apply_coupon RPC replacement)
 app.use('/api/coupons', require('./routes/coupons.cjs'));
 
