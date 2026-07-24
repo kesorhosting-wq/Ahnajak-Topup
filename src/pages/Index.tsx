@@ -130,14 +130,14 @@ const Index: React.FC = () => {
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={(e) => { e.preventDefault(); scrollToIndex('left'); }}
-                    className="hidden sm:flex w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)] items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
                     aria-label="Previous"
                   >
                     <ChevronLeft className="w-4 h-4 text-zinc-500" />
                   </button>
                   <button
                     onClick={(e) => { e.preventDefault(); scrollToIndex('right'); }}
-                    className="hidden sm:flex w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)] items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
                     aria-label="Next"
                   >
                     <ChevronRight className="w-4 h-4 text-zinc-500" />
@@ -146,13 +146,13 @@ const Index: React.FC = () => {
               </div>
 
               {/* Carousel for all screen sizes */}
-              <div className="relative -mx-4 sm:mx-0 px-4 sm:px-0">
+              <div className="relative">
                 <div
                   ref={featuredRef}
-                  className="flex gap-4 sm:gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [&::-webkit-scrollbar]:hidden"
+                  className="flex gap-3 sm:gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [&::-webkit-scrollbar]:hidden"
                 >
                   {featuredGames.map((game, index) => (
-                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[85vw] sm:w-[45vw] lg:w-[22vw] max-w-sm">
+                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[44vw] sm:w-[45vw] lg:w-[22vw] max-w-[200px] sm:max-w-sm">
                       <FeaturedGameCard game={game} index={index} />
                     </div>
                   ))}
