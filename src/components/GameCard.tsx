@@ -71,13 +71,13 @@ const GameCard: React.FC<GameCardProps> = ({ game, cardBgColor, cardBorderColor,
           </div>
           
           {/* Game name and Topup Button */}
-          <div className="p-1.5 sm:p-4 space-y-1 sm:space-y-2">
-            <h3 className="font-khmer text-[10px] sm:text-base font-bold text-foreground line-clamp-1 text-center">
+          <div className="p-2.5 sm:p-4 space-y-1.5 sm:space-y-2">
+            <h3 className="font-khmer text-xs sm:text-base font-bold text-foreground line-clamp-1 text-center">
               {game.name}
             </h3>
             <Link to={`/topup/${game.slug}`} className="block">
               <Button 
-                className="w-full gap-1 sm:gap-2 text-white font-semibold transition-all duration-300 shadow-md text-[9px] sm:text-sm h-7 sm:h-9"
+                className="w-full gap-1 sm:gap-2 text-white font-semibold transition-all duration-300 shadow-md text-[10px] sm:text-sm h-8 sm:h-9"
                 style={{ background: `linear-gradient(90deg, ${frameColor} 0%, ${frameColor}dd 100%)` }}
                 size="sm"
               >

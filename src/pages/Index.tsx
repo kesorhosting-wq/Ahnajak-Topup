@@ -7,6 +7,7 @@ import HeroBanner from '@/components/HeroBanner';
 import GameCard from '@/components/GameCard';
 import FeaturedGameCard from '@/components/FeaturedGameCard';
 import Footer from '@/components/Footer';
+import MobileBottomNav from '@/components/MobileBottomNav';
 import { useSite } from '@/contexts/SiteContext';
 import { useFavicon } from '@/hooks/useFavicon';
 import {
@@ -117,14 +118,14 @@ const Index: React.FC = () => {
           bannerHeight={settings.bannerHeight}
         />
 
-        <section className="w-[90%] mx-auto py-8 sm:py-12 flex-1">
+        <section className="w-[90%] mx-auto py-6 sm:py-12 flex-1 pb-24 md:pb-0">
           {/* Featured Games Section */}
           {!isLoading && featuredGames.length > 0 && (
-            <div className="mb-10">
+            <div className="mb-8 sm:mb-10">
               {/* Section header with scroll buttons */}
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" style={{ color: primaryColor }} />
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+                  <Sparkles className="w-4 h-5 sm:w-5 sm:h-5" style={{ color: primaryColor }} />
                   {settings.featuredGamesTitle || 'Featured Games'}
                 </h3>
                 <div className="flex items-center gap-1.5">
@@ -152,7 +153,7 @@ const Index: React.FC = () => {
                   className="flex gap-3 sm:gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [&::-webkit-scrollbar]:hidden"
                 >
                   {featuredGames.map((game, index) => (
-                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[44vw] sm:w-[45vw] lg:w-[22vw] max-w-[200px] sm:max-w-sm">
+                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[82vw] sm:w-[45vw] lg:w-[22vw] max-w-[320px] sm:max-w-sm">
                       <FeaturedGameCard game={game} index={index} />
                     </div>
                   ))}
@@ -162,9 +163,9 @@ const Index: React.FC = () => {
           )}
 
           {/* Header */}
-          <div className="mb-6 text-center">
+          <div className="mb-5 sm:mb-6 text-center">
             <div 
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-3 animate-pulse"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border mb-2 sm:mb-3 animate-pulse"
               style={{ 
                 backgroundColor: `${primaryColor}10`,
                 color: primaryColor,
@@ -173,18 +174,18 @@ const Index: React.FC = () => {
             >
               🔥 TOP RECHARGES IN CAMBODIA
             </div>
-            <h2 className="font-display text-2xl sm:text-4xl font-black leading-tight text-zinc-900 dark:text-zinc-50 mb-3">
+            <h2 className="font-display text-xl sm:text-4xl font-black leading-tight text-zinc-900 dark:text-zinc-50 mb-2 sm:mb-3">
               ជ្រើសរើសទំនិញ
             </h2>
             <div 
-              className="w-16 h-1 rounded-full mx-auto"
+              className="w-12 h-1 sm:w-16 rounded-full mx-auto"
               style={{ backgroundColor: primaryColor }}
             />
           </div>
 
           {/* All Games */}
           {isLoading ? (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="aspect-[3/4] rounded-2xl bg-zinc-200 dark:bg-zinc-800 animate-pulse border border-zinc-100 dark:border-zinc-900" />
               ))}
@@ -202,7 +203,7 @@ const Index: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
               {filteredGames.map((game, index) => (
                 <GameCard
                   key={game.id}
@@ -218,6 +219,8 @@ const Index: React.FC = () => {
             </div>
           )}
         </section>
+
+        <MobileBottomNav />
 
         <Footer
           backgroundColor={settings.footerBgColor || undefined}
