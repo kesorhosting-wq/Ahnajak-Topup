@@ -95,8 +95,8 @@ const G2BulkSyncWidget: React.FC<G2BulkSyncWidgetProps> = ({ onSyncComplete }) =
           continue;
         }
 
-        if (data?.success && data?.data) {
-          totalSynced += data.data.total_synced;
+        if (data?.success) {
+          totalSynced += data.synced || data.data?.total_synced || 0;
         }
       }
 
@@ -130,14 +130,14 @@ const G2BulkSyncWidget: React.FC<G2BulkSyncWidgetProps> = ({ onSyncComplete }) =
 
       if (error) throw error;
 
-      if (data?.success && data?.data) {
-        setProductCount(data.data.synced);
-        setCategoryCount(data.data.categories);
+      if (data?.success) {
+        setProductCount(data.synced || 0);
+        setCategoryCount(data.categories || 0);
         setLastSyncTime(new Date());
 
         toast({
           title: 'Sync complete!',
-          description: `${data.data.synced} products from ${data.data.categories} games`,
+          description: `${data.synced || data.data?.total_synced || 0} products from ${data.categories || data.data?.games_created || 0} games`,
         });
 
         onSyncComplete?.();

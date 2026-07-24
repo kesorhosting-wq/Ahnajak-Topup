@@ -97,7 +97,7 @@ router.post('/', async (req, res) => {
     case 'bulk_import_all':
       return res.json(await bulkImportAll(apiKey, params));
     case 'sync_games_batch':
-      return res.json(await syncGamesAndCatalogues(apiKey, params.gameCodes?.split(',') || []));
+      return res.json(await syncGamesAndCatalogues(apiKey, params.game_codes || []));
     default:
       return res.status(400).json({ success: false, error: `Unknown action: ${action}` });
   }
@@ -124,13 +124,13 @@ async function syncProducts(apiKey) {
     // Sync games + catalogues
     const gamesRes = await fetch(`${G2BULK_API_URL}/games`, { headers });
     const gamesData = await gamesRes.json();
-    if (gamesData.success && gamesData.games) {
+    if (gamesData.games) {
       for (const game of gamesData.games) {
         const gName = game.name || game.code || 'Unknown Game';
         gameNames.add(gName);
         const catRes = await fetch(`${G2BULK_API_URL}/games/${game.code}/catalogue`, { headers });
         const catData = await catRes.json();
-        if (catData.success && catData.catalogues) {
+        if (catData.catalogues) {
           for (const cat of catData.catalogues) {
             allProducts.push({
               g2bulk_type_id: String(cat.id), g2bulk_product_id: `game_${game.code}_${cat.id}`,
@@ -147,7 +147,7 @@ async function syncProducts(apiKey) {
     // Sync card products
     const prodRes = await fetch(`${G2BULK_API_URL}/products`, { headers });
     const prodData = await prodRes.json();
-    if (prodData.success && prodData.products) {
+    if (prodData.products) {
       for (const prod of prodData.products) {
         const pName = prod.name || `Card ${prod.id}`;
         allProducts.push({
@@ -190,7 +190,7 @@ async function bulkImportAll(apiKey, params) {
   try {
     const gamesRes = await fetch(`${G2BULK_API_URL}/games`, { headers });
     const gamesData = await gamesRes.json();
-    if (!gamesData.success || !gamesData.games) {
+    if (!gamesData.games) {
       return { success: false, error: 'Failed to fetch games from G2Bulk', data: result };
     }
 
@@ -216,7 +216,7 @@ async function bulkImportAll(apiKey, params) {
       // Fetch catalogue
       const catRes = await fetch(`${G2BULK_API_URL}/games/${game.code}/catalogue`, { headers });
       const catData = await catRes.json();
-      if (!catData.success || !catData.catalogues) continue;
+      if (!catData.catalogues) continue;
 
       for (const cat of catData.catalogues) {
         let price = parseFloat(cat.amount) || 0;
