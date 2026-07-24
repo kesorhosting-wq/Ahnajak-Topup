@@ -84,7 +84,7 @@ const Index: React.FC = () => {
 
         <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-12 flex-1 flex flex-col min-h-0">
           {/* Header */}
-          <div className="mb-6 shrink-0">
+          <div className="mb-6 shrink-0 text-center">
             <div 
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-3 animate-pulse"
               style={{ 
@@ -99,7 +99,7 @@ const Index: React.FC = () => {
               ជ្រើសរើសទំនិញ
             </h2>
             <div 
-              className="w-16 h-1 rounded-full"
+              className="w-16 h-1 rounded-full mx-auto"
               style={{ backgroundColor: primaryColor }}
             />
           </div>
