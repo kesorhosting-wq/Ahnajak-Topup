@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import HeaderSpacer from '@/components/HeaderSpacer';
@@ -8,17 +9,14 @@ import Footer from '@/components/Footer';
 import { useSite } from '@/contexts/SiteContext';
 import { useFavicon } from '@/hooks/useFavicon';
 import {
-  Search,
-  X,
   AlertCircle,
   Sparkles,
 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 
 const Index: React.FC = () => {
   const { settings, games, isLoading } = useSite();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
 
   const isKesor = settings.siteName?.toLowerCase().includes('kesor');
   const primaryColor = settings.primaryColor || (isKesor ? '#D4A84B' : '#E53E3E');
@@ -82,7 +80,7 @@ const Index: React.FC = () => {
           bannerHeight={settings.bannerHeight}
         />
 
-        <section className="w-[85%] sm:w-[80%] mx-auto py-8 sm:py-12 flex-1">
+        <section className="w-[90%] mx-auto py-8 sm:py-12 flex-1">
           {/* Header */}
           <div className="mb-6 text-center">
             <div 
@@ -102,30 +100,6 @@ const Index: React.FC = () => {
               className="w-16 h-1 rounded-full mx-auto"
               style={{ backgroundColor: primaryColor }}
             />
-          </div>
-
-          {/* Search */}
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
-              <Input
-                type="text"
-                placeholder="ស្វែងរកហ្គេម... (Search games)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 pr-11 h-12 bg-white/80 dark:bg-zinc-900/30 border-2 border-zinc-300 dark:border-zinc-600 focus:border-red-500 rounded-xl text-base shadow-sm focus:ring-1 focus:ring-red-500 transition-all"
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent text-muted-foreground hover:text-foreground"
-                  onClick={() => setSearchQuery('')}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
           </div>
 
           {/* Featured Games Section */}
@@ -153,49 +127,40 @@ const Index: React.FC = () => {
           )}
 
           {/* All Games */}
-          <div className="border border-zinc-300 dark:border-zinc-700 rounded-2xl bg-white/40 dark:bg-zinc-900/20 backdrop-blur-sm overflow-hidden">
-            <div className="p-4 border-b border-zinc-200 dark:border-zinc-700">
-              <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
-                All Games ({filteredGames.length})
-              </h3>
+          {isLoading ? (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="aspect-[3/4] rounded-2xl bg-zinc-200 dark:bg-zinc-800 animate-pulse border border-zinc-100 dark:border-zinc-900" />
+              ))}
             </div>
-            <div className="p-4">
-              {isLoading ? (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="aspect-[3/4] rounded-2xl bg-zinc-200 dark:bg-zinc-800 animate-pulse border border-zinc-100 dark:border-zinc-900" />
-                  ))}
-                </div>
-              ) : filteredGames.length === 0 ? (
-                <div className="text-center py-16 sm:py-24">
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 mb-4">
-                    <AlertCircle className="w-7 h-7" />
-                  </div>
-                  <h3 className="text-base sm:text-lg font-bold mb-2 text-zinc-950 dark:text-zinc-50">រកមិនឃើញហ្គេមទេ</h3>
-                  <p className="text-muted-foreground text-xs sm:text-sm">
-                    {searchQuery
-                      ? `មិនមានលទ្ធផលស្វែងរកសម្រាប់ "${searchQuery}" ឡើយ។`
-                      : 'មិនមានហ្គេមឡើយនៅឡើយទេ។'}
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
-                  {filteredGames.map((game, index) => (
-                    <GameCard
-                      key={game.id}
-                      game={game}
-                      cardBgColor={settings.gameCardBgColor}
-                      cardBorderColor={settings.gameCardBorderColor}
-                      cardFrameImage={settings.gameCardFrameImage}
-                      cardBorderImage={settings.gameCardBorderImage}
-                      priority={index < 4}
-                      index={index}
-                    />
-                  ))}
-                </div>
-              )}
+          ) : filteredGames.length === 0 ? (
+            <div className="text-center py-16 sm:py-24">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400 mb-4">
+                <AlertCircle className="w-7 h-7" />
+              </div>
+              <h3 className="text-base sm:text-lg font-bold mb-2 text-zinc-950 dark:text-zinc-50">រកមិនឃើញហ្គេមទេ</h3>
+              <p className="text-muted-foreground text-xs sm:text-sm">
+                {searchQuery
+                  ? `មិនមានលទ្ធផលស្វែងរកសម្រាប់ "${searchQuery}" ឡើយ។`
+                  : 'មិនមានហ្គេមឡើយនៅឡើយទេ។'}
+              </p>
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+              {filteredGames.map((game, index) => (
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  cardBgColor={settings.gameCardBgColor}
+                  cardBorderColor={settings.gameCardBorderColor}
+                  cardFrameImage={settings.gameCardFrameImage}
+                  cardBorderImage={settings.gameCardBorderImage}
+                  priority={index < 4}
+                  index={index}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         <Footer
