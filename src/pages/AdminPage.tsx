@@ -1839,8 +1839,9 @@ const AdminPage: React.FC = () => {
               </TabsContent>
 
               {/* Games Management */}
-              <TabsContent value="games">
-                {/* G2Bulk Sync Widget */}
+              <TabsContent value="games" className="overflow-hidden">
+                <div className="max-h-[calc(100vh-160px)] overflow-y-auto space-y-6 pr-2">
+                  {/* G2Bulk Sync Widget */}
                 <div className="mb-6">
                   <G2BulkSyncWidget />
                 </div>
@@ -3039,6 +3040,7 @@ const AdminPage: React.FC = () => {
                     </Card>
                   ))}
                 </div>
+              </div>
               </TabsContent>
 
               {/* KHQR Payment Settings */}
