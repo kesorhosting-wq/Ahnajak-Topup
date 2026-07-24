@@ -30,31 +30,38 @@ const EventBannersTab: React.FC = () => {
   useEffect(() => { loadBanners(); }, []);
 
   const loadBanners = async () => {
+    setLoading(true);
     try {
-      const { data } = await api.get('/event-banners/all');
+      const { data, error } = await api.get('/event-banners/all');
+      if (error) throw new Error(error.message);
       setBanners((data as EventBanner[]) || []);
-    } catch { setBanners([]); }
+    } catch (err: any) {
+      console.error('loadBanners error:', err);
+      setBanners([]);
+      toast({ title: 'Failed to load banners', description: err.message, variant: 'destructive' });
+    }
     setLoading(false);
   };
 
   const handleAdd = async () => {
     if (!newBanner.image) {
-      toast({ title: 'Please upload a banner image', variant: 'destructive' });
+      toast({ title: 'Please upload a banner image first', variant: 'destructive' });
       return;
     }
     setSaving(true);
     try {
-      await api.post('/event-banners', {
+      const { error } = await api.post('/event-banners', {
         title: newBanner.title || null,
         image: newBanner.image,
         link: newBanner.link || null,
       });
+      if (error) throw new Error(error.message);
       setNewBanner({ title: '', image: '', link: '' });
       setAdding(false);
-      loadBanners();
+      await loadBanners();
       toast({ title: 'Banner added!' });
     } catch (err: any) {
-      toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      toast({ title: 'Failed to save', description: err.message, variant: 'destructive' });
     }
     setSaving(false);
   };
@@ -66,12 +73,13 @@ const EventBannersTab: React.FC = () => {
     }
     setSaving(true);
     try {
-      await api.put(`/event-banners/${id}`, editData);
+      const { error } = await api.put(`/event-banners/${id}`, editData);
+      if (error) throw new Error(error.message);
       setEditing(null);
-      loadBanners();
-      toast({ title: 'Saved!' });
+      await loadBanners();
+      toast({ title: 'Banner updated!' });
     } catch (err: any) {
-      toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      toast({ title: 'Failed to update', description: err.message, variant: 'destructive' });
     }
     setSaving(false);
   };
@@ -79,17 +87,19 @@ const EventBannersTab: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this banner?')) return;
     try {
-      await api.delete(`/event-banners/${id}`);
-      loadBanners();
-      toast({ title: 'Deleted' });
-    } catch { toast({ title: 'Failed', variant: 'destructive' }); }
+      const { error } = await api.del(`/event-banners/${id}`);
+      if (error) throw new Error(error.message);
+      await loadBanners();
+      toast({ title: 'Banner deleted' });
+    } catch { toast({ title: 'Failed to delete', variant: 'destructive' }); }
   };
 
   const handleToggle = async (id: string, active: boolean) => {
     try {
-      await api.put(`/event-banners/${id}`, { is_active: active });
-      loadBanners();
-    } catch { toast({ title: 'Failed', variant: 'destructive' }); }
+      const { error } = await api.put(`/event-banners/${id}`, { is_active: active });
+      if (error) throw new Error(error.message);
+      await loadBanners();
+    } catch { toast({ title: 'Failed to update', variant: 'destructive' }); }
   };
 
   return (
