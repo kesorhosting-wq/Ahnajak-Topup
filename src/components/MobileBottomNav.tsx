@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSite } from '@/contexts/SiteContext';
-import { Home, PartyPopper, Gamepad2, Repeat, ShoppingCart } from 'lucide-react';
+import { Home, PartyPopper, User, Repeat, ShoppingCart } from 'lucide-react';
 
 const NAV_H = 72;
 const BTN_S = 52;
@@ -18,7 +18,7 @@ const MobileBottomNav: React.FC = () => {
     { id: 'home', label: 'Home', icon: Home, path: '/' },
     { id: 'event', label: 'Event', icon: PartyPopper, path: '/events' },
     { id: 'topup', label: 'Top Up', icon: ShoppingCart, path: '/orders', center: true },
-    { id: 'game', label: 'Game', icon: Gamepad2, path: '/games' },
+    { id: 'profile', label: 'Profile', icon: User, path: '/profile' },
     { id: 'exchange', label: 'Exchange', icon: Repeat, path: '/exchange' },
   ];
 
@@ -26,7 +26,7 @@ const MobileBottomNav: React.FC = () => {
   const getActiveTabFromPath = (path: string): string => {
     if (path === '/events') return 'event';
     if (path === '/orders') return 'topup';
-    if (path === '/games') return 'game';
+    if (path === '/profile') return 'profile';
     if (path === '/exchange') return 'exchange';
     if (path === '/') return 'home';
     return 'home';
