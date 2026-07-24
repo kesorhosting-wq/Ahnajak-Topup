@@ -7,7 +7,6 @@ import HeroBanner from '@/components/HeroBanner';
 import GameCard from '@/components/GameCard';
 import FeaturedGameCard from '@/components/FeaturedGameCard';
 import Footer from '@/components/Footer';
-import MobileBottomNav from '@/components/MobileBottomNav';
 import { useSite } from '@/contexts/SiteContext';
 import { useFavicon } from '@/hooks/useFavicon';
 import {
@@ -118,7 +117,7 @@ const Index: React.FC = () => {
           bannerHeight={settings.bannerHeight}
         />
 
-        <section className="w-[90%] mx-auto py-6 sm:py-12 flex-1 pb-24 md:pb-0">
+        <section className="w-[90%] mx-auto py-6 sm:py-12 flex-1">
           {/* Featured Games Section */}
           {!isLoading && featuredGames.length > 0 && (
             <div className="mb-8 sm:mb-10">
@@ -219,8 +218,6 @@ const Index: React.FC = () => {
             </div>
           )}
         </section>
-
-        <MobileBottomNav />
 
         <Footer
           backgroundColor={settings.footerBgColor || undefined}

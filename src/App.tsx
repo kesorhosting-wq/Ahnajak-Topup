@@ -12,6 +12,7 @@ import CustomFontLoader from "./components/CustomFontLoader";
 import GlobalBackground from "./components/GlobalBackground";
 import ContactButton from "./components/ContactButton";
 import ClickSpark from "./components/ClickSpark";
+import MobileBottomNav from "./components/MobileBottomNav";
 import Index from "./pages/Index";
 import TopupPage from "./pages/TopupPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -79,6 +80,8 @@ const App = () => (
                   />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                <div className="pb-24 md:pb-0" />
+                <MobileBottomNav />
                 <ContactButton />
               </TooltipProvider>
             </CartProvider>
