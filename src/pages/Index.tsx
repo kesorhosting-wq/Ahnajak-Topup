@@ -122,36 +122,14 @@ const Index: React.FC = () => {
                 </div>
               </div>
 
-              {/* Desktop grid (4 cols) */}
-              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {featuredGames.map((game, index) => (
-                  <FeaturedGameCard
-                    key={`featured-${game.id}`}
-                    game={game}
-                    index={index}
-                  />
-                ))}
-              </div>
-
-              {/* Tablet grid (2 cols) */}
-              <div className="hidden sm:grid md:hidden grid-cols-2 gap-4">
-                {featuredGames.map((game, index) => (
-                  <FeaturedGameCard
-                    key={`featured-${game.id}`}
-                    game={game}
-                    index={index}
-                  />
-                ))}
-              </div>
-
-              {/* Mobile horizontal carousel */}
-              <div className="sm:hidden relative">
+              {/* Carousel for all screen sizes */}
+              <div className="relative">
                 <div
                   ref={featuredRef}
-                  className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 -mx-2 px-2 [&::-webkit-scrollbar]:hidden"
+                  className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [&::-webkit-scrollbar]:hidden"
                 >
-                  {featuredGames.map((game, index) => (
-                    <div key={`featured-mob-${game.id}`} className="snap-start shrink-0 w-[85vw] max-w-sm">
+                  {featuredGames.slice(0, 4).map((game, index) => (
+                    <div key={`featured-${game.id}`} className="snap-start shrink-0 w-[85vw] sm:w-[48vw] lg:w-[23.5vw] max-w-sm">
                       <FeaturedGameCard game={game} index={index} />
                     </div>
                   ))}
