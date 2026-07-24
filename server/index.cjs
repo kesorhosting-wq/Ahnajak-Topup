@@ -134,12 +134,11 @@ const { pool } = require('./db.cjs');
 
 // ── Start server ────────────────────────────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('');
-  console.log('╔══════════════════════════════════════════════╗');
-  console.log(`║   Ahnajak Topup API Server v2 (MySQL)        ║`);
-  console.log(`║   Port: ${PORT}                                   ║`);
-  console.log('║   Auth: JWT + bcrypt                         ║');
-  console.log('║   Uploads: /uploads/site-assets              ║`);
-  console.log('╚══════════════════════════════════════════════╝');
-  console.log('');
+  console.log('\n' +
+    '╔══════════════════════════════════════════════╗\n' +
+    '║   Ahnajak Topup API Server v2 (MySQL)        ║\n' +
+    `║   Port: ${PORT}                                   ║\n` +
+    '║   Auth: JWT + bcrypt                         ║\n' +
+    '║   Uploads: /uploads/site-assets              ║\n' +
+    '╚══════════════════════════════════════════════╝\n');
 });
