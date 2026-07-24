@@ -7,20 +7,22 @@ const MobileBottomNav: React.FC = () => {
   const location = useLocation();
   const { settings } = useSite();
   const primaryColor = settings.primaryColor || '#D4A84B';
-  const [centerUp, setCenterUp] = useState(false);
 
   const navItems = [
-    { label: 'Home', icon: Home, path: '/' },
-    { label: 'Event', icon: PartyPopper, path: '/events' },
-    { label: 'Top Up', icon: ShoppingCart, path: '/', center: true },
-    { label: 'Game', icon: Gamepad2, path: '/' },
-    { label: 'Order', icon: Receipt, path: '/orders' },
+    { id: 'home', label: 'Home', icon: Home, path: '/' },
+    { id: 'event', label: 'Event', icon: PartyPopper, path: '/events' },
+    { id: 'topup', label: 'Top Up', icon: ShoppingCart, path: '/', center: true },
+    { id: 'game', label: 'Game', icon: Gamepad2, path: '/' },
+    { id: 'order', label: 'Order', icon: Receipt, path: '/orders' },
   ];
 
-  const handleCenterClick = () => {
-    setCenterUp(true);
-    setTimeout(() => setCenterUp(false), 600);
-  };
+  const [activeTab, setActiveTab] = useState(() => {
+    if (location.pathname === '/events') return 'event';
+    if (location.pathname === '/orders') return 'order';
+    return 'home';
+  });
+
+  const isTopUpActive = activeTab === 'topup';
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-3">
@@ -28,12 +30,17 @@ const MobileBottomNav: React.FC = () => {
         {/* Center Button */}
         <Link
           to="/"
-          onClick={handleCenterClick}
-          className="absolute left-1/2 -translate-x-1/2 z-10 w-[58px] h-[58px] rounded-full flex items-center justify-center shadow-xl active:scale-90 transition-all duration-300"
+          onClick={() => setActiveTab('topup')}
+          className="absolute left-1/2 -translate-x-1/2 z-10 w-[58px] h-[58px] rounded-full flex items-center justify-center active:scale-90 transition-all duration-300"
           style={{
-            bottom: centerUp ? 'calc(100% + 4px)' : 'calc(100% - 40px)',
-            background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`,
-            boxShadow: `0 6px 24px ${primaryColor}55`,
+            bottom: isTopUpActive ? 'calc(100% + 12px)' : 'calc(100% - 40px)',
+            transform: isTopUpActive ? 'translateY(0) scale(1.05)' : 'translateY(0) scale(1)',
+            background: isTopUpActive
+              ? `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`
+              : `linear-gradient(135deg, ${primaryColor}cc, ${primaryColor}99)`,
+            boxShadow: isTopUpActive
+              ? `0 8px 32px ${primaryColor}66`
+              : `0 6px 24px ${primaryColor}44`,
           }}
         >
           <ShoppingCart className="w-[26px] h-[26px] text-white" strokeWidth={2.5} />
@@ -60,7 +67,7 @@ const MobileBottomNav: React.FC = () => {
           <div
             className="absolute left-1/2 -translate-x-1/2 z-[1] w-[62px] h-[32px] pointer-events-none transition-all duration-300 bg-white/85 dark:bg-zinc-900/85 border-l border-r border-t border-zinc-200 dark:border-zinc-700/50 border-b-0"
             style={{
-              top: centerUp ? '-22px' : '0px',
+              top: isTopUpActive ? '-24px' : '0px',
               borderRadius: '31px 31px 0 0',
             }}
           />
@@ -68,33 +75,37 @@ const MobileBottomNav: React.FC = () => {
           <div className="flex items-center h-full">
             {navItems.map((item) => {
               if (item.center) {
-                return <div key={item.label} className="flex-1" />;
+                return <div key={item.id} className="flex-1" />;
               }
 
-              const isActive = location.pathname === item.path;
+              const isActive = activeTab === item.id;
               const Icon = item.icon;
 
               return (
                 <Link
-                  key={item.label}
+                  key={item.id}
                   to={item.path}
-                  className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-200 active:scale-90"
+                  onClick={() => setActiveTab(item.id)}
+                  className="flex flex-col items-center justify-center gap-1 flex-1 h-full transition-all duration-300 active:scale-90"
+                  style={{
+                    transform: isActive ? 'translateY(-2px) scale(1.02)' : 'translateY(0) scale(1)',
+                  }}
                 >
                   <div className="relative">
                     <Icon
-                      className="w-[22px] h-[22px] transition-colors duration-200"
+                      className="w-[22px] h-[22px] transition-all duration-300"
                       style={{ color: isActive ? primaryColor : '#9ca3af' }}
                       strokeWidth={isActive ? 2.5 : 2}
                     />
                     {isActive && (
                       <div
-                        className="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                        className="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-1 h-1 rounded-full transition-all duration-300"
                         style={{ backgroundColor: primaryColor }}
                       />
                     )}
                   </div>
                   <span
-                    className="text-[10px] font-semibold transition-colors duration-200"
+                    className="text-[10px] font-semibold transition-all duration-300"
                     style={{ color: isActive ? primaryColor : '#9ca3af' }}
                   >
                     {item.label}
