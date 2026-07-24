@@ -136,7 +136,7 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5" style={{ overscrollBehavior: 'contain' }}>
+            <nav className="flex-1 overflow-y-hidden px-3 py-2 space-y-0.5">
               {menuItems.map((item) => {
                 const isActive = location.pathname === item.id;
                 const Icon = item.icon;
