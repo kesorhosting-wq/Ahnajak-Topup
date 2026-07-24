@@ -110,6 +110,28 @@ app.use('/api/update-prices', require('./routes/prices.cjs'));
 // Misc (proxy-image, search-icons + edge function aliases like get-ikhode-public-config, khqrcc-payment, etc.)
 app.use('/api', require('./routes/misc.cjs'));
 
+// ── Auto-migration ───────────────────────────────────────────────────────────
+const { pool } = require('./db.cjs');
+(async () => {
+  try {
+    const conn = await pool.getConnection();
+    await conn.query(`CREATE TABLE IF NOT EXISTS event_banners (
+      id          CHAR(36)     NOT NULL DEFAULT (UUID()) PRIMARY KEY,
+      title       VARCHAR(255) DEFAULT NULL,
+      image       TEXT         NOT NULL,
+      link        TEXT         DEFAULT NULL,
+      is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+      sort_order  INT          DEFAULT 0,
+      created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`);
+    conn.release();
+    console.log('  ✓ Auto-migration: event_banners table ready');
+  } catch (err) {
+    console.error('  ✗ Auto-migration failed:', err.message);
+  }
+})();
+
 // ── Start server ────────────────────────────────────────────────────────────
 app.listen(PORT, '0.0.0.0', () => {
   console.log('');
@@ -117,7 +139,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`║   Ahnajak Topup API Server v2 (MySQL)        ║`);
   console.log(`║   Port: ${PORT}                                   ║`);
   console.log('║   Auth: JWT + bcrypt                         ║');
-  console.log('║   Uploads: /uploads/site-assets              ║');
+  console.log('║   Uploads: /uploads/site-assets              ║`);
   console.log('╚══════════════════════════════════════════════╝');
   console.log('');
 });
