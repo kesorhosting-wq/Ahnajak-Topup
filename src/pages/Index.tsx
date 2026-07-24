@@ -1,16 +1,19 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import HeaderSpacer from '@/components/HeaderSpacer';
 import HeroBanner from '@/components/HeroBanner';
 import GameCard from '@/components/GameCard';
+import FeaturedGameCard from '@/components/FeaturedGameCard';
 import Footer from '@/components/Footer';
 import { useSite } from '@/contexts/SiteContext';
 import { useFavicon } from '@/hooks/useFavicon';
 import {
   AlertCircle,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 const Index: React.FC = () => {
@@ -20,6 +23,17 @@ const Index: React.FC = () => {
 
   const isKesor = settings.siteName?.toLowerCase().includes('kesor');
   const primaryColor = settings.primaryColor || (isKesor ? '#D4A84B' : '#E53E3E');
+
+  const featuredRef = useRef<HTMLDivElement>(null);
+
+  const scrollFeatured = (dir: 'left' | 'right') => {
+    if (!featuredRef.current) return;
+    const scrollAmount = featuredRef.current.clientWidth * 0.8;
+    featuredRef.current.scrollBy({
+      left: dir === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  };
 
   useFavicon(settings.siteIcon);
 
@@ -104,24 +118,65 @@ const Index: React.FC = () => {
 
           {/* Featured Games Section */}
           {!isLoading && featuredGames.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-4 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-gold fill-gold" />
-                {settings.featuredGamesTitle || 'Featured Games'}
-              </h3>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+            <div className="mb-10">
+              {/* Section header with scroll buttons */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-[#ff4da6]" />
+                  {settings.featuredGamesTitle || 'Featured Games'}
+                </h3>
+                <div className="hidden sm:flex items-center gap-1.5">
+                  <button
+                    onClick={() => scrollFeatured('left')}
+                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                    aria-label="Previous"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-zinc-500" />
+                  </button>
+                  <button
+                    onClick={() => scrollFeatured('right')}
+                    className="w-8 h-8 rounded-full bg-white dark:bg-zinc-800 shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                    aria-label="Next"
+                  >
+                    <ChevronRight className="w-4 h-4 text-zinc-500" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Desktop grid (4 cols) */}
+              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {featuredGames.map((game, index) => (
-                  <GameCard
+                  <FeaturedGameCard
                     key={`featured-${game.id}`}
                     game={game}
-                    cardBgColor={settings.gameCardBgColor}
-                    cardBorderColor={settings.gameCardBorderColor}
-                    cardFrameImage={settings.gameCardFrameImage}
-                    cardBorderImage={settings.gameCardBorderImage}
-                    priority={index < 4}
                     index={index}
                   />
                 ))}
+              </div>
+
+              {/* Tablet grid (2 cols) */}
+              <div className="hidden sm:grid md:hidden grid-cols-2 gap-4">
+                {featuredGames.map((game, index) => (
+                  <FeaturedGameCard
+                    key={`featured-${game.id}`}
+                    game={game}
+                    index={index}
+                  />
+                ))}
+              </div>
+
+              {/* Mobile horizontal carousel */}
+              <div className="sm:hidden relative">
+                <div
+                  ref={featuredRef}
+                  className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 -mx-2 px-2 [&::-webkit-scrollbar]:hidden"
+                >
+                  {featuredGames.map((game, index) => (
+                    <div key={`featured-mob-${game.id}`} className="snap-start shrink-0 w-[85vw] max-w-sm">
+                      <FeaturedGameCard game={game} index={index} />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
