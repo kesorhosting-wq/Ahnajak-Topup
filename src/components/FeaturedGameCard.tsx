@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart } from 'lucide-react';
-import { Game } from '@/contexts/SiteContext';
+import { Game, useSite } from '@/contexts/SiteContext';
 import { resolveIconUrl } from '@/lib/icon-url';
 
 interface Props {
@@ -10,6 +10,8 @@ interface Props {
 }
 
 const FeaturedGameCard: React.FC<Props> = ({ game, index }) => {
+  const { settings } = useSite();
+  const primaryColor = settings.primaryColor || '#D4A84B';
   const [favorited, setFavorited] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
 
@@ -23,10 +25,21 @@ const FeaturedGameCard: React.FC<Props> = ({ game, index }) => {
       style={{ animationDelay: `${index * 60}ms`, animationFillMode: 'both' }}
     >
       <Link to={`/topup/${game.slug}`} className="block">
-        <div className="relative h-[100px] bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden transition-all duration-250 ease-out group-hover:-translate-y-1 group-hover:shadow-[0_16px_48px_-8px_rgba(255,77,166,0.25)] shadow-[0_4px_20px_-6px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_20px_-6px_rgba(0,0,0,0.3)] group-hover:shadow-xl">
-          {/* Pink gradient border (pseudo-element via background on parent) */}
+        <div className="relative h-[100px] bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden transition-all duration-250 ease-out shadow-md group-hover:-translate-y-1 group-hover:shadow-xl">
+          {/* Hover glow */}
+          <div
+            className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+            style={{ boxShadow: `inset 0 0 30px -5px ${primaryColor}40` }}
+          />
+
+          {/* Gradient border */}
           <div className="absolute inset-0 rounded-2xl p-[1.5px] pointer-events-none">
-            <div className="w-full h-full rounded-2xl bg-gradient-to-r from-[#ff4da6] to-[#ff8ac5] opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+            <div
+              className="w-full h-full rounded-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+              style={{
+                background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc)`,
+              }}
+            />
           </div>
 
           {/* White inner background */}
@@ -44,9 +57,11 @@ const FeaturedGameCard: React.FC<Props> = ({ game, index }) => {
                 aria-label="Favorite"
               >
                 <Heart
-                  className={`w-3.5 h-3.5 transition-colors duration-200 ${
-                    favorited ? 'fill-[#ff4da6] text-[#ff4da6]' : 'text-[#ff4da6]'
-                  }`}
+                  className="w-3.5 h-3.5 transition-colors duration-200"
+                  style={{
+                    color: primaryColor,
+                    fill: favorited ? primaryColor : 'transparent',
+                  }}
                 />
               </button>
 
@@ -79,7 +94,13 @@ const FeaturedGameCard: React.FC<Props> = ({ game, index }) => {
 
             {/* Action button */}
             <div className="shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff4da6] to-[#ff8ac5] flex items-center justify-center shadow-[0_4px_14px_-2px_rgba(255,77,166,0.35)] transition-all duration-250 group-hover:scale-110 group-hover:shadow-[0_6px_20px_-2px_rgba(255,77,166,0.5)]">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-250 group-hover:scale-110"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}bb)`,
+                  boxShadow: `0 4px 14px -2px ${primaryColor}55`,
+                }}
+              >
                 <ShoppingCart className="w-4.5 h-4.5 text-white" strokeWidth={2.2} />
               </div>
             </div>

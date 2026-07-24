@@ -95,34 +95,13 @@ const Index: React.FC = () => {
         />
 
         <section className="w-[90%] mx-auto py-8 sm:py-12 flex-1">
-          {/* Header */}
-          <div className="mb-6 text-center">
-            <div 
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-3 animate-pulse"
-              style={{ 
-                backgroundColor: `${primaryColor}10`,
-                color: primaryColor,
-                borderColor: `${primaryColor}25`
-              }}
-            >
-              🔥 TOP RECHARGES IN CAMBODIA
-            </div>
-            <h2 className="font-display text-2xl sm:text-4xl font-black leading-tight text-zinc-900 dark:text-zinc-50 mb-3">
-              ជ្រើសរើសទំនិញ
-            </h2>
-            <div 
-              className="w-16 h-1 rounded-full mx-auto"
-              style={{ backgroundColor: primaryColor }}
-            />
-          </div>
-
           {/* Featured Games Section */}
           {!isLoading && featuredGames.length > 0 && (
             <div className="mb-10">
               {/* Section header with scroll buttons */}
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-[#ff4da6]" />
+                  <Sparkles className="w-5 h-5" style={{ color: primaryColor }} />
                   {settings.featuredGamesTitle || 'Featured Games'}
                 </h3>
                 <div className="hidden sm:flex items-center gap-1.5">
@@ -180,6 +159,27 @@ const Index: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Header */}
+          <div className="mb-6 text-center">
+            <div 
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border mb-3 animate-pulse"
+              style={{ 
+                backgroundColor: `${primaryColor}10`,
+                color: primaryColor,
+                borderColor: `${primaryColor}25`
+              }}
+            >
+              🔥 TOP RECHARGES IN CAMBODIA
+            </div>
+            <h2 className="font-display text-2xl sm:text-4xl font-black leading-tight text-zinc-900 dark:text-zinc-50 mb-3">
+              ជ្រើសរើសទំនិញ
+            </h2>
+            <div 
+              className="w-16 h-1 rounded-full mx-auto"
+              style={{ backgroundColor: primaryColor }}
+            />
+          </div>
 
           {/* All Games */}
           {isLoading ? (
