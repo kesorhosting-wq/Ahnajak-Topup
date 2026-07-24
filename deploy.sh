@@ -34,8 +34,9 @@ show_menu() {
   echo -e " [0] Install Ahnajak Topup (Full Setup)"
   echo -e " [1] Setup/Renew Let's Encrypt SSL"
   echo -e " [2] Uninstall Ahnajak Topup"
-  echo -e " [3] Exit\n"
-  read -p "* Input option (0-3): " OPTION
+  echo -e " [3] Update Existing Installation (pull, migrate, build, restart)"
+  echo -e " [4] Exit\n"
+  read -p "* Input option (0-4): " OPTION
 }
 
 check_mysql() {
@@ -59,6 +60,59 @@ check_mysql() {
     }
   fi
   success "MySQL is running"
+}
+
+run_migrations() {
+  local DB_NAME="$1"
+  info "Running database migrations..."
+  mysql "$DB_NAME" <<SQL
+CREATE TABLE IF NOT EXISTS event_banners (
+  id          CHAR(36)     NOT NULL DEFAULT (UUID()) PRIMARY KEY,
+  title       VARCHAR(255) DEFAULT NULL,
+  image       TEXT         NOT NULL,
+  link        TEXT         DEFAULT NULL,
+  is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+  sort_order  INT          DEFAULT 0,
+  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+SQL
+  success "Migrations applied"
+}
+
+update_app() {
+  log "Starting update"
+  read -p "Domain (e.g. kesortopup.cam): " DOMAIN_NAME
+  APP_DIR="/var/www/${DOMAIN_NAME}"
+  if [ ! -d "$APP_DIR" ]; then
+    error "Directory ${APP_DIR} not found"
+    exit 1
+  fi
+
+  cd "$APP_DIR"
+
+  info "Pulling latest code..."
+  git stash 2>/dev/null || true
+  git pull origin main
+  success "Code updated"
+
+  info "Installing npm packages..."
+  npm install --loglevel=error
+  success "npm packages installed"
+
+  run_migrations "${DB_NAME:-ahnajak_topup}"
+
+  info "Building frontend..."
+  npm run build
+  success "Frontend built"
+
+  info "Restarting PM2..."
+  pm2 restart "${DOMAIN_NAME}-api" 2>/dev/null || pm2 start server/index.cjs --name "${DOMAIN_NAME}-api"
+  pm2 save
+  success "${DOMAIN_NAME}-api restarted"
+
+  echo -e "\n${GREEN}✓ Update complete for ${DOMAIN_NAME}${NC}"
+  log "Update complete for ${DOMAIN_NAME}"
 }
 
 create_swap() {
@@ -162,6 +216,8 @@ EOT
   info "Running database seed (creates tables + default data)..."
   node scripts/seed.cjs
   success "Database seeded"
+
+  run_migrations "$DB_NAME"
 
   # Set custom admin credentials
   info "Setting admin credentials..."
@@ -319,5 +375,6 @@ case "$OPTION" in
   0) install_app ;;
   1) setup_ssl_only ;;
   2) uninstall_app ;;
+  3) update_app ;;
   *) echo "Exiting."; exit 0 ;;
 esac

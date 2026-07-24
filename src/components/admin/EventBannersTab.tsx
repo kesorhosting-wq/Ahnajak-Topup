@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
 import { Plus, Trash2, Edit2, Save, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import ImageUpload from '@/components/ImageUpload';
 
 interface EventBanner {
   id: string;
@@ -20,9 +21,11 @@ interface EventBanner {
 const EventBannersTab: React.FC = () => {
   const [banners, setBanners] = useState<EventBanner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
+  const [newBanner, setNewBanner] = useState({ title: '', image: '', link: '' });
   const [editData, setEditData] = useState({ title: '', image: '', link: '', is_active: true });
-  const [uploading, setUploading] = useState<string | null>(null);
 
   useEffect(() => { loadBanners(); }, []);
 
@@ -34,32 +37,34 @@ const EventBannersTab: React.FC = () => {
     setLoading(false);
   };
 
-  const handleUpload = async (id: string, file: File) => {
-    setUploading(id);
-    try {
-      const { data, error } = await api.upload(file);
-      if (error || !data) throw new Error(error?.message || 'Upload failed');
-      await api.put(`/event-banners/${id}`, { image: data.url });
-      loadBanners();
-      toast({ title: 'Image updated!' });
-    } catch (err: any) {
-      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
-    }
-    setUploading(null);
-  };
-
   const handleAdd = async () => {
+    if (!newBanner.image) {
+      toast({ title: 'Please upload a banner image', variant: 'destructive' });
+      return;
+    }
+    setSaving(true);
     try {
-      const { data, error } = await api.post('/event-banners', { title: 'New Banner', image: '' });
-      if (error) throw new Error(error.message);
+      await api.post('/event-banners', {
+        title: newBanner.title || null,
+        image: newBanner.image,
+        link: newBanner.link || null,
+      });
+      setNewBanner({ title: '', image: '', link: '' });
+      setAdding(false);
       loadBanners();
-      toast({ title: 'Banner added' });
+      toast({ title: 'Banner added!' });
     } catch (err: any) {
       toast({ title: 'Failed', description: err.message, variant: 'destructive' });
     }
+    setSaving(false);
   };
 
   const handleSave = async (id: string) => {
+    if (!editData.image) {
+      toast({ title: 'Image is required', variant: 'destructive' });
+      return;
+    }
+    setSaving(true);
     try {
       await api.put(`/event-banners/${id}`, editData);
       setEditing(null);
@@ -68,6 +73,7 @@ const EventBannersTab: React.FC = () => {
     } catch (err: any) {
       toast({ title: 'Failed', description: err.message, variant: 'destructive' });
     }
+    setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -94,57 +100,65 @@ const EventBannersTab: React.FC = () => {
             <ImageIcon className="w-5 h-5 text-gold" />
             Event Banners
           </span>
-          <Button size="sm" onClick={handleAdd}>
+          <Button size="sm" onClick={() => setAdding(!adding)}>
             <Plus className="w-4 h-4 mr-1" /> Add Banner
           </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {adding && (
+          <div className="p-4 border rounded-lg space-y-3 bg-muted/30">
+            <ImageUpload
+              value={newBanner.image}
+              onChange={(url) => setNewBanner(p => ({ ...p, image: url }))}
+              folder="event-banners"
+              aspectRatio="wide"
+              placeholder="Upload Banner Image (21:9 recommended)"
+            />
+            <Input
+              placeholder="Title (optional)"
+              value={newBanner.title}
+              onChange={(e) => setNewBanner(p => ({ ...p, title: e.target.value }))}
+            />
+            <Input
+              placeholder="Link URL (optional)"
+              value={newBanner.link}
+              onChange={(e) => setNewBanner(p => ({ ...p, link: e.target.value }))}
+            />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleAdd} disabled={saving}>
+                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
+                Save
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setAdding(false)}>
+                <X className="w-4 h-4 mr-1" /> Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <p className="text-muted-foreground text-sm">Loading...</p>
         ) : banners.length === 0 ? (
-          <p className="text-muted-foreground text-sm text-center py-8">No event banners yet.</p>
+          <p className="text-muted-foreground text-sm text-center py-8">No event banners yet. Click "Add Banner" to upload one.</p>
         ) : (
           banners.map((banner) => (
             <div key={banner.id} className="p-4 border rounded-lg space-y-3">
               {editing === banner.id ? (
                 <>
+                  <ImageUpload
+                    value={editData.image}
+                    onChange={(url) => setEditData(p => ({ ...p, image: url }))}
+                    folder="event-banners"
+                    aspectRatio="wide"
+                  />
                   <Input
-                    placeholder="Title (optional)"
+                    placeholder="Title"
                     value={editData.title}
                     onChange={(e) => setEditData(p => ({ ...p, title: e.target.value }))}
                   />
-                  <div className="flex items-center justify-between gap-4">
-                    {banner.image ? (
-                      <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-                        <img src={banner.image} alt="" className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-full aspect-video rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground text-sm">
-                        No image
-                      </div>
-                    )}
-                    <div className="shrink-0 flex flex-col gap-2">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        id={`file-${banner.id}`}
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleUpload(banner.id, file);
-                        }}
-                      />
-                      <label
-                        htmlFor={`file-${banner.id}`}
-                        className="px-3 py-1.5 rounded-md bg-secondary text-xs font-medium cursor-pointer hover:bg-secondary/80 text-center"
-                      >
-                        {uploading === banner.id ? 'Uploading...' : 'Upload'}
-                      </label>
-                    </div>
-                  </div>
                   <Input
-                    placeholder="Link URL (optional)"
+                    placeholder="Link URL"
                     value={editData.link}
                     onChange={(e) => setEditData(p => ({ ...p, link: e.target.value }))}
                   />
@@ -156,8 +170,9 @@ const EventBannersTab: React.FC = () => {
                     <span className="text-sm">{editData.is_active ? 'Active' : 'Hidden'}</span>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={() => handleSave(banner.id)}>
-                      <Save className="w-4 h-4 mr-1" /> Save
+                    <Button size="sm" onClick={() => handleSave(banner.id)} disabled={saving}>
+                      {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
+                      Save
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => setEditing(null)}>
                       <X className="w-4 h-4 mr-1" /> Cancel
@@ -169,7 +184,7 @@ const EventBannersTab: React.FC = () => {
                   {banner.image ? (
                     <img src={banner.image} alt="" className="w-24 aspect-video object-cover rounded-lg shrink-0" />
                   ) : (
-                    <div className="w-24 aspect-video rounded-lg bg-muted flex items-center justify-center">
+                    <div className="w-24 aspect-video rounded-lg bg-muted flex items-center justify-center shrink-0">
                       <ImageIcon className="w-6 h-6 text-muted-foreground" />
                     </div>
                   )}
