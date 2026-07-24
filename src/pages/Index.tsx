@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import Lottie from 'lottie-react';
 import Header from '@/components/Header';
 import HeaderSpacer from '@/components/HeaderSpacer';
 import HeroBanner from '@/components/HeroBanner';
