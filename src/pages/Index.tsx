@@ -11,6 +11,7 @@ import {
   Search,
   X,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,17 @@ const Index: React.FC = () => {
 
   useFavicon(settings.siteIcon);
 
+  const featuredGames = useMemo(() => {
+    let result = games.filter(game => game.tags?.includes('featured'));
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(game =>
+        (game.name || '').toLowerCase().includes(query)
+      );
+    }
+    return result;
+  }, [games, searchQuery]);
+
   const filteredGames = useMemo(() => {
     let result = games;
     if (searchQuery.trim()) {
@@ -32,12 +44,7 @@ const Index: React.FC = () => {
         (game.name || '').toLowerCase().includes(query)
       );
     }
-    // Sort: featured first, then rest
-    return [...result].sort((a, b) => {
-      const aF = a.tags?.includes('featured') ? 0 : 1;
-      const bF = b.tags?.includes('featured') ? 0 : 1;
-      return aF - bF;
-    });
+    return result;
   }, [games, searchQuery]);
 
   return (
@@ -97,33 +104,61 @@ const Index: React.FC = () => {
             />
           </div>
 
-          {/* Bordered container with search + scrollable grid */}
-          <div className="border border-zinc-300 dark:border-zinc-700 rounded-2xl bg-white/40 dark:bg-zinc-900/20 backdrop-blur-sm overflow-hidden flex flex-col min-h-0 flex-1">
-            {/* Search bar inside the container */}
-            <div className="p-4 pb-0">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
-                <Input
-                  type="text"
-                  placeholder="ស្វែងរកហ្គេម... (Search games)"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-11 pr-11 h-12 bg-white/80 dark:bg-zinc-900/30 border-2 border-zinc-300 dark:border-zinc-600 focus:border-red-500 rounded-xl text-base shadow-sm focus:ring-1 focus:ring-red-500 transition-all"
-                />
-                {searchQuery && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent text-muted-foreground hover:text-foreground"
-                    onClick={() => setSearchQuery('')}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                )}
+          {/* Search */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-zinc-400" />
+              <Input
+                type="text"
+                placeholder="ស្វែងរកហ្គេម... (Search games)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-11 pr-11 h-12 bg-white/80 dark:bg-zinc-900/30 border-2 border-zinc-300 dark:border-zinc-600 focus:border-red-500 rounded-xl text-base shadow-sm focus:ring-1 focus:ring-red-500 transition-all"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 hover:bg-transparent text-muted-foreground hover:text-foreground"
+                  onClick={() => setSearchQuery('')}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Featured Games Section */}
+          {!isLoading && featuredGames.length > 0 && (
+            <div className="mb-8">
+              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-4 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-gold fill-gold" />
+                {settings.featuredGamesTitle || 'Featured Games'}
+              </h3>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
+                {featuredGames.map((game, index) => (
+                  <GameCard
+                    key={`featured-${game.id}`}
+                    game={game}
+                    cardBgColor={settings.gameCardBgColor}
+                    cardBorderColor={settings.gameCardBorderColor}
+                    cardFrameImage={settings.gameCardFrameImage}
+                    cardBorderImage={settings.gameCardBorderImage}
+                    priority={index < 4}
+                    index={index}
+                  />
+                ))}
               </div>
             </div>
+          )}
 
-            {/* Scrollable game grid */}
+          {/* All Games - Scrollable Container */}
+          <div className="border border-zinc-300 dark:border-zinc-700 rounded-2xl bg-white/40 dark:bg-zinc-900/20 backdrop-blur-sm overflow-hidden flex flex-col min-h-0 flex-1">
+            <div className="p-4 border-b border-zinc-200 dark:border-zinc-700">
+              <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
+                All Games ({filteredGames.length})
+              </h3>
+            </div>
             <div className="p-4 flex-1 overflow-y-auto min-h-0">
               {isLoading ? (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 sm:gap-4">
@@ -139,7 +174,7 @@ const Index: React.FC = () => {
                   <h3 className="text-base sm:text-lg font-bold mb-2 text-zinc-950 dark:text-zinc-50">រកមិនឃើញហ្គេមទេ</h3>
                   <p className="text-muted-foreground text-xs sm:text-sm">
                     {searchQuery
-                      ? `មិនមានលទ្ធផលស្វែងរកសម្រាប់ "${searchQuery}" ឡើយ。`
+                      ? `មិនមានលទ្ធផលស្វែងរកសម្រាប់ "${searchQuery}" ឡើយ។`
                       : 'មិនមានហ្គេមឡើយនៅឡើយទេ។'}
                   </p>
                 </div>
