@@ -75,13 +75,13 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
             aria-hidden="true"
           />
 
-          {/* Drawer Container */}
+          {/* Drawer Container - Auto-height fits content cleanly */}
           <motion.aside
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed top-0 left-0 z-[110] h-[100dvh] w-[280px] max-w-[85vw] bg-zinc-950/95 backdrop-blur-2xl border-r border-zinc-800/60 shadow-2xl flex flex-col overflow-hidden"
+            className="fixed top-0 left-0 z-[110] h-auto max-h-[85dvh] w-[280px] max-w-[85vw] bg-zinc-950/95 backdrop-blur-2xl border-r border-b border-zinc-800/60 rounded-br-3xl shadow-2xl flex flex-col overflow-hidden"
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
@@ -142,7 +142,7 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
               </div>
             </div>
 
-            {/* Nav Menu Items (Scrollable Middle Area) */}
+            {/* Nav Menu Items & Inline Action Button */}
             <nav className="flex-1 min-h-0 overflow-y-auto px-3 py-2 space-y-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {menuItems.map((item) => {
                 const isActive = location.pathname === item.id;
@@ -213,33 +213,33 @@ const MobileDrawer: React.FC<MobileDrawerProps> = ({ open, onClose }) => {
                   </span>
                 </button>
               )}
-            </nav>
 
-            {/* Footer Section */}
-            <div className="shrink-0 p-3.5 border-t border-zinc-800/50 bg-zinc-950/50">
-              {user ? (
-                <button
-                  onClick={confirmSignOut}
-                  className="w-full h-11 flex items-center justify-center gap-2 rounded-xl text-white font-semibold text-sm transition-all active:scale-[0.97] bg-red-600 hover:bg-red-500 shadow-lg shadow-red-600/25"
-                >
-                  <LogOut className="w-4 h-4" strokeWidth={2.5} />
-                  Sign Out
-                </button>
-              ) : (
-                <Link
-                  to="/auth"
-                  onClick={onClose}
-                  className="w-full h-11 flex items-center justify-center gap-2 rounded-xl text-white font-semibold text-sm transition-all active:scale-[0.97] hover:opacity-95"
-                  style={{
-                    background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`,
-                    boxShadow: `0 4px 16px ${primaryColor}40`,
-                  }}
-                >
-                  <LogIn className="w-4 h-4" strokeWidth={2.5} />
-                  Sign In
-                </Link>
-              )}
-            </div>
+              {/* Sign Out / Sign In Button - Positioned right below navigation */}
+              <div className="pt-4 pb-2 mt-4 border-t border-zinc-800/40">
+                {user ? (
+                  <button
+                    onClick={confirmSignOut}
+                    className="w-full h-11 flex items-center justify-center gap-2 rounded-xl text-white font-semibold text-sm transition-all active:scale-[0.97] bg-red-600 hover:bg-red-500 shadow-lg shadow-red-600/25"
+                  >
+                    <LogOut className="w-4 h-4" strokeWidth={2.5} />
+                    Sign Out
+                  </button>
+                ) : (
+                  <Link
+                    to="/auth"
+                    onClick={onClose}
+                    className="w-full h-11 flex items-center justify-center gap-2 rounded-xl text-white font-semibold text-sm transition-all active:scale-[0.97] hover:opacity-95"
+                    style={{
+                      background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`,
+                      boxShadow: `0 4px 16px ${primaryColor}40`,
+                    }}
+                  >
+                    <LogIn className="w-4 h-4" strokeWidth={2.5} />
+                    Sign In
+                  </Link>
+                )}
+              </div>
+            </nav>
           </motion.aside>
         </>
       )}
